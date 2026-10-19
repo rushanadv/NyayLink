@@ -7,7 +7,7 @@ import {
   MailCheck,
   FileText,
   Sliders,
-  ExternalLink,
+  ArrowUpRight,
 } from "lucide-react";
 import type { AdminDashboardTab, UserRole } from "@/lib/admin/types";
 import { LogoutButton } from "@/components/logout-button";
@@ -32,45 +32,43 @@ export function AdminSidebar({
     badge?: number;
   }> = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
-    { id: "lawyers", label: "Lawyers", icon: Scale },
+    { id: "lawyers", label: "Advocates", icon: Scale },
     {
       id: "verifications",
-      label: "Pending Verifications",
+      label: "Verifications",
       icon: ShieldCheck,
       badge: pendingCount,
     },
     { id: "clients", label: "Users & Roles", icon: Users },
     { id: "invitations", label: "Invitations", icon: MailCheck },
-    { id: "audit", label: "Audit Logs", icon: FileText },
-    { id: "settings", label: "System Settings", icon: Sliders },
+    { id: "audit", label: "Audit Ledger", icon: FileText },
+    { id: "settings", label: "Settings", icon: Sliders },
   ];
 
   return (
-    <aside className="w-72 bg-[#0C0F17] border-r border-[#1F2536] flex flex-col shrink-0 min-h-screen text-slate-300 select-none">
-      {/* Brand Header */}
-      <div className="p-6 border-b border-[#1F2536]">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#C5A059] to-[#8C6B2B] flex items-center justify-center text-slate-950 shadow-lg shadow-[#C5A059]/15">
-            <Scale className="w-5 h-5" strokeWidth={2.2} />
+    <aside className="w-64 bg-[#0C0D0C] border-r border-white/[0.07] flex flex-col shrink-0 min-h-screen text-[#92958E] select-none">
+      {/* Editorial Typographic Brand Header */}
+      <div className="h-20 px-6 flex items-center border-b border-white/[0.07]">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#B8A078]" />
+            <span className="font-serif tracking-[0.2em] text-base text-[#EEECE5] font-normal uppercase">
+              NyayaLink
+            </span>
+            <span className="text-[10px] font-mono tracking-widest text-[#92958E]/70 pl-1">
+              / OPS
+            </span>
           </div>
-          <div>
-            <div className="font-bold tracking-wider text-slate-100 text-base font-serif flex items-center gap-1.5">
-              NYAYALINK
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#C5A059]/20 text-[#E5C07B] font-sans font-semibold tracking-normal border border-[#C5A059]/30">
-                ADMIN
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400 font-mono tracking-tight">
-              Legal Marketplace Core
-            </p>
-          </div>
+          <span className="text-[10px] tracking-wider text-[#92958E]/60 uppercase font-sans mt-0.5">
+            Institutional Console
+          </span>
         </div>
       </div>
 
-      {/* Navigation Links */}
-      <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
-        <div className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-          Management
+      {/* Navigation Section */}
+      <nav className="flex-1 px-3 py-6 space-y-0.5 overflow-y-auto">
+        <div className="px-3 pb-2 text-[10px] font-medium tracking-widest uppercase text-[#92958E]/50 font-mono">
+          Operations
         </div>
 
         {navItems.map((item) => {
@@ -80,24 +78,24 @@ export function AdminSidebar({
             <Link
               key={item.id}
               href={`/admin/dashboard?tab=${item.id}`}
-              className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all group ${
+              className={`group flex items-center justify-between px-3 py-2 rounded-md text-xs font-medium transition-all duration-150 border-l-2 ${
                 isActive
-                  ? "bg-[#C5A059]/15 text-[#E5C07B] border border-[#C5A059]/30 shadow-sm"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-[#161B26]"
+                  ? "bg-[#141614] text-[#EEECE5] border-[#B8A078]"
+                  : "text-[#92958E] hover:text-[#EEECE5] hover:bg-[#141614]/60 border-transparent"
               }`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <Icon
                   className={`w-4 h-4 transition-colors ${
-                    isActive ? "text-[#E5C07B]" : "text-slate-400 group-hover:text-slate-200"
+                    isActive ? "text-[#B8A078]" : "text-[#92958E] group-hover:text-[#EEECE5]"
                   }`}
-                  strokeWidth={isActive ? 2.2 : 1.75}
+                  strokeWidth={1.5}
                 />
-                <span>{item.label}</span>
+                <span className="tracking-wide">{item.label}</span>
               </div>
 
               {typeof item.badge === "number" && item.badge > 0 && (
-                <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                <span className="px-1.5 py-0.5 text-[10px] font-mono font-medium rounded bg-[#B8A078]/15 text-[#B8A078] border border-[#B8A078]/25">
                   {item.badge}
                 </span>
               )}
@@ -105,49 +103,50 @@ export function AdminSidebar({
           );
         })}
 
-        <div className="pt-6 px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-          Quick Links
+        <div className="pt-8 px-3 pb-2 text-[10px] font-medium tracking-widest uppercase text-[#92958E]/50 font-mono">
+          External
         </div>
         <Link
           href="/"
           target="_blank"
-          className="flex items-center justify-between px-3.5 py-2 rounded-xl text-xs text-slate-400 hover:text-slate-200 hover:bg-[#161B26] transition-colors"
+          className="group flex items-center justify-between px-3 py-2 rounded-md text-xs text-[#92958E] hover:text-[#EEECE5] hover:bg-[#141614]/60 transition-colors border-l-2 border-transparent"
         >
-          <span>Public Portal</span>
-          <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+          <span className="tracking-wide">Public Portal</span>
+          <ArrowUpRight className="w-3.5 h-3.5 text-[#92958E]/60 group-hover:text-[#EEECE5]" />
         </Link>
       </nav>
 
-      {/* Admin Profile & Role Info Footer */}
-      <div className="p-4 border-t border-[#1F2536] bg-[#0E121C]">
-        <div className="bg-[#141926] border border-[#232B3D] rounded-xl p-3">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-              Signed in Administrator
+      {/* Admin Profile Footer */}
+      <div className="p-4 border-t border-white/[0.07] bg-[#0E100E]">
+        <div className="flex flex-col space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-mono tracking-widest text-[#92958E]/60 uppercase">
+              Administrator
             </span>
-            <span className="w-2 h-2 rounded-full bg-emerald-400 ring-4 ring-emerald-400/20" />
+            <div className="flex items-center gap-1">
+              {userRoles.map((role) => (
+                <span
+                  key={role}
+                  className={`text-[9px] font-mono px-1.5 py-0.2 rounded uppercase tracking-wider ${
+                    role === "admin"
+                      ? "text-[#B8A078] bg-[#B8A078]/10 border border-[#B8A078]/20"
+                      : "text-[#92958E] bg-white/[0.04]"
+                  }`}
+                >
+                  {role}
+                </span>
+              ))}
+            </div>
           </div>
 
-          <div className="text-xs font-medium text-slate-200 truncate mb-2 font-mono" title={userEmail}>
+          <div
+            className="text-xs text-[#EEECE5] font-mono truncate"
+            title={userEmail}
+          >
             {userEmail}
           </div>
 
-          <div className="flex flex-wrap gap-1 mb-3">
-            {userRoles.map((role) => (
-              <span
-                key={role}
-                className={`text-[10px] px-2 py-0.5 rounded font-mono font-semibold uppercase tracking-wider ${
-                  role === "admin"
-                    ? "bg-[#C5A059]/20 text-[#E5C07B] border border-[#C5A059]/40"
-                    : "bg-slate-800 text-slate-300 border border-slate-700/60"
-                }`}
-              >
-                {role}
-              </span>
-            ))}
-          </div>
-
-          <div className="pt-2 border-t border-[#232B3D]/80 flex justify-end">
+          <div className="pt-1 flex justify-start">
             <LogoutButton />
           </div>
         </div>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ShieldAlert, ArrowLeft } from "lucide-react";
+import { ArrowLeft, ShieldAlert } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import type { UserRole } from "@/lib/admin/types";
 import { LogoutButton } from "@/components/logout-button";
@@ -11,60 +11,56 @@ interface AccessDeniedProps {
 
 export function AccessDenied({ user, roles }: AccessDeniedProps) {
   return (
-    <div className="min-h-screen bg-[#090B10] text-slate-100 flex flex-col justify-center items-center p-6 selection:bg-[#C5A059]/30">
-      <div className="w-full max-w-md bg-[#11141D] border border-red-500/20 rounded-2xl p-8 shadow-2xl relative overflow-hidden backdrop-blur-xl">
-        {/* Subtle accent glow */}
-        <div className="absolute top-0 right-0 w-48 h-48 bg-red-500/5 rounded-full blur-3xl -z-10 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#C5A059]/5 rounded-full blur-3xl -z-10 pointer-events-none" />
-
+    <div className="min-h-screen bg-[#0C0D0C] text-[#EEECE5] flex flex-col justify-center items-center p-6 selection:bg-[#B8A078]/25 font-sans">
+      <div className="w-full max-w-md border border-white/[0.08] bg-[#141614] rounded-lg p-8 shadow-2xl">
         <div className="flex flex-col items-center text-center">
-          <div className="w-16 h-16 rounded-2xl bg-red-950/40 border border-red-500/30 flex items-center justify-center mb-6 shadow-inner">
-            <ShieldAlert className="w-8 h-8 text-red-400" strokeWidth={1.75} />
+          <div className="w-10 h-10 rounded-full bg-white/[0.03] border border-white/[0.08] flex items-center justify-center text-[#B8A078] mb-4">
+            <ShieldAlert className="w-5 h-5" strokeWidth={1.5} />
           </div>
 
-          <span className="text-xs font-semibold uppercase tracking-widest text-red-400/90 mb-1">
+          <span className="text-[10px] font-mono tracking-widest uppercase text-[#B8A078] mb-1">
             403 Forbidden
           </span>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-50 mb-3">
-            Administrative Access Denied
+          <h1 className="text-2xl font-serif font-normal tracking-tight text-[#EEECE5] mb-2">
+            Access Prohibited
           </h1>
-          <p className="text-sm text-slate-400 leading-relaxed mb-6">
-            Your authenticated account is not authorized to access the NyayaLink Administration Portal. Role permissions are enforced server-side against <code className="text-xs bg-slate-800/80 px-1.5 py-0.5 rounded font-mono text-[#E5C07B]">public.user_roles</code>.
+          <p className="text-xs text-[#92958E] leading-relaxed mb-6">
+            Your account is authenticated, but does not possess the administrative role required for the NyayaLink Operations Console. Authorization is verified server-side against <code className="font-mono text-[#EEECE5] bg-white/[0.04] px-1 py-0.5 rounded">public.user_roles</code>.
           </p>
 
-          <div className="w-full bg-[#161B26] border border-slate-800/80 rounded-xl p-4 mb-6 text-left">
-            <div className="text-xs text-slate-400 mb-1.5 font-medium">Account Details:</div>
-            <div className="text-sm font-mono text-slate-200 truncate mb-3" title={user.email}>
+          <div className="w-full border border-white/[0.06] bg-[#0C0D0C] rounded p-4 mb-6 text-left space-y-2 text-xs">
+            <div className="text-[10px] font-mono uppercase text-[#92958E]/60">Account Identity</div>
+            <div className="font-mono text-[#EEECE5] truncate" title={user.email || user.id}>
               {user.email || user.id}
             </div>
 
-            <div className="text-xs text-slate-400 mb-1.5 font-medium">Assigned Roles:</div>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="text-[10px] font-mono uppercase text-[#92958E]/60 pt-1">Assigned Role(s)</div>
+            <div className="flex flex-wrap gap-1 font-mono text-[11px]">
               {roles.length > 0 ? (
-                roles.map((role) => (
+                roles.map((r) => (
                   <span
-                    key={role}
-                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700/60 uppercase tracking-wider"
+                    key={r}
+                    className="px-2 py-0.5 rounded bg-white/[0.04] text-[#EEECE5] border border-white/[0.06]"
                   >
-                    {role}
+                    {r}
                   </span>
                 ))
               ) : (
-                <span className="text-xs text-slate-400 italic">No assigned roles found</span>
+                <span className="text-[#92958E]/40 italic">None</span>
               )}
             </div>
           </div>
 
-          <div className="w-full flex flex-col gap-2.5">
+          <div className="w-full flex flex-col gap-2">
             <Link
               href="/"
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#C5A059] hover:bg-[#D4AF37] text-slate-950 font-semibold text-sm transition-colors shadow-lg shadow-[#C5A059]/10"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded text-xs font-medium bg-[#B8A078] text-[#0C0D0C] hover:bg-[#C9B38F] transition-colors"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-3.5 h-3.5" />
               Return to Public Portal
             </Link>
 
-            <div className="w-full flex items-center justify-center pt-2">
+            <div className="pt-2 flex justify-center">
               <LogoutButton />
             </div>
           </div>

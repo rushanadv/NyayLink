@@ -1,22 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import {
-  Scale,
-  Search,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  XCircle,
-  Shield,
-  Eye,
-  X,
-  FileText,
-  Lock,
-  Globe,
-  MapPin,
-  GraduationCap,
-} from "lucide-react";
+import { Search, X, Shield, Lock } from "lucide-react";
 import type { LawyerProfileRecord } from "@/lib/admin/types";
 
 interface LawyersTabProps {
@@ -48,26 +33,26 @@ export function LawyersTab({ initialLawyers }: LawyersTabProps) {
 
   return (
     <div className="space-y-6">
-      {/* Top Banner Notice: Read-only Notice */}
-      <div className="bg-[#141926] border border-[#C5A059]/30 rounded-xl p-4 flex items-start gap-3">
-        <Lock className="w-5 h-5 text-[#E5C07B] shrink-0 mt-0.5" />
-        <div>
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-[#E5C07B] mb-0.5 font-mono">
-            Read-Only Review Mode Enforced
-          </h4>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            Lawyer verification reviews are displayed in read-only mode during this phase. Approve, reject, and changes-requested mutations are reserved until administrative review workflow sign-off.
-          </p>
+      {/* Read-Only Status Notice */}
+      <div className="border border-white/[0.07] bg-[#141614] rounded-lg px-5 py-3.5 flex items-center justify-between text-xs">
+        <div className="flex items-center gap-2.5">
+          <Lock className="w-3.5 h-3.5 text-[#B8A078]" strokeWidth={1.5} />
+          <span className="text-[#92958E]">
+            Verification review actions are currently <strong className="text-[#EEECE5] font-medium">read-only</strong>. State mutations (Approve, Reject, Request Changes) will be enabled after administrative workflow sign-off.
+          </span>
         </div>
+        <span className="text-[10px] font-mono uppercase tracking-widest text-[#B8A078] shrink-0 ml-4">
+          Read-Only Mode
+        </span>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-[#11141D] border border-[#1F2536] rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between shadow-lg">
-        {/* Category Tabs */}
-        <div className="flex flex-wrap gap-1.5 w-full md:w-auto">
+      <div className="border border-white/[0.07] bg-[#141614] rounded-lg p-3 flex flex-col md:flex-row gap-4 items-center justify-between">
+        {/* Status Filter Tabs */}
+        <div className="flex flex-wrap gap-1 w-full md:w-auto">
           {[
-            { id: "all", label: "All Lawyers" },
-            { id: "pending", label: "Pending Review" },
+            { id: "all", label: "All Records" },
+            { id: "pending", label: "Pending" },
             { id: "approved", label: "Approved" },
             { id: "changes_requested", label: "Changes Requested" },
             { id: "rejected", label: "Rejected" },
@@ -75,10 +60,10 @@ export function LawyersTab({ initialLawyers }: LawyersTabProps) {
             <button
               key={tab.id}
               onClick={() => setSelectedStatus(tab.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+              className={`px-3 py-1.5 rounded text-xs font-sans transition-all ${
                 selectedStatus === tab.id
-                  ? "bg-[#C5A059] text-slate-950 font-semibold shadow-md shadow-[#C5A059]/20"
-                  : "bg-[#161B26] text-slate-400 hover:text-slate-200 hover:bg-[#1A2130]"
+                  ? "bg-white/[0.08] text-[#EEECE5] font-medium border border-white/[0.12]"
+                  : "text-[#92958E] hover:text-[#EEECE5] hover:bg-white/[0.03] border border-transparent"
               }`}
             >
               {tab.label}
@@ -86,152 +71,148 @@ export function LawyersTab({ initialLawyers }: LawyersTabProps) {
           ))}
         </div>
 
-        {/* Search Input */}
-        <div className="relative w-full md:w-80">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+        {/* Minimal Search Input */}
+        <div className="relative w-full md:w-72">
+          <Search className="w-3.5 h-3.5 text-[#92958E]/60 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search name, Bar Council, city, or practice..."
-            className="w-full pl-10 pr-4 py-2 bg-[#161B26] border border-[#232B3D] focus:border-[#C5A059] rounded-xl text-xs text-slate-100 placeholder:text-slate-400 focus:outline-none transition-colors"
+            placeholder="Search name, bar registration, city..."
+            className="w-full pl-9 pr-3 py-1.5 bg-[#0C0D0C] border border-white/[0.08] focus:border-[#B8A078]/50 rounded text-xs text-[#EEECE5] placeholder:text-[#92958E]/50 focus:outline-none transition-colors font-sans"
           />
         </div>
       </div>
 
-      {/* Lawyers Table or Empty State */}
+      {/* Data Table */}
       {filteredLawyers.length === 0 ? (
-        <div className="bg-[#11141D] border border-[#1F2536] rounded-2xl p-12 text-center flex flex-col items-center justify-center shadow-xl">
-          <div className="w-14 h-14 rounded-2xl bg-slate-800/60 border border-slate-700/40 flex items-center justify-center text-slate-400 mb-4">
-            <Scale className="w-7 h-7" />
-          </div>
-          <h3 className="text-base font-semibold text-slate-200 mb-1 font-serif">
-            No lawyer profiles match the criteria
+        <div className="border border-white/[0.07] bg-[#141614] rounded-lg p-12 text-center flex flex-col items-center justify-center">
+          <h3 className="text-base font-serif text-[#EEECE5] mb-1">
+            No advocate records match this filter
           </h3>
-          <p className="text-xs text-slate-400 max-w-md">
+          <p className="text-xs text-[#92958E] max-w-sm">
             {initialLawyers.length === 0
-              ? "There are currently no registered lawyer profiles in the database. When lawyers create profiles and submit Bar Council enrollment, they will be listed here."
-              : "Try clearing your search query or selecting a different status filter."}
+              ? "The advocate directory is currently empty. As practitioners register and submit Bar credentials, they will be cataloged here."
+              : "Try refining your search keyword or selecting a different status filter."}
           </p>
         </div>
       ) : (
-        <div className="bg-[#11141D] border border-[#1F2536] rounded-2xl overflow-hidden shadow-xl">
+        <div className="border border-white/[0.07] bg-[#141614] rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-[#0E121C] text-slate-400 uppercase tracking-wider text-[10px] border-b border-[#1F2536] font-mono">
+            <table className="w-full text-left text-xs text-[#EEECE5]">
+              <thead className="border-b border-white/[0.07] bg-[#0E100E] text-[10px] font-mono tracking-wider uppercase text-[#92958E]">
                 <tr>
-                  <th className="px-5 py-3.5">Lawyer Name</th>
-                  <th className="px-5 py-3.5">Bar Council Reg</th>
-                  <th className="px-5 py-3.5">Location</th>
-                  <th className="px-5 py-3.5">Experience</th>
-                  <th className="px-5 py-3.5">Practice Areas</th>
-                  <th className="px-5 py-3.5">Verification</th>
-                  <th className="px-5 py-3.5">Publication</th>
-                  <th className="px-5 py-3.5 text-right">Actions</th>
+                  <th className="px-6 py-3 font-medium">Advocate Name</th>
+                  <th className="px-6 py-3 font-medium">Bar Registration</th>
+                  <th className="px-6 py-3 font-medium">Jurisdiction</th>
+                  <th className="px-6 py-3 font-medium">Experience</th>
+                  <th className="px-6 py-3 font-medium">Practice Areas</th>
+                  <th className="px-6 py-3 font-medium">Verification</th>
+                  <th className="px-6 py-3 font-medium">Directory</th>
+                  <th className="px-6 py-3 font-medium text-right">Details</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#1F2536]">
+              <tbody className="divide-y divide-white/[0.05]">
                 {filteredLawyers.map((lawyer) => {
                   const status = lawyer.verification?.status || "pending";
                   return (
                     <tr
                       key={lawyer.id}
-                      className="hover:bg-[#141926] transition-colors group cursor-pointer"
                       onClick={() => setSelectedLawyer(lawyer)}
+                      className="hover:bg-white/[0.02] transition-colors cursor-pointer group"
                     >
-                      <td className="px-5 py-4">
-                        <div className="font-semibold text-slate-100 group-hover:text-[#E5C07B] transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="font-medium text-[#EEECE5] group-hover:text-[#B8A078] transition-colors">
                           {lawyer.professional_name}
                         </div>
-                        <div className="text-[10px] text-slate-400 font-mono truncate max-w-[140px]" title={lawyer.id}>
-                          ID: {lawyer.id.slice(0, 8)}...
+                        <div className="text-[10px] font-mono text-[#92958E]/60 mt-0.5" title={lawyer.id}>
+                          UUID: {lawyer.id.slice(0, 8)}...
                         </div>
                       </td>
 
-                      <td className="px-5 py-4 font-mono">
-                        <span className="px-2 py-1 rounded bg-[#161B26] border border-[#232B3D] text-slate-200">
+                      <td className="px-6 py-4 font-mono text-xs">
+                        <span className="text-[#EEECE5]">
                           {lawyer.bar_council_number}
                         </span>
-                        <div className="text-[10px] text-slate-400 mt-1">
+                        <div className="text-[10px] text-[#92958E]/60 mt-0.5">
                           {lawyer.bar_council_state} ({lawyer.bar_council_enrollment_year})
                         </div>
                       </td>
 
-                      <td className="px-5 py-4 text-slate-300">
-                        <div className="flex items-center gap-1.5">
-                          <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                          <span>{lawyer.city}, {lawyer.state}</span>
-                        </div>
+                      <td className="px-6 py-4 text-[#92958E]">
+                        {lawyer.city}, {lawyer.state}
                       </td>
 
-                      <td className="px-5 py-4 text-slate-300">
-                        <div className="flex items-center gap-1.5">
-                          <GraduationCap className="w-3.5 h-3.5 text-slate-400" />
-                          <span>{lawyer.experience_years} yrs</span>
-                        </div>
+                      <td className="px-6 py-4 text-[#92958E] font-mono">
+                        {lawyer.experience_years} yrs
                       </td>
 
-                      <td className="px-5 py-4">
+                      <td className="px-6 py-4">
                         <div className="flex flex-wrap gap-1 max-w-xs">
                           {lawyer.practice_areas.slice(0, 2).map((pa) => (
                             <span
                               key={pa}
-                              className="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300 border border-slate-700/60"
+                              className="px-1.5 py-0.5 rounded text-[10px] bg-white/[0.04] text-[#92958E] border border-white/[0.06]"
                             >
                               {pa}
                             </span>
                           ))}
                           {lawyer.practice_areas.length > 2 && (
-                            <span className="px-1.5 py-0.5 text-[10px] text-slate-400">
+                            <span className="text-[10px] text-[#92958E]/60 px-1 py-0.5">
                               +{lawyer.practice_areas.length - 2}
                             </span>
                           )}
                         </div>
                       </td>
 
-                      <td className="px-5 py-4">
+                      <td className="px-6 py-4">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
+                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider ${
                             status === "approved"
-                              ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
+                              ? "bg-emerald-950/40 text-emerald-300 border border-emerald-800/40"
                               : status === "pending"
-                              ? "bg-amber-500/15 text-amber-300 border border-amber-500/30"
+                              ? "bg-[#B8A078]/10 text-[#B8A078] border border-[#B8A078]/25"
                               : status === "changes_requested"
-                              ? "bg-blue-500/15 text-blue-300 border border-blue-500/30"
-                              : "bg-red-500/15 text-red-300 border border-red-500/30"
+                              ? "bg-sky-950/40 text-sky-300 border border-sky-800/40"
+                              : "bg-red-950/40 text-red-300 border border-red-800/40"
                           }`}
                         >
-                          {status === "approved" && <CheckCircle2 className="w-3 h-3" />}
-                          {status === "pending" && <Clock className="w-3 h-3" />}
-                          {status === "changes_requested" && <AlertCircle className="w-3 h-3" />}
-                          {status === "rejected" && <XCircle className="w-3 h-3" />}
+                          <span
+                            className={`w-1 h-1 rounded-full ${
+                              status === "approved"
+                                ? "bg-emerald-400"
+                                : status === "pending"
+                                ? "bg-[#B8A078]"
+                                : status === "changes_requested"
+                                ? "bg-sky-400"
+                                : "bg-red-400"
+                            }`}
+                          />
                           {status.replace("_", " ")}
                         </span>
                       </td>
 
-                      <td className="px-5 py-4">
+                      <td className="px-6 py-4 font-mono text-[11px]">
                         <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono ${
+                          className={
                             lawyer.is_published
-                              ? "bg-[#C5A059]/15 text-[#E5C07B] border border-[#C5A059]/30"
-                              : "bg-slate-800/80 text-slate-400 border border-slate-700/50"
-                          }`}
+                              ? "text-[#B8A078]"
+                              : "text-[#92958E]/60"
+                          }
                         >
-                          <Globe className="w-3 h-3" />
                           {lawyer.is_published ? "Published" : "Private"}
                         </span>
                       </td>
 
-                      <td className="px-5 py-4 text-right">
+                      <td className="px-6 py-4 text-right">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedLawyer(lawyer);
                           }}
-                          className="px-3 py-1.5 rounded-lg bg-[#161B26] hover:bg-[#C5A059] hover:text-slate-950 text-slate-300 border border-[#232B3D] text-xs font-medium transition-all flex items-center gap-1.5 ml-auto"
+                          className="px-2.5 py-1 rounded bg-white/[0.03] hover:bg-white/[0.08] text-xs font-mono text-[#EEECE5] border border-white/[0.08] transition-colors"
                         >
-                          <Eye className="w-3.5 h-3.5" />
-                          <span>Inspect</span>
+                          Inspect →
                         </button>
                       </td>
                     </tr>
@@ -243,120 +224,110 @@ export function LawyersTab({ initialLawyers }: LawyersTabProps) {
         </div>
       )}
 
-      {/* Lawyer Detail Modal / Drawer */}
+      {/* Slide-over Inspection Drawer */}
       {selectedLawyer && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex justify-end animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl bg-[#0E121C] border-l border-[#1F2536] h-full overflow-y-auto p-8 shadow-2xl space-y-6">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end animate-in fade-in duration-150">
+          <div className="w-full max-w-xl bg-[#0C0D0C] border-l border-white/[0.08] h-full overflow-y-auto p-8 space-y-6 shadow-2xl">
             {/* Header */}
-            <div className="flex items-start justify-between pb-6 border-b border-[#1F2536]">
+            <div className="flex items-start justify-between pb-6 border-b border-white/[0.07]">
               <div>
-                <span className="text-[11px] font-mono uppercase tracking-widest text-[#E5C07B] mb-1 block">
-                  Confidential Administrative Record
+                <span className="text-[10px] font-mono tracking-widest uppercase text-[#B8A078] block mb-1">
+                  Advocate Dossier
                 </span>
-                <h2 className="text-xl font-bold font-serif text-slate-100">
+                <h2 className="text-2xl font-serif text-[#EEECE5]">
                   {selectedLawyer.professional_name}
                 </h2>
-                <p className="text-xs text-slate-400 font-mono mt-1">
-                  User ID: {selectedLawyer.id}
-                </p>
+                <div className="text-xs font-mono text-[#92958E]/60 mt-1">
+                  UUID: {selectedLawyer.id}
+                </div>
               </div>
               <button
                 onClick={() => setSelectedLawyer(null)}
-                className="w-8 h-8 rounded-lg bg-[#161B26] border border-[#232B3D] text-slate-400 hover:text-slate-100 flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06] text-[#92958E] hover:text-[#EEECE5] flex items-center justify-center transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Verification Status Card */}
-            <div className="bg-[#141926] border border-[#232B3D] rounded-xl p-5 space-y-3">
+            {/* Verification Status */}
+            <div className="border border-white/[0.07] bg-[#141614] rounded-lg p-5 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">
-                  Verification Lifecycle Status
+                <span className="text-xs font-sans text-[#92958E]">
+                  Verification Lifecycle
                 </span>
-                <span
-                  className={`text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider ${
-                    selectedLawyer.verification?.status === "approved"
-                      ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
-                      : selectedLawyer.verification?.status === "pending"
-                      ? "bg-amber-500/15 text-amber-300 border border-amber-500/30"
-                      : "bg-red-500/15 text-red-300 border border-red-500/30"
-                  }`}
-                >
+                <span className="text-xs font-mono uppercase tracking-wider text-[#B8A078]">
                   {selectedLawyer.verification?.status || "pending"}
                 </span>
               </div>
-
-              <div className="grid grid-cols-2 gap-4 text-xs font-mono pt-2 border-t border-[#1F2536]">
+              <div className="grid grid-cols-2 gap-4 pt-3 border-t border-white/[0.05] text-xs font-mono">
                 <div>
-                  <span className="text-slate-400 block text-[10px]">Reviewed By:</span>
-                  <span className="text-slate-200">
+                  <span className="text-[10px] text-[#92958E]/60 block uppercase">Reviewer</span>
+                  <span className="text-[#EEECE5]">
                     {selectedLawyer.verification?.reviewed_by
                       ? `${selectedLawyer.verification.reviewed_by.slice(0, 12)}...`
-                      : "Unreviewed"}
+                      : "Unassigned"}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[10px]">Reviewed Timestamp:</span>
-                  <span className="text-slate-200">
+                  <span className="text-[10px] text-[#92958E]/60 block uppercase">Review Timestamp</span>
+                  <span className="text-[#EEECE5]">
                     {selectedLawyer.verification?.reviewed_at
-                      ? new Date(selectedLawyer.verification.reviewed_at).toLocaleString()
-                      : "N/A"}
+                      ? new Date(selectedLawyer.verification.reviewed_at).toLocaleDateString()
+                      : "Pending review"}
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Bar Council Credentials Section */}
-            <div className="bg-[#141926] border border-[#232B3D] rounded-xl p-5 space-y-3">
-              <h3 className="text-xs font-semibold text-[#E5C07B] uppercase tracking-wider flex items-center gap-2 font-mono">
-                <Shield className="w-4 h-4" />
-                Bar Council Registration Details
-              </h3>
-
-              <div className="grid grid-cols-3 gap-4 text-xs font-mono pt-2">
+            {/* Bar Council Credentials */}
+            <div className="border border-white/[0.07] bg-[#141614] rounded-lg p-5 space-y-3">
+              <div className="flex items-center gap-1.5 text-xs font-sans text-[#B8A078]">
+                <Shield className="w-3.5 h-3.5" strokeWidth={1.5} />
+                <span>Bar Council Enrollment Verification</span>
+              </div>
+              <div className="grid grid-cols-3 gap-4 pt-2 text-xs font-mono">
                 <div>
-                  <span className="text-slate-400 block text-[10px]">Enrollment Number:</span>
-                  <span className="text-slate-100 font-bold bg-[#161B26] px-2 py-1 rounded border border-[#232B3D] inline-block mt-1">
+                  <span className="text-[10px] text-[#92958E]/60 block uppercase">Registration</span>
+                  <span className="text-[#EEECE5] font-bold block mt-1">
                     {selectedLawyer.bar_council_number}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[10px]">Enrolling State:</span>
-                  <span className="text-slate-200 inline-block mt-1 font-sans">
+                  <span className="text-[10px] text-[#92958E]/60 block uppercase">State Council</span>
+                  <span className="text-[#EEECE5] block mt-1 font-sans">
                     {selectedLawyer.bar_council_state}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[10px]">Enrollment Year:</span>
-                  <span className="text-slate-200 inline-block mt-1 font-sans">
+                  <span className="text-[10px] text-[#92958E]/60 block uppercase">Year</span>
+                  <span className="text-[#EEECE5] block mt-1 font-sans">
                     {selectedLawyer.bar_council_enrollment_year}
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Profile Overview */}
+            {/* Profile Information */}
             <div className="space-y-4 text-xs">
               <div>
-                <span className="text-slate-400 block text-[10px] uppercase tracking-wider mb-1">
-                  Professional Bio
+                <span className="text-[10px] font-mono tracking-wider uppercase text-[#92958E]/60 block mb-1">
+                  Professional Biography
                 </span>
-                <p className="text-slate-300 leading-relaxed bg-[#141926] p-4 rounded-xl border border-[#232B3D]">
+                <p className="border border-white/[0.07] bg-[#141614] p-4 rounded-lg text-[#EEECE5] leading-relaxed">
                   {selectedLawyer.bio || "No professional biography provided."}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className="text-slate-400 block text-[10px] uppercase tracking-wider mb-1">
+                  <span className="text-[10px] font-mono tracking-wider uppercase text-[#92958E]/60 block mb-1">
                     Practice Areas
                   </span>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-1">
                     {selectedLawyer.practice_areas.map((pa) => (
                       <span
                         key={pa}
-                        className="px-2.5 py-1 rounded bg-[#161B26] text-slate-300 border border-[#232B3D]"
+                        className="px-2 py-0.5 rounded bg-white/[0.04] text-[#EEECE5] border border-white/[0.06] text-[11px]"
                       >
                         {pa}
                       </span>
@@ -365,14 +336,14 @@ export function LawyersTab({ initialLawyers }: LawyersTabProps) {
                 </div>
 
                 <div>
-                  <span className="text-slate-400 block text-[10px] uppercase tracking-wider mb-1">
+                  <span className="text-[10px] font-mono tracking-wider uppercase text-[#92958E]/60 block mb-1">
                     Languages
                   </span>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-1">
                     {selectedLawyer.languages.map((lang) => (
                       <span
                         key={lang}
-                        className="px-2.5 py-1 rounded bg-[#161B26] text-slate-300 border border-[#232B3D]"
+                        className="px-2 py-0.5 rounded bg-white/[0.04] text-[#EEECE5] border border-white/[0.06] text-[11px]"
                       >
                         {lang}
                       </span>
@@ -382,51 +353,45 @@ export function LawyersTab({ initialLawyers }: LawyersTabProps) {
               </div>
             </div>
 
-            {/* Internal Admin Notes (Strictly Protected) */}
-            <div className="bg-[#141926] border border-[#C5A059]/40 rounded-xl p-5 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-[#E5C07B] uppercase tracking-wider flex items-center gap-1.5 font-mono">
-                  <Lock className="w-3.5 h-3.5" />
-                  Internal Administrator Notes (Confidential)
+            {/* Confidential Internal Notes */}
+            <div className="border border-[#B8A078]/25 bg-[#141614] rounded-lg p-5 space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-mono text-[11px] uppercase tracking-wider text-[#B8A078]">
+                  Internal Admin Notes (Confidential)
                 </span>
-                <span className="text-[10px] text-slate-400 font-mono">
-                  From admin_lawyer_verifications
+                <span className="font-mono text-[10px] text-[#92958E]/60">
+                  via admin_lawyer_verifications
                 </span>
               </div>
-              <p className="text-xs text-slate-300 bg-[#0E121C] p-3 rounded-lg border border-[#232B3D] font-mono whitespace-pre-wrap">
+              <p className="text-xs text-[#EEECE5] font-mono p-3 rounded bg-[#0C0D0C] border border-white/[0.06] whitespace-pre-wrap">
                 {selectedLawyer.verification?.internal_notes || "No internal notes recorded."}
               </p>
             </div>
 
             {/* Lawyer-Visible Feedback */}
-            <div className="bg-[#141926] border border-[#232B3D] rounded-xl p-5 space-y-2">
-              <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5 font-mono">
-                <FileText className="w-3.5 h-3.5" />
+            <div className="border border-white/[0.07] bg-[#141614] rounded-lg p-5 space-y-2">
+              <span className="font-mono text-[11px] uppercase tracking-wider text-[#92958E] block">
                 Lawyer-Facing Feedback
               </span>
-              <p className="text-xs text-slate-400 bg-[#0E121C] p-3 rounded-lg border border-[#232B3D] whitespace-pre-wrap">
+              <p className="text-xs text-[#92958E] p-3 rounded bg-[#0C0D0C] border border-white/[0.06] whitespace-pre-wrap">
                 {selectedLawyer.verification?.lawyer_feedback || "No feedback issued to lawyer."}
               </p>
             </div>
 
-            {/* Publication Consent Metadata */}
-            <div className="bg-[#141926] border border-[#232B3D] rounded-xl p-4 text-xs font-mono space-y-1.5">
-              <span className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1">
+            {/* Publication Consent Audit */}
+            <div className="border border-white/[0.07] bg-[#141614] rounded-lg p-4 text-xs font-mono space-y-1.5 text-[#92958E]">
+              <span className="text-[10px] uppercase tracking-wider text-[#92958E]/60 block mb-1">
                 Publication Consent Audit Trail
               </span>
-              <div className="flex justify-between text-slate-300">
-                <span>Directory Visibility:</span>
-                <span className={selectedLawyer.is_published ? "text-[#E5C07B]" : "text-slate-400"}>
-                  {selectedLawyer.is_published ? "Explicitly Consented" : "Unpublished / Private"}
+              <div className="flex justify-between">
+                <span>Public Listing:</span>
+                <span className={selectedLawyer.is_published ? "text-[#B8A078]" : "text-[#92958E]"}>
+                  {selectedLawyer.is_published ? "Consented & Visible" : "Unpublished / Private"}
                 </span>
               </div>
-              <div className="flex justify-between text-slate-400">
-                <span>Consent Timestamp:</span>
+              <div className="flex justify-between text-[11px]">
+                <span>Consent Date:</span>
                 <span>{selectedLawyer.published_at ? new Date(selectedLawyer.published_at).toLocaleString() : "N/A"}</span>
-              </div>
-              <div className="flex justify-between text-slate-400">
-                <span>Consented By UUID:</span>
-                <span>{selectedLawyer.published_by ? `${selectedLawyer.published_by.slice(0, 16)}...` : "N/A"}</span>
               </div>
             </div>
           </div>

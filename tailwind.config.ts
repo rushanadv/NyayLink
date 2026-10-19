@@ -11,7 +11,24 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        serif: ["var(--font-serif)", "Georgia", "serif"],
+        sans: ["var(--font-sans)", "system-ui", "-apple-system", "sans-serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "monospace"],
+      },
       colors: {
+        nyaya: {
+          bg: "#0C0D0C",
+          surface: "#141614",
+          elevated: "#1B1E1B",
+          primary: "#EEECE5",
+          muted: "#92958E",
+          dim: "#63665F",
+          accent: "#B8A078",
+          accentSoft: "rgba(184, 160, 120, 0.12)",
+          border: "rgba(255, 255, 255, 0.07)",
+          borderStrong: "rgba(255, 255, 255, 0.14)",
+        },
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {

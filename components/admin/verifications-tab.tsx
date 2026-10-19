@@ -1,11 +1,4 @@
-import {
-  Clock,
-  CheckCircle2,
-  FileCheck,
-  Lock,
-  MapPin,
-  GraduationCap,
-} from "lucide-react";
+import { CheckCircle2, Lock, FileCheck } from "lucide-react";
 import type { LawyerProfileRecord } from "@/lib/admin/types";
 
 interface VerificationsTabProps {
@@ -19,128 +12,113 @@ export function VerificationsTab({ lawyers }: VerificationsTabProps) {
 
   return (
     <div className="space-y-6">
-      {/* Top Banner Notice */}
-      <div className="bg-[#141926] border border-amber-500/30 rounded-xl p-4 flex items-start gap-3">
-        <Lock className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-        <div>
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-amber-400 mb-0.5 font-mono">
-            Verification Queue — Read-Only Mode
-          </h4>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            Administrative decision actions (Approve, Reject, Request Changes) are intentionally disabled on this interface pending dedicated mutation security sign-off.
-          </p>
+      {/* Read-Only Status Banner */}
+      <div className="border border-white/[0.07] bg-[#141614] rounded-lg px-5 py-3.5 flex items-center justify-between text-xs">
+        <div className="flex items-center gap-2.5">
+          <Lock className="w-3.5 h-3.5 text-[#B8A078]" strokeWidth={1.5} />
+          <span className="text-[#92958E]">
+            Verification review queue is currently <strong className="text-[#EEECE5] font-medium">read-only</strong>. State transition workflows are preserved for authorized review sign-off.
+          </span>
         </div>
+        <span className="text-[10px] font-mono uppercase tracking-widest text-[#B8A078] shrink-0 ml-4">
+          Read-Only Mode
+        </span>
       </div>
 
       {pendingLawyers.length === 0 ? (
-        <div className="bg-[#11141D] border border-[#1F2536] rounded-2xl p-12 text-center flex flex-col items-center justify-center shadow-xl">
-          <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4">
-            <CheckCircle2 className="w-7 h-7" />
+        <div className="border border-white/[0.07] bg-[#141614] rounded-lg p-12 text-center flex flex-col items-center justify-center">
+          <div className="w-9 h-9 rounded-full bg-white/[0.03] border border-white/[0.08] flex items-center justify-center text-[#B8A078] mb-3">
+            <CheckCircle2 className="w-4 h-4" />
           </div>
-          <h3 className="text-base font-semibold text-slate-100 font-serif mb-1">
-            Verification Queue is Clean
+          <h3 className="text-base font-serif text-[#EEECE5] mb-1">
+            Verification Queue Clear
           </h3>
-          <p className="text-xs text-slate-400 max-w-sm">
-            There are currently no lawyer profiles awaiting Bar Council credential verification.
+          <p className="text-xs text-[#92958E] max-w-sm">
+            All submitted advocate Bar Council filings have been reviewed. New credentials will appear here automatically upon submission.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {pendingLawyers.map((lawyer) => (
             <div
               key={lawyer.id}
-              className="bg-[#11141D] border border-amber-500/30 hover:border-[#C5A059] rounded-2xl p-6 shadow-xl transition-all space-y-4"
+              className="border border-white/[0.07] bg-[#141614] rounded-lg p-6 space-y-4 hover:border-[#B8A078]/40 transition-colors"
             >
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between border-b border-white/[0.06] pb-4">
                 <div>
-                  <span className="text-[10px] font-mono text-amber-400 uppercase tracking-widest bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 inline-block mb-1.5">
-                    Pending Review
+                  <span className="text-[10px] font-mono tracking-widest uppercase text-[#B8A078] block mb-1">
+                    Pending Verification
                   </span>
-                  <h3 className="text-base font-bold font-serif text-slate-100">
+                  <h3 className="text-lg font-serif text-[#EEECE5]">
                     {lawyer.professional_name}
                   </h3>
-                  <div className="text-xs text-slate-400 font-mono mt-0.5">
-                    ID: {lawyer.id}
+                  <div className="text-xs text-[#92958E] mt-0.5">
+                    {lawyer.city}, {lawyer.state} · {lawyer.experience_years} years experience
                   </div>
                 </div>
 
-                <div className="w-9 h-9 rounded-xl bg-[#161B26] border border-[#232B3D] flex items-center justify-center text-amber-400">
-                  <Clock className="w-4 h-4" />
+                <div className="text-right font-mono text-[11px] text-[#92958E]/60">
+                  {lawyer.verification?.submitted_at
+                    ? new Date(lawyer.verification.submitted_at).toLocaleDateString()
+                    : "Initial Filing"}
                 </div>
               </div>
 
-              {/* Bar Council Credentials Box */}
-              <div className="bg-[#161B26] border border-[#232B3D] rounded-xl p-4 space-y-2">
-                <div className="text-[11px] font-semibold text-[#E5C07B] uppercase tracking-wider font-mono flex items-center gap-1.5">
-                  <FileCheck className="w-3.5 h-3.5" />
-                  Bar Council Enrollment Credentials
+              {/* Bar Council Credentials Panel */}
+              <div className="border border-white/[0.06] bg-[#0E100E] rounded p-4 space-y-2">
+                <div className="text-[11px] font-mono text-[#B8A078] uppercase tracking-wider flex items-center gap-1.5">
+                  <FileCheck className="w-3.5 h-3.5" strokeWidth={1.5} />
+                  <span>Bar Council Filing Credentials</span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-xs font-mono pt-1">
+                <div className="grid grid-cols-3 gap-3 text-xs font-mono pt-1">
                   <div>
-                    <span className="text-slate-400 block text-[10px]">Enrollment Number:</span>
-                    <span className="text-slate-100 font-bold bg-[#0E121C] px-2 py-1 rounded border border-[#232B3D] inline-block mt-0.5">
+                    <span className="text-[10px] text-[#92958E]/60 block uppercase">Registration</span>
+                    <span className="text-[#EEECE5] font-bold block mt-0.5">
                       {lawyer.bar_council_number}
                     </span>
                   </div>
                   <div>
-                    <span className="text-slate-400 block text-[10px]">Bar Council State:</span>
-                    <span className="text-slate-200 mt-1 inline-block font-sans">
+                    <span className="text-[10px] text-[#92958E]/60 block uppercase">State Council</span>
+                    <span className="text-[#EEECE5] block mt-0.5 font-sans">
                       {lawyer.bar_council_state}
                     </span>
                   </div>
                   <div>
-                    <span className="text-slate-400 block text-[10px]">Enrollment Year:</span>
-                    <span className="text-slate-200 mt-1 inline-block font-sans">
+                    <span className="text-[10px] text-[#92958E]/60 block uppercase">Enrollment Year</span>
+                    <span className="text-[#EEECE5] block mt-0.5">
                       {lawyer.bar_council_enrollment_year}
                     </span>
                   </div>
-                  <div>
-                    <span className="text-slate-400 block text-[10px]">Submission Time:</span>
-                    <span className="text-slate-300 mt-1 inline-block">
-                      {lawyer.verification?.submitted_at
-                        ? new Date(lawyer.verification.submitted_at).toLocaleDateString()
-                        : "Initial submission"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Meta details */}
-              <div className="flex flex-wrap gap-3 text-xs text-slate-400 pt-2 border-t border-[#1F2536]">
-                <div className="flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                  <span>{lawyer.city}, {lawyer.state}</span>
-                </div>
-                <span>•</span>
-                <div className="flex items-center gap-1.5">
-                  <GraduationCap className="w-3.5 h-3.5 text-slate-400" />
-                  <span>{lawyer.experience_years} years experience</span>
                 </div>
               </div>
 
               {/* Practice Areas */}
-              <div className="flex flex-wrap gap-1">
-                {lawyer.practice_areas.map((pa) => (
-                  <span
-                    key={pa}
-                    className="px-2 py-0.5 text-[10px] rounded bg-slate-800 text-slate-300 border border-slate-700/60"
-                  >
-                    {pa}
-                  </span>
-                ))}
+              <div className="space-y-1">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[#92958E]/60 block">
+                  Practice Areas
+                </span>
+                <div className="flex flex-wrap gap-1">
+                  {lawyer.practice_areas.map((pa) => (
+                    <span
+                      key={pa}
+                      className="px-2 py-0.5 rounded text-[11px] bg-white/[0.04] text-[#EEECE5] border border-white/[0.06]"
+                    >
+                      {pa}
+                    </span>
+                  ))}
+                </div>
               </div>
 
-              {/* Verification checklist notice */}
-              <div className="bg-[#0E121C] border border-slate-800 rounded-xl p-3 text-xs text-slate-400 space-y-1">
-                <span className="font-semibold text-slate-300 block text-[10px] uppercase tracking-wider font-mono">
-                  Administrative Checklist:
+              {/* Verification Checklist */}
+              <div className="border-t border-white/[0.06] pt-3 text-xs text-[#92958E] space-y-1">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-[#92958E]/60 block">
+                  Verification Criteria
                 </span>
-                <ul className="list-disc list-inside text-[11px] space-y-0.5 text-slate-400">
-                  <li>Verify Bar Council database matches {lawyer.bar_council_number}</li>
-                  <li>Confirm active license in State Bar of {lawyer.bar_council_state}</li>
-                  <li>Verify experience claims ({lawyer.experience_years} yrs from {lawyer.bar_council_enrollment_year})</li>
-                </ul>
+                <div className="text-[11px] space-y-0.5 text-[#92958E]">
+                  <div>• Confirm enrollment number {lawyer.bar_council_number} against State Bar Council of {lawyer.bar_council_state}</div>
+                  <div>• Verify non-disciplinary standing and active license date</div>
+                </div>
               </div>
             </div>
           ))}
