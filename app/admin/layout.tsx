@@ -1,16 +1,10 @@
 import type { Metadata } from "next";
-import { Instrument_Serif, Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 
 export const metadata: Metadata = {
   title: "NyayaLink — Operations & Administration",
   description: "Administrative Management Portal for NyayaLink Legal Services Marketplace",
 };
-
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-serif",
-  subsets: ["latin"],
-  weight: "400",
-});
 
 const geistSans = Geist({
   variable: "--font-sans",
@@ -29,7 +23,7 @@ export default function AdminLayout({
 }) {
   return (
     <div
-      className={`${instrumentSerif.variable} ${geistSans.variable} ${geistMono.variable} font-sans min-h-screen bg-[#0C0D0C] text-[#EEECE5] antialiased selection:bg-[#B8A078]/25`}
+      className={`${geistSans.variable} ${geistMono.variable} font-sans min-h-screen bg-[#09090F] text-[#F5F4FA] antialiased selection:bg-[#A99AFF]/25 selection:text-white`}
     >
       {children}
     </div>

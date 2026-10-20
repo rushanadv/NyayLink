@@ -11,53 +11,60 @@ interface AccessDeniedProps {
 
 export function AccessDenied({ user, roles }: AccessDeniedProps) {
   return (
-    <div className="min-h-screen bg-[#0C0D0C] text-[#EEECE5] flex flex-col justify-center items-center p-6 selection:bg-[#B8A078]/25 font-sans">
-      <div className="w-full max-w-md border border-white/[0.08] bg-[#141614] rounded-lg p-8 shadow-2xl">
-        <div className="flex flex-col items-center text-center">
-          <div className="w-10 h-10 rounded-full bg-white/[0.03] border border-white/[0.08] flex items-center justify-center text-[#B8A078] mb-4">
-            <ShieldAlert className="w-5 h-5" strokeWidth={1.5} />
+    <div className="min-h-screen bg-[#09090F] text-[#F5F4FA] flex flex-col justify-center items-center p-6 selection:bg-[#A99AFF]/25 font-sans">
+      <div className="w-full max-w-md border border-white/[0.08] bg-[#111119] rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+        {/* Luminous glow */}
+        <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-[#A99AFF]/10 blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col items-center text-center">
+          <div className="w-12 h-12 rounded-full bg-[#A99AFF]/10 border border-[#A99AFF]/25 flex items-center justify-center text-[#A99AFF] mb-4">
+            <ShieldAlert className="w-6 h-6" strokeWidth={1.5} />
           </div>
 
-          <span className="text-[10px] font-mono tracking-widest uppercase text-[#B8A078] mb-1">
+          <span className="text-[10px] font-mono tracking-widest uppercase text-[#A99AFF] px-2.5 py-0.5 rounded-full bg-[#A99AFF]/10 border border-[#A99AFF]/20 mb-2">
             403 Forbidden
           </span>
-          <h1 className="text-2xl font-serif font-normal tracking-tight text-[#EEECE5] mb-2">
+          <h1 className="text-2xl font-semibold tracking-tight text-[#F5F4FA] mb-2">
             Access Prohibited
           </h1>
-          <p className="text-xs text-[#92958E] leading-relaxed mb-6">
-            Your account is authenticated, but does not possess the administrative role required for the NyayaLink Operations Console. Authorization is verified server-side against <code className="font-mono text-[#EEECE5] bg-white/[0.04] px-1 py-0.5 rounded">public.user_roles</code>.
+          <p className="text-xs text-[#A5A3B2] leading-relaxed mb-6">
+            Your account is authenticated, but lacks the administrative credentials required for the NyayaLink Operations Console. Role permissions are verified server-side against <code className="font-mono text-[#F5F4FA] bg-white/[0.06] px-1.5 py-0.5 rounded">public.user_roles</code>.
           </p>
 
-          <div className="w-full border border-white/[0.06] bg-[#0C0D0C] rounded p-4 mb-6 text-left space-y-2 text-xs">
-            <div className="text-[10px] font-mono uppercase text-[#92958E]/60">Account Identity</div>
-            <div className="font-mono text-[#EEECE5] truncate" title={user.email || user.id}>
-              {user.email || user.id}
+          <div className="w-full border border-white/[0.06] bg-[#09090F] rounded-xl p-4 mb-6 text-left space-y-2.5 text-xs">
+            <div>
+              <div className="text-[10px] font-mono uppercase text-[#6F6E7D]">Account Identity</div>
+              <div className="font-mono text-[#F5F4FA] truncate mt-0.5" title={user.email || user.id}>
+                {user.email || user.id}
+              </div>
             </div>
 
-            <div className="text-[10px] font-mono uppercase text-[#92958E]/60 pt-1">Assigned Role(s)</div>
-            <div className="flex flex-wrap gap-1 font-mono text-[11px]">
-              {roles.length > 0 ? (
-                roles.map((r) => (
-                  <span
-                    key={r}
-                    className="px-2 py-0.5 rounded bg-white/[0.04] text-[#EEECE5] border border-white/[0.06]"
-                  >
-                    {r}
-                  </span>
-                ))
-              ) : (
-                <span className="text-[#92958E]/40 italic">None</span>
-              )}
+            <div className="pt-1 border-t border-white/[0.04]">
+              <div className="text-[10px] font-mono uppercase text-[#6F6E7D] mb-1.5">Assigned Role(s)</div>
+              <div className="flex flex-wrap gap-1 font-mono text-[11px]">
+                {roles.length > 0 ? (
+                  roles.map((r) => (
+                    <span
+                      key={r}
+                      className="px-2 py-0.5 rounded bg-white/[0.04] text-[#A5A3B2] border border-white/[0.06]"
+                    >
+                      {r}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-[#6F6E7D] italic">None</span>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="w-full flex flex-col gap-2">
+          <div className="w-full flex flex-col gap-2.5">
             <Link
               href="/"
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded text-xs font-medium bg-[#B8A078] text-[#0C0D0C] hover:bg-[#C9B38F] transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-medium bg-[#A99AFF] text-[#09090F] hover:bg-[#9887FA] transition-colors shadow-[0_0_20px_rgba(169,154,255,0.2)]"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              Return to Public Portal
+              <span>Return to Public Portal</span>
             </Link>
 
             <div className="pt-2 flex justify-center">

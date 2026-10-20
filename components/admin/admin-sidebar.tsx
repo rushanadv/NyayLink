@@ -17,6 +17,7 @@ interface AdminSidebarProps {
   pendingCount: number;
   userEmail: string;
   userRoles: UserRole[];
+  onTabSelect?: (tab: AdminDashboardTab) => void;
 }
 
 export function AdminSidebar({
@@ -24,6 +25,7 @@ export function AdminSidebar({
   pendingCount,
   userEmail,
   userRoles,
+  onTabSelect,
 }: AdminSidebarProps) {
   const navItems: Array<{
     id: AdminDashboardTab;
@@ -46,29 +48,33 @@ export function AdminSidebar({
   ];
 
   return (
-    <aside className="w-64 bg-[#0C0D0C] border-r border-white/[0.07] flex flex-col shrink-0 min-h-screen text-[#92958E] select-none">
-      {/* Editorial Typographic Brand Header */}
-      <div className="h-20 px-6 flex items-center border-b border-white/[0.07]">
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#B8A078]" />
-            <span className="font-serif tracking-[0.2em] text-base text-[#EEECE5] font-normal uppercase">
-              NyayaLink
-            </span>
-            <span className="text-[10px] font-mono tracking-widest text-[#92958E]/70 pl-1">
-              / OPS
+    <aside className="w-64 bg-[#09090F] border-r border-white/[0.06] flex flex-col shrink-0 min-h-screen text-[#A5A3B2] select-none font-sans">
+      {/* Brand Header with Custom Obsidian Monogram */}
+      <div className="h-20 px-6 flex items-center border-b border-white/[0.06]">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1E1C30] to-[#121120] border border-[#A99AFF]/30 flex items-center justify-center shadow-[0_0_15px_rgba(169,154,255,0.18)]">
+            <span className="font-mono text-xs font-bold text-[#A99AFF] tracking-wider">NL</span>
+          </div>
+          <div className="flex flex-col">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-semibold tracking-tight text-[#F5F4FA]">
+                NyayaLink
+              </span>
+              <span className="text-[10px] font-mono text-[#A99AFF]/80">
+                PROD
+              </span>
+            </div>
+            <span className="text-[10px] tracking-wide text-[#6F6E7D] font-mono">
+              Workspace IN-HQ
             </span>
           </div>
-          <span className="text-[10px] tracking-wider text-[#92958E]/60 uppercase font-sans mt-0.5">
-            Institutional Console
-          </span>
         </div>
       </div>
 
-      {/* Navigation Section */}
-      <nav className="flex-1 px-3 py-6 space-y-0.5 overflow-y-auto">
-        <div className="px-3 pb-2 text-[10px] font-medium tracking-widest uppercase text-[#92958E]/50 font-mono">
-          Operations
+      {/* Navigation Links */}
+      <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+        <div className="px-3 pb-2 text-[10px] font-medium tracking-widest uppercase text-[#6F6E7D] font-mono">
+          Administrative Console
         </div>
 
         {navItems.map((item) => {
@@ -78,24 +84,30 @@ export function AdminSidebar({
             <Link
               key={item.id}
               href={`/admin/dashboard?tab=${item.id}`}
-              className={`group flex items-center justify-between px-3 py-2 rounded-md text-xs font-medium transition-all duration-150 border-l-2 ${
+              onClick={(e) => {
+                if (onTabSelect) {
+                  e.preventDefault();
+                  onTabSelect(item.id);
+                }
+              }}
+              className={`group flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 border-l-2 ${
                 isActive
-                  ? "bg-[#141614] text-[#EEECE5] border-[#B8A078]"
-                  : "text-[#92958E] hover:text-[#EEECE5] hover:bg-[#141614]/60 border-transparent"
+                  ? "bg-[#191923] text-[#F5F4FA] border-[#A99AFF] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+                  : "text-[#A5A3B2] hover:text-[#F5F4FA] hover:bg-[#14141E] border-transparent"
               }`}
             >
               <div className="flex items-center gap-2.5">
                 <Icon
                   className={`w-4 h-4 transition-colors ${
-                    isActive ? "text-[#B8A078]" : "text-[#92958E] group-hover:text-[#EEECE5]"
+                    isActive ? "text-[#A99AFF]" : "text-[#6F6E7D] group-hover:text-[#F5F4FA]"
                   }`}
-                  strokeWidth={1.5}
+                  strokeWidth={1.75}
                 />
-                <span className="tracking-wide">{item.label}</span>
+                <span className="tracking-normal">{item.label}</span>
               </div>
 
               {typeof item.badge === "number" && item.badge > 0 && (
-                <span className="px-1.5 py-0.5 text-[10px] font-mono font-medium rounded bg-[#B8A078]/15 text-[#B8A078] border border-[#B8A078]/25">
+                <span className="px-2 py-0.5 text-[10px] font-mono font-semibold rounded-full bg-[#A99AFF]/15 text-[#A99AFF] border border-[#A99AFF]/30 animate-pulse">
                   {item.badge}
                 </span>
               )}
@@ -103,34 +115,34 @@ export function AdminSidebar({
           );
         })}
 
-        <div className="pt-8 px-3 pb-2 text-[10px] font-medium tracking-widest uppercase text-[#92958E]/50 font-mono">
-          External
+        <div className="pt-6 px-3 pb-2 text-[10px] font-medium tracking-widest uppercase text-[#6F6E7D] font-mono">
+          Public Network
         </div>
         <Link
           href="/"
           target="_blank"
-          className="group flex items-center justify-between px-3 py-2 rounded-md text-xs text-[#92958E] hover:text-[#EEECE5] hover:bg-[#141614]/60 transition-colors border-l-2 border-transparent"
+          className="group flex items-center justify-between px-3 py-2 rounded-lg text-xs text-[#A5A3B2] hover:text-[#F5F4FA] hover:bg-[#14141E] transition-colors border-l-2 border-transparent"
         >
-          <span className="tracking-wide">Public Portal</span>
-          <ArrowUpRight className="w-3.5 h-3.5 text-[#92958E]/60 group-hover:text-[#EEECE5]" />
+          <span className="tracking-normal">Citizen Portal</span>
+          <ArrowUpRight className="w-3.5 h-3.5 text-[#6F6E7D] group-hover:text-[#F5F4FA]" />
         </Link>
       </nav>
 
       {/* Admin Profile Footer */}
-      <div className="p-4 border-t border-white/[0.07] bg-[#0E100E]">
+      <div className="p-4 border-t border-white/[0.06] bg-[#0C0C14]">
         <div className="flex flex-col space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono tracking-widest text-[#92958E]/60 uppercase">
-              Administrator
+            <span className="text-[10px] font-mono tracking-wider text-[#6F6E7D] uppercase">
+              Authenticated Session
             </span>
             <div className="flex items-center gap-1">
               {userRoles.map((role) => (
                 <span
                   key={role}
-                  className={`text-[9px] font-mono px-1.5 py-0.2 rounded uppercase tracking-wider ${
+                  className={`text-[9px] font-mono px-1.5 py-0.5 rounded uppercase tracking-wider ${
                     role === "admin"
-                      ? "text-[#B8A078] bg-[#B8A078]/10 border border-[#B8A078]/20"
-                      : "text-[#92958E] bg-white/[0.04]"
+                      ? "text-[#A99AFF] bg-[#A99AFF]/15 border border-[#A99AFF]/25 font-semibold"
+                      : "text-[#A5A3B2] bg-white/[0.04]"
                   }`}
                 >
                   {role}
@@ -140,7 +152,7 @@ export function AdminSidebar({
           </div>
 
           <div
-            className="text-xs text-[#EEECE5] font-mono truncate"
+            className="text-xs text-[#F5F4FA] font-mono truncate"
             title={userEmail}
           >
             {userEmail}

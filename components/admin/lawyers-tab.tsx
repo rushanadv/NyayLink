@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, X, Shield, Lock } from "lucide-react";
+import { Search, X, Shield, Lock, ArrowRight } from "lucide-react";
 import type { LawyerProfileRecord } from "@/lib/admin/types";
 
 interface LawyersTabProps {
@@ -34,25 +34,25 @@ export function LawyersTab({ initialLawyers }: LawyersTabProps) {
   return (
     <div className="space-y-6">
       {/* Read-Only Status Notice */}
-      <div className="border border-white/[0.07] bg-[#141614] rounded-lg px-5 py-3.5 flex items-center justify-between text-xs">
+      <div className="border border-white/[0.06] bg-[#111119] rounded-xl px-5 py-3.5 flex items-center justify-between text-xs">
         <div className="flex items-center gap-2.5">
-          <Lock className="w-3.5 h-3.5 text-[#B8A078]" strokeWidth={1.5} />
-          <span className="text-[#92958E]">
-            Verification review actions are currently <strong className="text-[#EEECE5] font-medium">read-only</strong>. State mutations (Approve, Reject, Request Changes) will be enabled after administrative workflow sign-off.
+          <Lock className="w-3.5 h-3.5 text-[#A99AFF]" strokeWidth={1.5} />
+          <span className="text-[#A5A3B2]">
+            Advocate verification queue is currently operating in <strong className="text-[#F5F4FA] font-medium">read-only administrative view</strong>. Mutation transitions require operational clearance.
           </span>
         </div>
-        <span className="text-[10px] font-mono uppercase tracking-widest text-[#B8A078] shrink-0 ml-4">
-          Read-Only Mode
+        <span className="text-[10px] font-mono uppercase tracking-widest text-[#A99AFF] px-2 py-0.5 rounded bg-[#A99AFF]/10 border border-[#A99AFF]/20 shrink-0 ml-4">
+          Read-Only Access
         </span>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="border border-white/[0.07] bg-[#141614] rounded-lg p-3 flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="border border-white/[0.06] bg-[#111119] rounded-xl p-3 sm:p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
         {/* Status Filter Tabs */}
-        <div className="flex flex-wrap gap-1 w-full md:w-auto">
+        <div className="flex flex-wrap gap-1.5 w-full md:w-auto">
           {[
             { id: "all", label: "All Records" },
-            { id: "pending", label: "Pending" },
+            { id: "pending", label: "Pending Review" },
             { id: "approved", label: "Approved" },
             { id: "changes_requested", label: "Changes Requested" },
             { id: "rejected", label: "Rejected" },
@@ -60,10 +60,10 @@ export function LawyersTab({ initialLawyers }: LawyersTabProps) {
             <button
               key={tab.id}
               onClick={() => setSelectedStatus(tab.id)}
-              className={`px-3 py-1.5 rounded text-xs font-sans transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-sans transition-all ${
                 selectedStatus === tab.id
-                  ? "bg-white/[0.08] text-[#EEECE5] font-medium border border-white/[0.12]"
-                  : "text-[#92958E] hover:text-[#EEECE5] hover:bg-white/[0.03] border border-transparent"
+                  ? "bg-[#A99AFF]/15 text-[#F5F4FA] font-medium border border-[#A99AFF]/30 shadow-[0_0_12px_rgba(169,154,255,0.1)]"
+                  : "text-[#A5A3B2] hover:text-[#F5F4FA] hover:bg-white/[0.03] border border-transparent"
               }`}
             >
               {tab.label}
@@ -71,48 +71,51 @@ export function LawyersTab({ initialLawyers }: LawyersTabProps) {
           ))}
         </div>
 
-        {/* Minimal Search Input */}
+        {/* Search Input */}
         <div className="relative w-full md:w-72">
-          <Search className="w-3.5 h-3.5 text-[#92958E]/60 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="w-3.5 h-3.5 text-[#6F6E7D] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search name, bar registration, city..."
-            className="w-full pl-9 pr-3 py-1.5 bg-[#0C0D0C] border border-white/[0.08] focus:border-[#B8A078]/50 rounded text-xs text-[#EEECE5] placeholder:text-[#92958E]/50 focus:outline-none transition-colors font-sans"
+            placeholder="Search name, Bar ID, jurisdiction..."
+            className="w-full pl-9 pr-3 py-1.5 bg-[#09090F] border border-white/[0.08] focus:border-[#A99AFF]/50 rounded-lg text-xs text-[#F5F4FA] placeholder:text-[#6F6E7D] focus:outline-none transition-colors font-sans"
           />
         </div>
       </div>
 
       {/* Data Table */}
       {filteredLawyers.length === 0 ? (
-        <div className="border border-white/[0.07] bg-[#141614] rounded-lg p-12 text-center flex flex-col items-center justify-center">
-          <h3 className="text-base font-serif text-[#EEECE5] mb-1">
+        <div className="border border-white/[0.06] bg-[#111119] rounded-xl p-12 text-center flex flex-col items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[#6F6E7D] mb-3">
+            <Search className="w-4 h-4" />
+          </div>
+          <h3 className="text-base font-semibold text-[#F5F4FA] mb-1">
             No advocate records match this filter
           </h3>
-          <p className="text-xs text-[#92958E] max-w-sm">
+          <p className="text-xs text-[#A5A3B2] max-w-sm">
             {initialLawyers.length === 0
               ? "The advocate directory is currently empty. As practitioners register and submit Bar credentials, they will be cataloged here."
               : "Try refining your search keyword or selecting a different status filter."}
           </p>
         </div>
       ) : (
-        <div className="border border-white/[0.07] bg-[#141614] rounded-lg overflow-hidden">
+        <div className="border border-white/[0.06] bg-[#111119] rounded-xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-[#EEECE5]">
-              <thead className="border-b border-white/[0.07] bg-[#0E100E] text-[10px] font-mono tracking-wider uppercase text-[#92958E]">
+            <table className="w-full text-left text-xs text-[#F5F4FA]">
+              <thead className="border-b border-white/[0.06] bg-[#0E0E17] text-[11px] font-mono tracking-wider uppercase text-[#6F6E7D]">
                 <tr>
-                  <th className="px-6 py-3 font-medium">Advocate Name</th>
-                  <th className="px-6 py-3 font-medium">Bar Registration</th>
-                  <th className="px-6 py-3 font-medium">Jurisdiction</th>
-                  <th className="px-6 py-3 font-medium">Experience</th>
-                  <th className="px-6 py-3 font-medium">Practice Areas</th>
-                  <th className="px-6 py-3 font-medium">Verification</th>
-                  <th className="px-6 py-3 font-medium">Directory</th>
-                  <th className="px-6 py-3 font-medium text-right">Details</th>
+                  <th className="px-6 py-3.5 font-medium">Advocate Name</th>
+                  <th className="px-6 py-3.5 font-medium">Bar Registration</th>
+                  <th className="px-6 py-3.5 font-medium">Jurisdiction</th>
+                  <th className="px-6 py-3.5 font-medium">Experience</th>
+                  <th className="px-6 py-3.5 font-medium">Practice Areas</th>
+                  <th className="px-6 py-3.5 font-medium">Verification Status</th>
+                  <th className="px-6 py-3.5 font-medium">Directory</th>
+                  <th className="px-6 py-3.5 font-medium text-right">Inspect</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.05]">
+              <tbody className="divide-y divide-white/[0.04]">
                 {filteredLawyers.map((lawyer) => {
                   const status = lawyer.verification?.status || "pending";
                   return (
@@ -122,28 +125,28 @@ export function LawyersTab({ initialLawyers }: LawyersTabProps) {
                       className="hover:bg-white/[0.02] transition-colors cursor-pointer group"
                     >
                       <td className="px-6 py-4">
-                        <div className="font-medium text-[#EEECE5] group-hover:text-[#B8A078] transition-colors">
+                        <div className="font-medium text-[#F5F4FA] group-hover:text-[#A99AFF] transition-colors">
                           {lawyer.professional_name}
                         </div>
-                        <div className="text-[10px] font-mono text-[#92958E]/60 mt-0.5" title={lawyer.id}>
+                        <div className="text-[10px] font-mono text-[#6F6E7D] mt-0.5" title={lawyer.id}>
                           UUID: {lawyer.id.slice(0, 8)}...
                         </div>
                       </td>
 
                       <td className="px-6 py-4 font-mono text-xs">
-                        <span className="text-[#EEECE5]">
+                        <span className="text-[#F5F4FA] font-medium">
                           {lawyer.bar_council_number}
                         </span>
-                        <div className="text-[10px] text-[#92958E]/60 mt-0.5">
+                        <div className="text-[10px] text-[#6F6E7D] mt-0.5">
                           {lawyer.bar_council_state} ({lawyer.bar_council_enrollment_year})
                         </div>
                       </td>
 
-                      <td className="px-6 py-4 text-[#92958E]">
+                      <td className="px-6 py-4 text-[#A5A3B2]">
                         {lawyer.city}, {lawyer.state}
                       </td>
 
-                      <td className="px-6 py-4 text-[#92958E] font-mono">
+                      <td className="px-6 py-4 text-[#A5A3B2] font-mono">
                         {lawyer.experience_years} yrs
                       </td>
 
@@ -152,13 +155,13 @@ export function LawyersTab({ initialLawyers }: LawyersTabProps) {
                           {lawyer.practice_areas.slice(0, 2).map((pa) => (
                             <span
                               key={pa}
-                              className="px-1.5 py-0.5 rounded text-[10px] bg-white/[0.04] text-[#92958E] border border-white/[0.06]"
+                              className="px-2 py-0.5 rounded text-[10px] bg-white/[0.04] text-[#A5A3B2] border border-white/[0.06]"
                             >
                               {pa}
                             </span>
                           ))}
                           {lawyer.practice_areas.length > 2 && (
-                            <span className="text-[10px] text-[#92958E]/60 px-1 py-0.5">
+                            <span className="text-[10px] text-[#6F6E7D] px-1 py-0.5 font-mono">
                               +{lawyer.practice_areas.length - 2}
                             </span>
                           )}
@@ -167,25 +170,25 @@ export function LawyersTab({ initialLawyers }: LawyersTabProps) {
 
                       <td className="px-6 py-4">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider ${
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider ${
                             status === "approved"
-                              ? "bg-emerald-950/40 text-emerald-300 border border-emerald-800/40"
+                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                               : status === "pending"
-                              ? "bg-[#B8A078]/10 text-[#B8A078] border border-[#B8A078]/25"
+                              ? "bg-[#A99AFF]/10 text-[#A99AFF] border border-[#A99AFF]/25"
                               : status === "changes_requested"
-                              ? "bg-sky-950/40 text-sky-300 border border-sky-800/40"
-                              : "bg-red-950/40 text-red-300 border border-red-800/40"
+                              ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                              : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
                           }`}
                         >
                           <span
-                            className={`w-1 h-1 rounded-full ${
+                            className={`w-1.5 h-1.5 rounded-full ${
                               status === "approved"
                                 ? "bg-emerald-400"
                                 : status === "pending"
-                                ? "bg-[#B8A078]"
+                                ? "bg-[#A99AFF]"
                                 : status === "changes_requested"
-                                ? "bg-sky-400"
-                                : "bg-red-400"
+                                ? "bg-amber-400"
+                                : "bg-rose-400"
                             }`}
                           />
                           {status.replace("_", " ")}
@@ -196,8 +199,8 @@ export function LawyersTab({ initialLawyers }: LawyersTabProps) {
                         <span
                           className={
                             lawyer.is_published
-                              ? "text-[#B8A078]"
-                              : "text-[#92958E]/60"
+                              ? "text-emerald-400"
+                              : "text-[#6F6E7D]"
                           }
                         >
                           {lawyer.is_published ? "Published" : "Private"}
@@ -210,9 +213,10 @@ export function LawyersTab({ initialLawyers }: LawyersTabProps) {
                             e.stopPropagation();
                             setSelectedLawyer(lawyer);
                           }}
-                          className="px-2.5 py-1 rounded bg-white/[0.03] hover:bg-white/[0.08] text-xs font-mono text-[#EEECE5] border border-white/[0.08] transition-colors"
+                          className="px-3 py-1 rounded-lg bg-white/[0.04] hover:bg-[#A99AFF]/15 text-xs font-mono text-[#F5F4FA] hover:text-[#A99AFF] border border-white/[0.08] hover:border-[#A99AFF]/30 transition-colors inline-flex items-center gap-1"
                         >
-                          Inspect →
+                          <span>Dossier</span>
+                          <ArrowRight className="w-3 h-3" />
                         </button>
                       </td>
                     </tr>
@@ -226,51 +230,51 @@ export function LawyersTab({ initialLawyers }: LawyersTabProps) {
 
       {/* Slide-over Inspection Drawer */}
       {selectedLawyer && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end animate-in fade-in duration-150">
-          <div className="w-full max-w-xl bg-[#0C0D0C] border-l border-white/[0.08] h-full overflow-y-auto p-8 space-y-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex justify-end animate-in fade-in duration-200">
+          <div className="w-full max-w-xl bg-[#09090F] border-l border-white/[0.08] h-full overflow-y-auto p-6 sm:p-8 space-y-6 shadow-2xl">
             {/* Header */}
-            <div className="flex items-start justify-between pb-6 border-b border-white/[0.07]">
+            <div className="flex items-start justify-between pb-6 border-b border-white/[0.06]">
               <div>
-                <span className="text-[10px] font-mono tracking-widest uppercase text-[#B8A078] block mb-1">
+                <span className="text-[10px] font-mono tracking-widest uppercase text-[#A99AFF] px-2 py-0.5 rounded bg-[#A99AFF]/10 border border-[#A99AFF]/20 inline-block mb-2">
                   Advocate Dossier
                 </span>
-                <h2 className="text-2xl font-serif text-[#EEECE5]">
+                <h2 className="text-2xl font-semibold tracking-tight text-[#F5F4FA]">
                   {selectedLawyer.professional_name}
                 </h2>
-                <div className="text-xs font-mono text-[#92958E]/60 mt-1">
+                <div className="text-xs font-mono text-[#6F6E7D] mt-1">
                   UUID: {selectedLawyer.id}
                 </div>
               </div>
               <button
                 onClick={() => setSelectedLawyer(null)}
-                className="w-8 h-8 rounded border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06] text-[#92958E] hover:text-[#EEECE5] flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-lg border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.08] text-[#A5A3B2] hover:text-white flex items-center justify-center transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Verification Status */}
-            <div className="border border-white/[0.07] bg-[#141614] rounded-lg p-5 space-y-3">
+            {/* Verification Status Card */}
+            <div className="border border-white/[0.06] bg-[#111119] rounded-xl p-5 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-sans text-[#92958E]">
+                <span className="text-xs font-medium text-[#A5A3B2]">
                   Verification Lifecycle
                 </span>
-                <span className="text-xs font-mono uppercase tracking-wider text-[#B8A078]">
+                <span className="text-xs font-mono uppercase tracking-wider text-[#A99AFF] px-2.5 py-0.5 rounded-full bg-[#A99AFF]/10 border border-[#A99AFF]/20">
                   {selectedLawyer.verification?.status || "pending"}
                 </span>
               </div>
-              <div className="grid grid-cols-2 gap-4 pt-3 border-t border-white/[0.05] text-xs font-mono">
+              <div className="grid grid-cols-2 gap-4 pt-3 border-t border-white/[0.04] text-xs font-mono">
                 <div>
-                  <span className="text-[10px] text-[#92958E]/60 block uppercase">Reviewer</span>
-                  <span className="text-[#EEECE5]">
+                  <span className="text-[10px] text-[#6F6E7D] block uppercase">Reviewer</span>
+                  <span className="text-[#F5F4FA]">
                     {selectedLawyer.verification?.reviewed_by
                       ? `${selectedLawyer.verification.reviewed_by.slice(0, 12)}...`
                       : "Unassigned"}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-[#92958E]/60 block uppercase">Review Timestamp</span>
-                  <span className="text-[#EEECE5]">
+                  <span className="text-[10px] text-[#6F6E7D] block uppercase">Review Timestamp</span>
+                  <span suppressHydrationWarning className="text-[#F5F4FA]">
                     {selectedLawyer.verification?.reviewed_at
                       ? new Date(selectedLawyer.verification.reviewed_at).toLocaleDateString()
                       : "Pending review"}
@@ -280,27 +284,27 @@ export function LawyersTab({ initialLawyers }: LawyersTabProps) {
             </div>
 
             {/* Bar Council Credentials */}
-            <div className="border border-white/[0.07] bg-[#141614] rounded-lg p-5 space-y-3">
-              <div className="flex items-center gap-1.5 text-xs font-sans text-[#B8A078]">
+            <div className="border border-white/[0.06] bg-[#111119] rounded-xl p-5 space-y-3">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-[#A99AFF]">
                 <Shield className="w-3.5 h-3.5" strokeWidth={1.5} />
                 <span>Bar Council Enrollment Verification</span>
               </div>
               <div className="grid grid-cols-3 gap-4 pt-2 text-xs font-mono">
                 <div>
-                  <span className="text-[10px] text-[#92958E]/60 block uppercase">Registration</span>
-                  <span className="text-[#EEECE5] font-bold block mt-1">
+                  <span className="text-[10px] text-[#6F6E7D] block uppercase">Registration</span>
+                  <span className="text-[#F5F4FA] font-bold block mt-1">
                     {selectedLawyer.bar_council_number}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-[#92958E]/60 block uppercase">State Council</span>
-                  <span className="text-[#EEECE5] block mt-1 font-sans">
+                  <span className="text-[10px] text-[#6F6E7D] block uppercase">State Council</span>
+                  <span className="text-[#F5F4FA] block mt-1 font-sans">
                     {selectedLawyer.bar_council_state}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-[#92958E]/60 block uppercase">Year</span>
-                  <span className="text-[#EEECE5] block mt-1 font-sans">
+                  <span className="text-[10px] text-[#6F6E7D] block uppercase">Enrollment Year</span>
+                  <span className="text-[#F5F4FA] block mt-1 font-sans">
                     {selectedLawyer.bar_council_enrollment_year}
                   </span>
                 </div>
@@ -310,24 +314,24 @@ export function LawyersTab({ initialLawyers }: LawyersTabProps) {
             {/* Profile Information */}
             <div className="space-y-4 text-xs">
               <div>
-                <span className="text-[10px] font-mono tracking-wider uppercase text-[#92958E]/60 block mb-1">
+                <span className="text-[10px] font-mono tracking-wider uppercase text-[#6F6E7D] block mb-1.5">
                   Professional Biography
                 </span>
-                <p className="border border-white/[0.07] bg-[#141614] p-4 rounded-lg text-[#EEECE5] leading-relaxed">
+                <p className="border border-white/[0.06] bg-[#111119] p-4 rounded-xl text-[#F5F4FA] leading-relaxed">
                   {selectedLawyer.bio || "No professional biography provided."}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className="text-[10px] font-mono tracking-wider uppercase text-[#92958E]/60 block mb-1">
+                  <span className="text-[10px] font-mono tracking-wider uppercase text-[#6F6E7D] block mb-1.5">
                     Practice Areas
                   </span>
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex flex-wrap gap-1.5">
                     {selectedLawyer.practice_areas.map((pa) => (
                       <span
                         key={pa}
-                        className="px-2 py-0.5 rounded bg-white/[0.04] text-[#EEECE5] border border-white/[0.06] text-[11px]"
+                        className="px-2 py-0.5 rounded-md bg-white/[0.04] text-[#F5F4FA] border border-white/[0.06] text-[11px]"
                       >
                         {pa}
                       </span>
@@ -336,14 +340,14 @@ export function LawyersTab({ initialLawyers }: LawyersTabProps) {
                 </div>
 
                 <div>
-                  <span className="text-[10px] font-mono tracking-wider uppercase text-[#92958E]/60 block mb-1">
+                  <span className="text-[10px] font-mono tracking-wider uppercase text-[#6F6E7D] block mb-1.5">
                     Languages
                   </span>
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex flex-wrap gap-1.5">
                     {selectedLawyer.languages.map((lang) => (
                       <span
                         key={lang}
-                        className="px-2 py-0.5 rounded bg-white/[0.04] text-[#EEECE5] border border-white/[0.06] text-[11px]"
+                        className="px-2 py-0.5 rounded-md bg-white/[0.04] text-[#F5F4FA] border border-white/[0.06] text-[11px]"
                       >
                         {lang}
                       </span>
@@ -354,38 +358,38 @@ export function LawyersTab({ initialLawyers }: LawyersTabProps) {
             </div>
 
             {/* Confidential Internal Notes */}
-            <div className="border border-[#B8A078]/25 bg-[#141614] rounded-lg p-5 space-y-2">
+            <div className="border border-[#A99AFF]/25 bg-[#141322] rounded-xl p-5 space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-mono text-[11px] uppercase tracking-wider text-[#B8A078]">
+                <span className="font-mono text-[11px] uppercase tracking-wider text-[#A99AFF]">
                   Internal Admin Notes (Confidential)
                 </span>
-                <span className="font-mono text-[10px] text-[#92958E]/60">
+                <span className="font-mono text-[10px] text-[#6F6E7D]">
                   via admin_lawyer_verifications
                 </span>
               </div>
-              <p className="text-xs text-[#EEECE5] font-mono p-3 rounded bg-[#0C0D0C] border border-white/[0.06] whitespace-pre-wrap">
+              <p className="text-xs text-[#F5F4FA] font-mono p-3 rounded-lg bg-[#09090F] border border-white/[0.06] whitespace-pre-wrap">
                 {selectedLawyer.verification?.internal_notes || "No internal notes recorded."}
               </p>
             </div>
 
             {/* Lawyer-Visible Feedback */}
-            <div className="border border-white/[0.07] bg-[#141614] rounded-lg p-5 space-y-2">
-              <span className="font-mono text-[11px] uppercase tracking-wider text-[#92958E] block">
+            <div className="border border-white/[0.06] bg-[#111119] rounded-xl p-5 space-y-2">
+              <span className="font-mono text-[11px] uppercase tracking-wider text-[#A5A3B2] block">
                 Lawyer-Facing Feedback
               </span>
-              <p className="text-xs text-[#92958E] p-3 rounded bg-[#0C0D0C] border border-white/[0.06] whitespace-pre-wrap">
+              <p className="text-xs text-[#A5A3B2] p-3 rounded-lg bg-[#09090F] border border-white/[0.06] whitespace-pre-wrap">
                 {selectedLawyer.verification?.lawyer_feedback || "No feedback issued to lawyer."}
               </p>
             </div>
 
             {/* Publication Consent Audit */}
-            <div className="border border-white/[0.07] bg-[#141614] rounded-lg p-4 text-xs font-mono space-y-1.5 text-[#92958E]">
-              <span className="text-[10px] uppercase tracking-wider text-[#92958E]/60 block mb-1">
+            <div className="border border-white/[0.06] bg-[#111119] rounded-xl p-4 text-xs font-mono space-y-1.5 text-[#A5A3B2]">
+              <span className="text-[10px] uppercase tracking-wider text-[#6F6E7D] block mb-1">
                 Publication Consent Audit Trail
               </span>
               <div className="flex justify-between">
                 <span>Public Listing:</span>
-                <span className={selectedLawyer.is_published ? "text-[#B8A078]" : "text-[#92958E]"}>
+                <span className={selectedLawyer.is_published ? "text-emerald-400" : "text-[#6F6E7D]"}>
                   {selectedLawyer.is_published ? "Consented & Visible" : "Unpublished / Private"}
                 </span>
               </div>

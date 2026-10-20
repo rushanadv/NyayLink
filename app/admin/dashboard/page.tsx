@@ -27,23 +27,23 @@ interface AdminDashboardPageProps {
 
 function AdminDashboardSkeleton() {
   return (
-    <div className="flex h-screen bg-[#0C0D0C] text-[#EEECE5] overflow-hidden font-sans">
-      <div className="w-64 bg-[#0C0D0C] border-r border-white/[0.07] p-6 space-y-6">
-        <div className="h-6 w-32 bg-white/[0.03] rounded animate-pulse" />
+    <div className="flex h-screen bg-[#09090F] text-[#F5F4FA] overflow-hidden font-sans">
+      <div className="w-64 bg-[#09090F] border-r border-white/[0.06] p-6 space-y-6">
+        <div className="h-6 w-32 bg-white/[0.04] rounded animate-pulse" />
         <div className="space-y-2 pt-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-7 bg-white/[0.02] rounded animate-pulse" />
+            <div key={i} className="h-7 bg-white/[0.03] rounded animate-pulse" />
           ))}
         </div>
       </div>
-      <div className="flex-1 flex flex-col bg-[#0C0D0C]">
-        <div className="h-20 bg-[#0C0D0C] border-b border-white/[0.07] px-8 flex items-center justify-between">
-          <div className="h-7 w-40 bg-white/[0.03] rounded animate-pulse" />
-          <div className="h-4 w-28 bg-white/[0.02] rounded animate-pulse" />
+      <div className="flex-1 flex flex-col bg-[#09090F]">
+        <div className="h-20 bg-[#09090F] border-b border-white/[0.06] px-8 flex items-center justify-between">
+          <div className="h-7 w-40 bg-white/[0.04] rounded animate-pulse" />
+          <div className="h-4 w-28 bg-white/[0.03] rounded animate-pulse" />
         </div>
         <div className="p-8 space-y-8">
-          <div className="h-44 bg-[#141614] border border-white/[0.07] rounded-lg animate-pulse" />
-          <div className="h-64 bg-[#141614] border border-white/[0.07] rounded-lg animate-pulse" />
+          <div className="h-44 bg-[#111119] border border-white/[0.06] rounded-xl animate-pulse" />
+          <div className="h-64 bg-[#111119] border border-white/[0.06] rounded-xl animate-pulse" />
         </div>
       </div>
     </div>
@@ -92,7 +92,7 @@ async function AdminDashboardContent({
   ]);
 
   return (
-    <div className="flex h-screen bg-[#0C0D0C] text-[#EEECE5] overflow-hidden font-sans">
+    <div className="flex h-screen bg-[#09090F] text-[#F5F4FA] overflow-hidden font-sans">
       {/* Sidebar Navigation */}
       <AdminSidebar
         currentTab={currentTab}
@@ -102,10 +102,10 @@ async function AdminDashboardContent({
       />
 
       {/* Main Workspace Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#0C0D0C]">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#09090F]">
         <AdminHeader currentTab={currentTab} />
 
-        <main className="flex-1 overflow-y-auto p-8">
+        <main className="flex-1 overflow-y-auto p-6 sm:p-8">
           <div className="max-w-7xl mx-auto space-y-8 pb-12">
             {currentTab === "overview" && (
               <OverviewTab
