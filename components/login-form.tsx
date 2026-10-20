@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { getPostLoginRedirectPath } from "@/lib/auth/post-login-redirect";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -14,7 +15,8 @@ export function LoginForm() {
   
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextUrl = searchParams.get("next") || "/admin/dashboard";
+  const intentParam = searchParams.get("intent");
+  const isLawyerIntent = intentParam === "lawyer";
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -23,7 +25,7 @@ export function LoginForm() {
     setError(null);
 
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -32,9 +34,18 @@ export function LoginForm() {
         throw signInError;
       }
 
-      // Check whether user has admin role or proceed to target destination
-      router.push(nextUrl);
-      router.refresh();
+      if (signInData?.user) {
+        const explicitNext = searchParams.get("next");
+        // If user followed an explicit protected deep link, prioritize it (except the old default fallback)
+        if (explicitNext && explicitNext !== "/admin/dashboard") {
+          router.push(explicitNext);
+        } else {
+          // Route based on ACTUAL user_roles from database (admin > lawyer > client)
+          const targetPath = await getPostLoginRedirectPath(supabase, signInData.user.id);
+          router.push(targetPath);
+        }
+        router.refresh();
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Authentication failed. Please verify your credentials.");
     } finally {
@@ -42,18 +53,24 @@ export function LoginForm() {
     }
   };
 
+  const nextParam = searchParams.get("next");
+  const nextQuery = nextParam ? `&next=${encodeURIComponent(nextParam)}` : "";
+
   return (
     <div className="w-full">
       {/* Header */}
       <div className="mb-8">
-        <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#191923] border border-white/[0.06] text-[11px] font-mono text-[#A99AFF] mb-4">
-          <span>PORTAL AUTHENTICATION</span>
+        <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#191923] border border-white/[0.06] text-[11px] font-mono text-[#DFBE7E] mb-4">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059]" />
+          <span>{isLawyerIntent ? "ADVOCATE WORKSPACE" : "LEGAL CLIENT PORTAL"}</span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#F5F4FA]">
-          Sign in
+        <h2 className="text-2xl sm:text-3xl font-serif tracking-tight text-[#F5F4FA]">
+          {isLawyerIntent ? "Sign in to manage your practice" : "Sign in to find your advocate"}
         </h2>
-        <p className="text-sm text-[#A5A3B2] mt-2">
-          Enter your institutional credentials to access your NyayaLink account.
+        <p className="text-sm text-[#A5A3B2] mt-2 leading-relaxed">
+          {isLawyerIntent
+            ? "Access your court calendar, active briefs, Vakalatnama vault, and client intake."
+            : "Track your active case, message your verified lawyer, and access your legal vault."}
         </p>
       </div>
 
@@ -93,11 +110,11 @@ export function LoginForm() {
             type="email"
             required
             autoComplete="email"
-            placeholder="advocate@nyayalink.in"
+            placeholder={isLawyerIntent ? "advocate@chambers.in" : "client@domain.in"}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isLoading}
-            className="w-full h-11 px-3.5 rounded-lg bg-[#111119] border border-white/[0.08] text-[#F5F4FA] placeholder-[#6F6E7D] text-sm focus:outline-none focus:border-[#A99AFF] focus:ring-1 focus:ring-[#A99AFF]/30 transition-colors disabled:opacity-50"
+            className="w-full h-11 px-3.5 rounded-lg bg-[#111119] border border-white/[0.08] text-[#F5F4FA] placeholder-[#6F6E7D] text-sm focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]/30 transition-colors disabled:opacity-50"
           />
         </div>
 
@@ -112,7 +129,7 @@ export function LoginForm() {
             </label>
             <Link
               href="/auth/forgot-password"
-              className="text-xs text-[#A99AFF] hover:text-[#C4BCFF] transition-colors font-mono"
+              className="text-xs text-[#DFBE7E] hover:underline transition-colors font-mono"
             >
               Forgot password?
             </Link>
@@ -128,7 +145,7 @@ export function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
-              className="w-full h-11 pl-3.5 pr-11 rounded-lg bg-[#111119] border border-white/[0.08] text-[#F5F4FA] placeholder-[#6F6E7D] text-sm focus:outline-none focus:border-[#A99AFF] focus:ring-1 focus:ring-[#A99AFF]/30 transition-colors disabled:opacity-50"
+              className="w-full h-11 pl-3.5 pr-11 rounded-lg bg-[#111119] border border-white/[0.08] text-[#F5F4FA] placeholder-[#6F6E7D] text-sm focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]/30 transition-colors disabled:opacity-50"
             />
             <button
               type="button"
@@ -155,28 +172,53 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full h-11 rounded-lg bg-gradient-to-r from-[#A99AFF] to-[#8C7BFF] hover:from-[#B9ACFF] hover:to-[#9B8BFF] text-[#09090F] font-semibold text-sm transition-all duration-200 shadow-[0_0_20px_rgba(169,154,255,0.22)] hover:shadow-[0_0_25px_rgba(169,154,255,0.35)] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
+          className="w-full h-11 rounded-lg bg-[#C5A059] hover:bg-[#DFBE7E] text-[#090B10] font-semibold text-sm transition-all duration-200 shadow-md shadow-[#C5A059]/20 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
         >
           {isLoading ? (
             <>
-              <svg className="animate-spin h-4 w-4 text-[#09090F]" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin h-4 w-4 text-[#090B10]" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
               </svg>
-              <span>Verifying session...</span>
+              <span>Verifying credentials...</span>
             </>
           ) : (
-            <span>Sign In to Workspace</span>
+            <span>{isLawyerIntent ? "Sign In as Advocate" : "Sign In to Client Portal"}</span>
           )}
         </button>
+
+        {/* Switch Intent Link */}
+        <div className="pt-2 text-center">
+          {isLawyerIntent ? (
+            <p className="text-xs text-[#A5A3B2]">
+              Looking for legal assistance instead?{" "}
+              <Link
+                href={`/auth/login?intent=client${nextQuery}`}
+                className="text-[#DFBE7E] hover:underline font-medium"
+              >
+                Switch to client sign-in
+              </Link>
+            </p>
+          ) : (
+            <p className="text-xs text-[#A5A3B2]">
+              Looking to offer legal services instead?{" "}
+              <Link
+                href={`/auth/login?intent=lawyer${nextQuery}`}
+                className="text-[#DFBE7E] hover:underline font-medium"
+              >
+                Switch to lawyer sign-in
+              </Link>
+            </p>
+          )}
+        </div>
 
         {/* Footer Navigation */}
         <div className="pt-4 border-t border-white/[0.06] text-center">
           <p className="text-xs text-[#A5A3B2]">
             Don&apos;t have an account yet?{" "}
             <Link
-              href="/auth/sign-up"
-              className="text-[#A99AFF] hover:text-[#C4BCFF] font-medium transition-colors"
+              href={`/auth/sign-up?intent=${isLawyerIntent ? "lawyer" : "client"}${nextQuery}`}
+              className="text-[#C5A059] hover:text-[#DFBE7E] font-medium transition-colors"
             >
               Create Account
             </Link>

@@ -64,7 +64,7 @@ export function MarketingFooter() {
               </h4>
               <ul className="space-y-2">
                 <li>
-                  <Link href="/auth/login" className="hover:text-white transition-colors">
+                  <Link href="/auth/login?intent=lawyer" className="hover:text-white transition-colors">
                     Join Network
                   </Link>
                 </li>

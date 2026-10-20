@@ -2,17 +2,19 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export function SignUpForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const intent = searchParams.get("intent") || "client";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -37,7 +39,7 @@ export function SignUpForm() {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/admin/dashboard`,
+          emailRedirectTo: `${window.location.origin}/dashboard`,
         },
       });
 
@@ -45,7 +47,7 @@ export function SignUpForm() {
         throw signUpError;
       }
 
-      router.push("/auth/sign-up-success");
+      router.push(`/auth/sign-up-success?intent=${intent}`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
