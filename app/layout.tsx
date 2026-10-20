@@ -19,6 +19,9 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
+import { CursorSpotlight } from "@/components/marketing/cursor-spotlight";
+import { FilmGrain } from "@/components/marketing/film-grain";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -26,13 +29,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.className} antialiased`}>
+      <body className={`${geistSans.className} antialiased bg-[#090B10] text-[#F5F4FA]`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="dark"
+          forcedTheme="dark"
+          enableSystem={false}
           disableTransitionOnChange
         >
+          {/* Subtle Global Ambient Layers */}
+          <CursorSpotlight />
+          <FilmGrain />
+
           {children}
         </ThemeProvider>
       </body>

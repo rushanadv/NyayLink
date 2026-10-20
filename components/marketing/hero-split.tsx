@@ -13,6 +13,7 @@ import {
 import { FEATURES } from "@/lib/marketing/features-data";
 import { FeaturePreview } from "./feature-preview";
 import { CaseStatusWidget } from "./case-status-widget";
+import { MagneticWrapper } from "@/components/ui/magnetic-wrapper";
 
 export function HeroSplit() {
   const [activeFeature, setActiveFeature] = useState<number>(0);
@@ -107,19 +108,23 @@ export function HeroSplit() {
 
           {/* CTA Buttons */}
           <div className="flex flex-wrap items-center gap-3 pt-1">
-            <Link
-              href="/lawyers"
-              className="px-6 py-3 rounded-lg bg-[#C5A059] hover:bg-[#DFBE7E] text-[#090B10] font-semibold text-sm transition-all duration-200 shadow-lg shadow-[#C5A059]/20 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C5A059]"
-            >
-              <span>Find a Lawyer</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              href="/auth/login?intent=lawyer"
-              className="px-5 py-3 rounded-lg border border-white/15 hover:border-[#C5A059]/50 text-white/90 hover:text-white font-medium text-sm transition-colors bg-white/[0.02] hover:bg-white/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C5A059]"
-            >
-              Join as a Lawyer
-            </Link>
+            <MagneticWrapper maxDisplacement={8}>
+              <Link
+                href="/lawyers"
+                className="px-6 py-3 rounded-lg bg-[#C5A059] hover:bg-[#DFBE7E] text-[#090B10] font-semibold text-sm transition-all duration-200 shadow-lg shadow-[#C5A059]/20 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C5A059]"
+              >
+                <span>Find a Lawyer</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </MagneticWrapper>
+            <MagneticWrapper maxDisplacement={8}>
+              <Link
+                href="/auth/login?intent=lawyer"
+                className="px-5 py-3 rounded-lg border border-white/15 hover:border-[#C5A059]/50 text-white/90 hover:text-white font-medium text-sm transition-colors bg-white/[0.02] hover:bg-white/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C5A059] block"
+              >
+                Join as a Lawyer
+              </Link>
+            </MagneticWrapper>
           </div>
 
           {/* Numbered Feature List (dimension.dev inspired driver) */}

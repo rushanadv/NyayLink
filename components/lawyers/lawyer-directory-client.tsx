@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   Search,
   CheckCircle2,
@@ -16,6 +17,7 @@ import {
   ShieldCheck,
   ChevronDown,
 } from "lucide-react";
+import { MagneticWrapper } from "@/components/ui/magnetic-wrapper";
 
 export interface PublicLawyer {
   id: string;
@@ -48,6 +50,7 @@ export function LawyerDirectoryClient({
   initialLawyers,
   isAuthenticated,
 }: LawyerDirectoryClientProps) {
+  const shouldReduceMotion = useReducedMotion();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPracticeArea, setSelectedPracticeArea] = useState<string>("all");
   const [selectedCity, setSelectedCity] = useState<string>("all");
@@ -341,11 +344,26 @@ export function LawyerDirectoryClient({
             const initials = getInitials(lawyer.professional_name);
 
             return (
-              <div
+              <motion.div
                 key={lawyer.id}
-                className="p-6 rounded-2xl bg-[#0C0F17]/95 border border-white/[0.08] hover:border-[#C5A059]/40 transition-all shadow-xl hover:shadow-2xl hover:shadow-black/70 flex flex-col justify-between group"
+                whileHover={shouldReduceMotion ? undefined : { scale: 1.018 }}
+                transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                className="relative p-6 rounded-2xl bg-[#0C0F17]/95 border border-white/[0.08] transition-colors shadow-xl hover:shadow-2xl hover:shadow-black/70 flex flex-col justify-between group overflow-hidden"
               >
-                <div>
+                {/* 1px Crisp Gold-to-Transparent Gradient Border on Hover */}
+                <div
+                  className="absolute inset-0 rounded-2xl pointer-events-none p-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, rgba(197, 160, 89, 0.8) 0%, rgba(197, 160, 89, 0.25) 45%, transparent 85%)",
+                    WebkitMask:
+                      "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                    WebkitMaskComposite: "xor",
+                    maskComposite: "exclude",
+                  }}
+                />
+
+                <div className="relative z-[1]">
                   {/* Card Header */}
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-3.5">
@@ -412,16 +430,18 @@ export function LawyerDirectoryClient({
                 </div>
 
                 {/* Card Action */}
-                <div className="pt-5 mt-5 border-t border-white/[0.06]">
-                  <Link
-                    href={consultationHref}
-                    className="w-full py-2.5 rounded-lg bg-[#C5A059] hover:bg-[#DFBE7E] text-[#090B10] font-semibold text-xs transition-colors shadow-md shadow-[#C5A059]/15 flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C5A059]"
-                  >
-                    <span>Request Consultation</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
+                <div className="pt-5 mt-5 border-t border-white/[0.06] relative z-[1]">
+                  <MagneticWrapper className="w-full" maxDisplacement={6}>
+                    <Link
+                      href={consultationHref}
+                      className="w-full py-2.5 rounded-lg bg-[#C5A059] hover:bg-[#DFBE7E] text-[#090B10] font-semibold text-xs transition-colors shadow-md shadow-[#C5A059]/15 flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C5A059] block"
+                    >
+                      <span>Request Consultation</span>
+                      <ArrowRight className="w-3.5 h-3.5 inline ml-1" />
+                    </Link>
+                  </MagneticWrapper>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>

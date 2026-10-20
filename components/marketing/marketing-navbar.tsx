@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Scale, ArrowRight, Menu, X } from "lucide-react";
 import { useSmoothScroll } from "./smooth-scroll-provider";
+import { MagneticWrapper } from "@/components/ui/magnetic-wrapper";
 
 export function MarketingNavbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -96,13 +97,15 @@ export function MarketingNavbar() {
           >
             Sign In
           </Link>
-          <Link
-            href="/lawyers"
-            className="px-4 py-2 rounded-lg bg-[#C5A059] hover:bg-[#DFBE7E] text-[#090B10] font-semibold text-xs transition-colors shadow-md shadow-[#C5A059]/15 flex items-center gap-1.5"
-          >
-            <span>Consult an Advocate</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          <MagneticWrapper maxDisplacement={6}>
+            <Link
+              href="/lawyers"
+              className="px-4 py-2 rounded-lg bg-[#C5A059] hover:bg-[#DFBE7E] text-[#090B10] font-semibold text-xs transition-colors shadow-md shadow-[#C5A059]/15 flex items-center gap-1.5 block"
+            >
+              <span>Consult an Advocate</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </MagneticWrapper>
         </div>
 
         {/* Mobile menu hamburger */}

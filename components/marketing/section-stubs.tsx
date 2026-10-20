@@ -1,8 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import Link from "next/link";
-import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { motion, useReducedMotion, useInView, type Variants } from "framer-motion";
+import { CountUp } from "@/components/ui/count-up";
 import {
   ArrowRight,
   ShieldCheck,
@@ -19,6 +20,55 @@ import {
   Clock,
   Mic,
 } from "lucide-react";
+
+/**
+ * ScrollSyncedPreview
+ * Synchronizes preview panels with viewport entry/exit:
+ * Enter: opacity 0 -> 1, y 24px -> 0px over 400ms (easeOut)
+ * Exit: opacity 1 -> 0, y 0px -> -16px over 250ms (easeIn)
+ */
+function ScrollSyncedPreview({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const shouldReduceMotion = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { amount: 0.4 });
+
+  const previewVariants: Variants = {
+    hidden: {
+      opacity: 0,
+      y: shouldReduceMotion ? 0 : 24,
+      transition: { duration: 0.25, ease: "easeIn" },
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.4, ease: "easeOut" },
+    },
+    exit: {
+      opacity: 0,
+      y: shouldReduceMotion ? 0 : -16,
+      transition: { duration: 0.25, ease: "easeIn" },
+    },
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      variants={previewVariants}
+      initial="hidden"
+      animate={isInView ? "visible" : "exit"}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 
 export function SectionStubs() {
   const shouldReduceMotion = useReducedMotion();
@@ -68,7 +118,7 @@ export function SectionStubs() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-10 pt-8 border-t border-white/[0.06]">
             <div className="space-y-1">
               <span className="font-serif text-3xl font-medium text-[#DFBE7E]">
-                5.1 Cr+
+                <CountUp to={5.1} decimals={1} suffix=" Cr+" />
               </span>
               <p className="text-xs text-[#A5A3B2] leading-relaxed">
                 Pending matters across subordinate & appellate courts
@@ -76,7 +126,7 @@ export function SectionStubs() {
             </div>
             <div className="space-y-1">
               <span className="font-serif text-3xl font-medium text-[#DFBE7E]">
-                84%
+                <CountUp to={84} suffix="%" />
               </span>
               <p className="text-xs text-[#A5A3B2] leading-relaxed">
                 Citizens report inability to understand complex statutory jargon
@@ -84,7 +134,7 @@ export function SectionStubs() {
             </div>
             <div className="space-y-1">
               <span className="font-serif text-3xl font-medium text-[#DFBE7E]">
-                100%
+                <CountUp to={100} suffix="%" />
               </span>
               <p className="text-xs text-[#A5A3B2] leading-relaxed">
                 Flat, milestone-based fee guarantee with zero hidden clerk charges
@@ -128,7 +178,9 @@ export function SectionStubs() {
               </div>
               <div className="flex items-center gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-[#C5A059] shrink-0" />
-                <span>Search across 28 states & 14 regional languages</span>
+                <span>
+                  Search across <CountUp to={28} /> states & <CountUp to={14} /> regional languages
+                </span>
               </div>
               <div className="flex items-center gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-[#C5A059] shrink-0" />
@@ -148,7 +200,7 @@ export function SectionStubs() {
           </div>
 
           {/* Right Supporting Visual (Device Frame Mockup) */}
-          <div className="lg:col-span-7">
+          <ScrollSyncedPreview className="lg:col-span-7">
             <div className="rounded-2xl bg-[#0C0F17]/95 border border-white/[0.08] shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden p-5 sm:p-7 space-y-4 hover:border-[#C5A059]/30 transition-colors">
               {/* Device Top Bar */}
               <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] text-xs font-mono text-[#A5A3B2]">
@@ -157,7 +209,7 @@ export function SectionStubs() {
                   <span className="text-white font-semibold">VERIFIED ADVOCATE ROLL</span>
                 </div>
                 <span className="text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/20 text-[10px]">
-                  480+ Advocates Active
+                  <CountUp to={480} suffix="+" /> Advocates Active
                 </span>
               </div>
 
@@ -214,7 +266,7 @@ export function SectionStubs() {
                 </div>
               </div>
             </div>
-          </div>
+          </ScrollSyncedPreview>
         </div>
       </motion.section>
 
@@ -229,7 +281,7 @@ export function SectionStubs() {
       >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           {/* Left Supporting Visual (Device Frame Mockup) */}
-          <div className="lg:col-span-7 order-2 lg:order-1">
+          <ScrollSyncedPreview className="lg:col-span-7 order-2 lg:order-1">
             <div className="rounded-2xl bg-[#0C0F17]/95 border border-white/[0.08] shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden p-5 sm:p-7 space-y-4 hover:border-[#C5A059]/30 transition-colors">
               {/* Device Top Bar */}
               <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] text-xs font-mono text-[#A5A3B2]">
@@ -272,7 +324,7 @@ export function SectionStubs() {
                 </div>
               </div>
             </div>
-          </div>
+          </ScrollSyncedPreview>
 
           {/* Right Text Column */}
           <div className="lg:col-span-5 order-1 lg:order-2 space-y-6">
@@ -372,7 +424,7 @@ export function SectionStubs() {
           </div>
 
           {/* Right Supporting Visual (Device Frame Mockup) */}
-          <div className="lg:col-span-7">
+          <ScrollSyncedPreview className="lg:col-span-7">
             <div className="rounded-2xl bg-[#0C0F17]/95 border border-white/[0.08] shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden p-5 sm:p-7 space-y-4 hover:border-[#C5A059]/30 transition-colors">
               {/* Device Top Bar */}
               <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] text-xs font-mono text-[#A5A3B2]">
@@ -413,7 +465,9 @@ export function SectionStubs() {
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div className="p-3 rounded-xl bg-[#121622] border border-white/5">
                   <span className="text-white/60 block text-[10px]">Active Briefs</span>
-                  <span className="text-lg font-bold text-white font-mono">18</span>
+                  <span className="text-lg font-bold text-white font-mono">
+                    <CountUp to={18} />
+                  </span>
                   <span className="text-emerald-400 text-[10px] block">+3 new intakes</span>
                 </div>
                 <div className="p-3 rounded-xl bg-[#121622] border border-white/5">
@@ -423,7 +477,7 @@ export function SectionStubs() {
                 </div>
               </div>
             </div>
-          </div>
+          </ScrollSyncedPreview>
         </div>
       </motion.section>
 

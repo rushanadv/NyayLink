@@ -23,6 +23,9 @@ import {
   Calendar,
 } from "lucide-react";
 import { FEATURES } from "@/lib/marketing/features-data";
+import { LiveAIIntakeDemo } from "./live-ai-intake";
+import { CountUp } from "@/components/ui/count-up";
+
 
 interface FeaturePreviewProps {
   activeIndex: number;
@@ -60,17 +63,17 @@ export function FeaturePreview({ activeIndex }: FeaturePreviewProps) {
   const variants: Variants = {
     initial: {
       opacity: 0,
-      y: shouldReduceMotion ? 0 : 12,
+      y: shouldReduceMotion ? 0 : 24,
     },
     animate: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.3, ease: "easeOut" },
+      transition: { duration: 0.4, ease: "easeOut" },
     },
     exit: {
       opacity: 0,
-      y: shouldReduceMotion ? 0 : -10,
-      transition: { duration: 0.2, ease: "easeIn" },
+      y: shouldReduceMotion ? 0 : -16,
+      transition: { duration: 0.25, ease: "easeIn" },
     },
   };
 
@@ -172,8 +175,9 @@ function PreviewSearchMatch() {
         <span className="text-white font-medium">
           Property Dispute · Tenancy Notice · Mumbai & Pune
         </span>
-        <span className="ml-auto font-mono text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
-          42 Advocates Online
+        <span className="ml-auto font-mono text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30 flex items-center gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <CountUp to={480} suffix="+" /> Advocates Active
         </span>
       </div>
 
@@ -269,71 +273,11 @@ function PreviewSearchMatch() {
   );
 }
 
-// 02 AI Legal Intake Preview
+// 02 AI Legal Intake Preview (Live Scripted Demo)
 function PreviewAILegalIntake() {
-  return (
-    <div className="space-y-3.5">
-      {/* Bot Header */}
-      <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-[#C5A059]/20 flex items-center justify-center text-[#C5A059]">
-            <Sparkles className="w-3.5 h-3.5" />
-          </div>
-          <span className="text-xs font-medium text-white">
-            NyayaAI Intake Assistant
-          </span>
-        </div>
-        <span className="font-mono text-[10px] text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/20">
-          Indian Civil Code v2.4 Grounded
-        </span>
-      </div>
-
-      {/* Chat Thread */}
-      <div className="space-y-3 text-xs">
-        {/* User Bubble */}
-        <div className="ml-auto max-w-[85%] p-3 rounded-2xl rounded-tr-sm bg-[#1C2234] border border-white/10 text-white/90">
-          <p className="leading-relaxed">
-            &ldquo;My landlord has withheld my ₹85,000 security deposit for 5 months
-            without explanation. What legal notice can I send?&rdquo;
-          </p>
-        </div>
-
-        {/* AI Response Card */}
-        <div className="mr-auto max-w-[95%] p-3.5 rounded-2xl rounded-tl-sm bg-[#121622] border border-[#C5A059]/20 space-y-2.5">
-          <div className="flex items-center gap-2 text-[#DFBE7E] text-[11px] font-semibold">
-            <Scale className="w-3.5 h-3.5" />
-            <span>Preliminary Legal Clarity & Rights</span>
-          </div>
-          <p className="text-[#A5A3B2] leading-relaxed text-[11px]">
-            Under Model Tenancy provisions and Section 73 of the Indian Contract
-            Act, a landlord cannot retain security without providing an itemized
-            statement of structural damages within 30 days of vacating.
-          </p>
-          <div className="p-2 rounded bg-black/40 border border-white/5 space-y-1 text-[11px]">
-            <div className="flex items-center justify-between text-white/80">
-              <span>Recommended Remedy:</span>
-              <span className="text-emerald-400 font-mono">
-                Statutory 15-Day Demand Notice
-              </span>
-            </div>
-            <div className="flex items-center justify-between text-white/60 text-[10px]">
-              <span>Limitation Period:</span>
-              <span className="font-mono">3 Years from default</span>
-            </div>
-          </div>
-          <div className="flex gap-2 pt-1">
-            <button className="px-2.5 py-1 rounded bg-[#C5A059] text-[#090B10] font-semibold text-[10px] hover:bg-[#DFBE7E] transition-colors">
-              Draft Legal Notice
-            </button>
-            <button className="px-2.5 py-1 rounded bg-white/10 text-white text-[10px] hover:bg-white/20 transition-colors">
-              Translate to Hindi (हिंदी)
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return <LiveAIIntakeDemo />;
 }
+
 
 // 03 Track Your Case Preview
 function PreviewTrackCase() {
@@ -536,7 +480,9 @@ function PreviewLawyerWorkspace() {
       <div className="grid grid-cols-2 gap-2 text-[11px]">
         <div className="p-2.5 rounded-lg bg-[#121622] border border-white/5">
           <span className="text-white/60 block text-[10px]">Active Briefs</span>
-          <span className="text-base font-bold text-white font-mono">18</span>
+          <span className="text-base font-bold text-white font-mono">
+            <CountUp to={18} />
+          </span>
           <span className="text-emerald-400 text-[10px] block">
             +3 new intakes
           </span>

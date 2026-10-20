@@ -3,11 +3,14 @@
 import React, { useEffect, useState } from "react";
 import { SECTIONS } from "@/lib/marketing/sections-data";
 import { useSmoothScroll } from "./smooth-scroll-provider";
+import { motion, useTransform, useReducedMotion } from "framer-motion";
 
 export function ScrollProgress() {
   const [activeSection, setActiveSection] = useState<string>("hero");
   const [hoveredSection, setHoveredSection] = useState<string | null>(null);
-  const { scrollTo } = useSmoothScroll();
+  const { scrollTo, scrollProgress } = useSmoothScroll();
+  const shouldReduceMotion = useReducedMotion();
+  const fillHeight = useTransform(scrollProgress, [0, 1], ["0%", "100%"]);
 
   useEffect(() => {
     const observerOptions = {
@@ -60,7 +63,22 @@ export function ScrollProgress() {
       className="fixed bottom-8 left-6 z-40 hidden lg:flex flex-col items-start gap-3 p-2.5 rounded-full bg-[#0C0F17]/85 backdrop-blur-md border border-white/[0.06] shadow-2xl shadow-black/60 transition-all select-none"
       aria-label="Section Navigation Rail"
     >
-      <div className="flex flex-col gap-2.5 items-center">
+      <div className="relative flex flex-col gap-2.5 items-center py-1">
+        {/* Continuous Scrubber Track */}
+        <div
+          aria-hidden="true"
+          className="absolute top-2 bottom-2 left-1/2 -translate-x-1/2 w-[2px] bg-white/[0.08] rounded-full pointer-events-none"
+        />
+
+        {/* Continuous Active Fill Line */}
+        {!shouldReduceMotion && (
+          <motion.div
+            aria-hidden="true"
+            className="absolute top-2 left-1/2 -translate-x-1/2 w-[2px] bg-gradient-to-b from-[#C5A059] to-[#DFBE7E] rounded-full pointer-events-none origin-top shadow-[0_0_8px_rgba(197,160,89,0.5)]"
+            style={{ height: fillHeight }}
+          />
+        )}
+
         {SECTIONS.map((sec) => {
           const isActive = activeSection === sec.id;
           const isHovered = hoveredSection === sec.id;
@@ -71,7 +89,7 @@ export function ScrollProgress() {
               onClick={() => handleSectionClick(sec.id)}
               onMouseEnter={() => setHoveredSection(sec.id)}
               onMouseLeave={() => setHoveredSection(null)}
-              className="group relative flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C5A059] rounded-full p-1"
+              className="group relative z-10 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C5A059] rounded-full p-1"
               aria-label={`Jump to section: ${sec.name}`}
               aria-current={isActive ? "true" : undefined}
             >
@@ -80,7 +98,7 @@ export function ScrollProgress() {
                 className={`transition-all duration-300 rounded-full ${
                   isActive
                     ? "w-2.5 h-6 bg-[#C5A059] shadow-[0_0_12px_rgba(197,160,89,0.5)]"
-                    : "w-2 h-2 bg-white/20 group-hover:bg-white/60 group-hover:scale-125"
+                    : "w-2 h-2 bg-[#0C0F17] ring-1.5 ring-white/20 group-hover:ring-white/60 group-hover:scale-125"
                 }`}
               />
 
