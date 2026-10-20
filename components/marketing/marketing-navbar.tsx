@@ -21,6 +21,10 @@ export function MarketingNavbar() {
 
   const handleNavClick = (id: string) => {
     setMobileMenuOpen(false);
+    if (typeof window !== "undefined" && window.location.pathname !== "/") {
+      window.location.href = `/#${id}`;
+      return;
+    }
     scrollTo(`#${id}`, { offset: -80 });
   };
 
@@ -58,12 +62,12 @@ export function MarketingNavbar() {
           >
             The Challenge
           </button>
-          <button
-            onClick={() => handleNavClick("marketplace")}
+          <Link
+            href="/lawyers"
             className="hover:text-white transition-colors focus-visible:outline-none focus-visible:text-white"
           >
             Lawyer Network
-          </button>
+          </Link>
           <button
             onClick={() => handleNavClick("ai-advisory")}
             className="hover:text-white transition-colors focus-visible:outline-none focus-visible:text-white"
@@ -93,7 +97,7 @@ export function MarketingNavbar() {
             Sign In
           </Link>
           <Link
-            href="/auth/login?intent=client"
+            href="/lawyers"
             className="px-4 py-2 rounded-lg bg-[#C5A059] hover:bg-[#DFBE7E] text-[#090B10] font-semibold text-xs transition-colors shadow-md shadow-[#C5A059]/15 flex items-center gap-1.5"
           >
             <span>Consult an Advocate</span>
@@ -123,12 +127,13 @@ export function MarketingNavbar() {
             >
               The Challenge
             </button>
-            <button
-              onClick={() => handleNavClick("marketplace")}
+            <Link
+              href="/lawyers"
+              onClick={() => setMobileMenuOpen(false)}
               className="text-left py-1 hover:text-white"
             >
               Lawyer Network
-            </button>
+            </Link>
             <button
               onClick={() => handleNavClick("ai-advisory")}
               className="text-left py-1 hover:text-white"
@@ -156,7 +161,8 @@ export function MarketingNavbar() {
               Sign In
             </Link>
             <Link
-              href="/auth/login?intent=client"
+              href="/lawyers"
+              onClick={() => setMobileMenuOpen(false)}
               className="text-center py-2.5 rounded-lg bg-[#C5A059] text-[#090B10] font-semibold text-xs"
             >
               Consult an Advocate

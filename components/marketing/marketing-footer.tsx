@@ -36,7 +36,7 @@ export function MarketingFooter() {
               </h4>
               <ul className="space-y-2">
                 <li>
-                  <Link href="#marketplace" className="hover:text-white transition-colors">
+                  <Link href="/lawyers" className="hover:text-white transition-colors">
                     Find Advocates
                   </Link>
                 </li>

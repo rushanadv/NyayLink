@@ -8,7 +8,7 @@ import {
   useReducedMotion,
 } from "framer-motion";
 import {
-  BACKGROUND_STOPS,
+  PALETTE_STOPS,
   STATIC_HERO_GRADIENT,
 } from "@/lib/marketing/background-stops";
 import { useSmoothScroll } from "./smooth-scroll-provider";
@@ -21,70 +21,20 @@ export function ScrollBackground() {
   // Prefer Lenis-synchronized scrollProgress, falling back to Framer Motion's native scroll
   const activeProgress = scrollProgress ?? nativeScrollYProgress;
 
-  // Calculate smooth continuous opacity transforms for each of the 7 stops
-  // Stop 0: Hero (Cosmic Midnight Navy)
-  const opacity0 = useTransform(
-    activeProgress,
-    BACKGROUND_STOPS[0].range,
-    BACKGROUND_STOPS[0].opacityCurve
-  );
+  // 3 GPU-accelerated compositor layers with opacity-only crossfading:
+  // Layer 1 (Start / Top): Deep indigo-navy (#090B10) - fades 1 -> 0 in the first half
+  const opacityStart = useTransform(activeProgress, [0, 0.5], [1, 0]);
 
-  // Stop 1: The Challenge (Twilight Indigo)
-  const opacity1 = useTransform(
-    activeProgress,
-    BACKGROUND_STOPS[1].range,
-    BACKGROUND_STOPS[1].opacityCurve
-  );
+  // Layer 2 (Mid / Middle): Warm near-black with faint gold undertone (#120F0A) - fades 0 -> 1 -> 0 across the middle
+  const opacityMid = useTransform(activeProgress, [0.15, 0.5, 0.85], [0, 1, 0]);
 
-  // Stop 2: Lawyer Network (Warm Amber Charcoal)
-  const opacity2 = useTransform(
-    activeProgress,
-    BACKGROUND_STOPS[2].range,
-    BACKGROUND_STOPS[2].opacityCurve
-  );
-
-  // Stop 3: AI Intake Engine (Luminous Cyan-Teal)
-  const opacity3 = useTransform(
-    activeProgress,
-    BACKGROUND_STOPS[3].range,
-    BACKGROUND_STOPS[3].opacityCurve
-  );
-
-  // Stop 4: Advocate SaaS (Deep Emerald-Navy)
-  const opacity4 = useTransform(
-    activeProgress,
-    BACKGROUND_STOPS[4].range,
-    BACKGROUND_STOPS[4].opacityCurve
-  );
-
-  // Stop 5: Compliance & Trust (Radiant Judicial Brass & Gold)
-  const opacity5 = useTransform(
-    activeProgress,
-    BACKGROUND_STOPS[5].range,
-    BACKGROUND_STOPS[5].opacityCurve
-  );
-
-  // Stop 6: CTA & Footer (Obsidian Pitch Black)
-  const opacity6 = useTransform(
-    activeProgress,
-    BACKGROUND_STOPS[6].range,
-    BACKGROUND_STOPS[6].opacityCurve
-  );
-
-  const opacities = [
-    opacity0,
-    opacity1,
-    opacity2,
-    opacity3,
-    opacity4,
-    opacity5,
-    opacity6,
-  ];
+  // Layer 3 (End / Bottom): Pure pitch black (#000000) - fades 0 -> 1 in the back half
+  const opacityEnd = useTransform(activeProgress, [0.5, 1.0], [0, 1]);
 
   if (shouldReduceMotion) {
     return (
       <div
-        className="fixed inset-0 pointer-events-none z-0 bg-[#060911]"
+        className="fixed inset-0 pointer-events-none z-0 bg-[#090B10]"
         style={{ background: STATIC_HERO_GRADIENT }}
         aria-hidden="true"
       />
@@ -93,43 +43,57 @@ export function ScrollBackground() {
 
   return (
     <div
-      className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-[#060911]"
+      className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-[#000000]"
       aria-hidden="true"
     >
-      {/* 7 Layered Gradient Stops for Smooth Continuous Color Journey */}
-      {BACKGROUND_STOPS.map((stop, index) => (
-        <motion.div
-          key={stop.id}
-          data-bg-stop={stop.id}
-          className="absolute inset-0 will-change-[opacity]"
-          style={{
-            background: stop.gradient,
-            opacity: opacities[index],
-          }}
-        />
-      ))}
-
-      {/* Atmospheric depth lighting overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-30 mix-blend-screen"
+      {/* Layer 1: Start (Deep indigo-navy) */}
+      <motion.div
+        data-layer="layer-start"
+        className="absolute inset-0"
         style={{
-          background:
-            "radial-gradient(ellipse 80% 60% at 50% 20%, rgba(255, 255, 255, 0.04) 0%, transparent 70%)",
+          background: PALETTE_STOPS.start.gradient,
+          opacity: opacityStart,
+          willChange: "opacity",
+          transform: "translateZ(0)",
         }}
       />
 
-      {/* Subtle spatial vignette */}
+      {/* Layer 2: Mid (Warm near-black with subtle gold accent undertone) */}
+      <motion.div
+        data-layer="layer-mid"
+        className="absolute inset-0"
+        style={{
+          background: PALETTE_STOPS.mid.gradient,
+          opacity: opacityMid,
+          willChange: "opacity",
+          transform: "translateZ(0)",
+        }}
+      />
+
+      {/* Layer 3: End (Pure black resolving to footer) */}
+      <motion.div
+        data-layer="layer-end"
+        className="absolute inset-0"
+        style={{
+          background: PALETTE_STOPS.end.gradient,
+          opacity: opacityEnd,
+          willChange: "opacity",
+          transform: "translateZ(0)",
+        }}
+      />
+
+      {/* Atmospheric depth lighting overlay */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-40 mix-blend-multiply"
+        className="absolute inset-0 pointer-events-none opacity-25 mix-blend-screen"
         style={{
           background:
-            "radial-gradient(circle at 50% 50%, transparent 50%, rgba(0, 0, 0, 0.75) 100%)",
+            "radial-gradient(ellipse 80% 60% at 50% 20%, rgba(255, 255, 255, 0.03) 0%, transparent 70%)",
         }}
       />
 
       {/* Architectural micro grid pattern */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-[0.035]"
+        className="absolute inset-0 pointer-events-none opacity-[0.03]"
         style={{
           backgroundImage:
             "linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)",

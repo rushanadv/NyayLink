@@ -138,7 +138,7 @@ export function SectionStubs() {
 
             <div className="pt-2">
               <Link
-                href="/auth/login?intent=client"
+                href="/lawyers"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[#C5A059] hover:bg-[#DFBE7E] text-[#090B10] font-semibold text-sm transition-all shadow-lg shadow-[#C5A059]/20"
               >
                 <span>Explore Verified Advocates</span>

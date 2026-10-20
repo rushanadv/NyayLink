@@ -1,77 +1,41 @@
-export interface GradientStop {
+/**
+ * Restrained Tonal Palette for GPU-Accelerated Scroll Background
+ * 
+ * Single directional color journey:
+ * 1. layer-start (Top / Hero): Deep indigo-navy (#090B10)
+ * 2. layer-mid (Middle): Warm near-black with faint gold undertone (#120F0A), catching the #C5A059 gold accent
+ * 3. layer-end (Bottom / Footer): Pure pitch black (#000000)
+ */
+
+export interface PaletteStop {
   id: string;
   name: string;
-  section: string;
-  range: number[]; // keyframe points for useTransform
-  opacityCurve: number[]; // corresponding opacity outputs
   gradient: string;
 }
 
-export const BACKGROUND_STOPS: GradientStop[] = [
-  {
-    id: "hero",
-    name: "Cosmic Midnight Navy",
-    section: "Hero",
-    range: [0, 0.1, 0.18],
-    opacityCurve: [1, 1, 0],
+export const PALETTE_STOPS: {
+  start: PaletteStop;
+  mid: PaletteStop;
+  end: PaletteStop;
+} = {
+  start: {
+    id: "layer-start",
+    name: "Deep Indigo Navy",
     gradient:
-      "radial-gradient(ellipse 130% 90% at 50% -10%, #16284D 0%, #0D1629 50%, #060911 100%)",
+      "radial-gradient(ellipse 130% 90% at 50% -10%, #131A2B 0%, #0D131F 50%, #090B10 100%)",
   },
-  {
-    id: "problem",
-    name: "Deep Twilight Indigo",
-    section: "The Challenge",
-    range: [0.08, 0.18, 0.28, 0.36],
-    opacityCurve: [0, 1, 1, 0],
+  mid: {
+    id: "layer-mid",
+    name: "Warm Gold Charcoal",
     gradient:
-      "radial-gradient(ellipse 120% 85% at 75% 15%, #19244D 0%, #0F152D 50%, #070914 100%)",
+      "radial-gradient(ellipse 130% 90% at 50% 30%, rgba(197, 160, 89, 0.12) 0%, #1A150D 40%, #120F0A 75%, #0A0906 100%)",
   },
-  {
-    id: "marketplace",
-    name: "Warm Amber Charcoal",
-    section: "Lawyer Network",
-    range: [0.26, 0.36, 0.44, 0.52],
-    opacityCurve: [0, 1, 1, 0],
+  end: {
+    id: "layer-end",
+    name: "Pitch Black",
     gradient:
-      "radial-gradient(ellipse 125% 85% at 50% 20%, #342514 0%, #1C130A 50%, #0A0805 100%)",
+      "radial-gradient(ellipse 130% 90% at 50% 60%, #0B0D12 0%, #050608 55%, #000000 100%)",
   },
-  {
-    id: "ai-advisory",
-    name: "Luminous Cyan-Teal",
-    section: "AI Intake Engine",
-    range: [0.42, 0.52, 0.6, 0.68],
-    opacityCurve: [0, 1, 1, 0],
-    gradient:
-      "radial-gradient(ellipse 125% 85% at 30% 25%, #0D3843 0%, #082027 50%, #030F13 100%)",
-  },
-  {
-    id: "lawyer-saas",
-    name: "Deep Emerald-Navy",
-    section: "Advocate SaaS",
-    range: [0.58, 0.68, 0.76, 0.84],
-    opacityCurve: [0, 1, 1, 0],
-    gradient:
-      "radial-gradient(ellipse 125% 85% at 70% 25%, #0E3823 0%, #082015 50%, #030F0A 100%)",
-  },
-  {
-    id: "trust-compliance",
-    name: "Radiant Judicial Brass & Gold",
-    section: "Compliance & Trust",
-    range: [0.74, 0.83, 0.89, 0.95],
-    opacityCurve: [0, 1, 1, 0],
-    gradient:
-      "radial-gradient(ellipse 130% 85% at 50% 25%, #3E2B12 0%, #221709 50%, #0B0703 100%)",
-  },
-  {
-    id: "cta-footer",
-    name: "Obsidian Pitch Black",
-    section: "CTA & Footer",
-    range: [0.86, 0.94, 1.0],
-    opacityCurve: [0, 1, 1],
-    gradient:
-      "radial-gradient(ellipse 130% 90% at 50% 55%, #111218 0%, #060608 60%, #000000 100%)",
-  },
-];
+};
 
-export const STATIC_HERO_GRADIENT =
-  "radial-gradient(ellipse 130% 90% at 50% -10%, #16284D 0%, #0D1629 50%, #060911 100%)";
+export const STATIC_HERO_GRADIENT = PALETTE_STOPS.start.gradient;
