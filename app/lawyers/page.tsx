@@ -166,14 +166,19 @@ async function LawyersDirectoryContent({
     ) {
       throw fatalError;
     }
-    console.error("[NyayaLink Fatal Server Error] Exception initializing Supabase or executing lawyer directory query:", fatalError);
+    const isMissingEnv =
+      fatalError instanceof Error &&
+      fatalError.message.includes("Supabase environment variables missing");
+
     if (devDemoRequested) {
       directoryState = "dev_demo";
       lawyers = FALLBACK_DEMO_LAWYERS;
       loadWarning = "Showing local mock seed profiles due to an initialization exception in development mode.";
     } else {
       directoryState = "error";
-      errorMessage = "An exception occurred while initializing the directory service. Please retry shortly.";
+      errorMessage = isMissingEnv
+        ? "The advocate directory database service is not yet configured. Please ensure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY are added to Vercel Environment Variables."
+        : "An exception occurred while initializing the directory service. Please retry shortly.";
     }
   }
 

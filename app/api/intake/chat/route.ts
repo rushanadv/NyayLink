@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "OPENROUTER_API_KEY is not configured on the server. Please set a valid OpenRouter API key in .env.local to enable real AI intake.",
+            "OPENROUTER_API_KEY is not configured on the server. Please configure OPENROUTER_API_KEY in Vercel Project Settings → Environment Variables (or .env.local for local development) to enable real AI intake.",
         },
         { status: 503 }
       );
