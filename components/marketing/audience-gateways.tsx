@@ -29,7 +29,7 @@ export function AudienceGateways() {
           Two distinct gateways. One verified platform.
         </h2>
         <p className="text-base text-[#69736D] leading-relaxed max-w-2xl font-light">
-          Whether you are navigating a legal dispute or managing litigation chambers, NyayaLink provides structured, compliant infrastructure.
+          Whether you are navigating a legal dispute or managing litigation chambers, NyayLink provides structured, compliant infrastructure.
         </p>
       </div>
 

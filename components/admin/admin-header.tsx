@@ -49,7 +49,7 @@ export function AdminHeader({ currentTab }: AdminHeaderProps) {
     <header className="h-20 bg-[#09090F] border-b border-white/[0.06] px-8 flex items-center justify-between shrink-0">
       <div>
         <div className="flex items-center gap-2 text-[11px] font-mono text-[#6F6E7D]">
-          <span>NyayaLink Workspace</span>
+          <span>NyayLink Workspace</span>
           <span>/</span>
           <span className="text-[#A99AFF]">{meta.breadcrumb}</span>
         </div>

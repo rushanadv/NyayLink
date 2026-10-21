@@ -78,7 +78,7 @@ async function requestOpenRouter(
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "HTTP-Referer": "https://nyay.live",
-        "X-Title": "NyayaLink Legal Intake Assistant",
+        "X-Title": "NyayLink Legal Intake Assistant",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -311,9 +311,9 @@ export async function POST(req: NextRequest) {
           // Append deterministic completion marker based on finish_reason
           if (hasEmittedTokens) {
             if (finishReason === "length") {
-              controller.enqueue(encoder.encode("\n\n__NYAYALINK_TRUNCATED__"));
+              controller.enqueue(encoder.encode("\n\n__NYAYLINK_TRUNCATED__"));
             } else {
-              controller.enqueue(encoder.encode("\n\n__NYAYALINK_DONE__"));
+              controller.enqueue(encoder.encode("\n\n__NYAYLINK_DONE__"));
             }
           }
 

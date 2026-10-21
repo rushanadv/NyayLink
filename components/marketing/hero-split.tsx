@@ -74,7 +74,7 @@ export function HeroSplit() {
           <div className="flex items-center gap-2.5">
             <span className="w-5 h-px bg-[#C5A059]" />
             <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/70 font-medium">
-              NyayaLink // National Legal Technology Infrastructure
+              NyayLink // National Legal Technology Infrastructure
             </span>
           </div>
 

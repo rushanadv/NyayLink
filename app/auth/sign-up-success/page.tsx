@@ -32,7 +32,7 @@ function SignUpSuccessContent() {
         </h2>
         <p className="text-sm text-[#69736D] mt-3 leading-relaxed">
           {isLawyerIntent
-            ? "Your registration has been logged in the NyayaLink registry. Please confirm your email address to activate your base credentials."
+            ? "Your registration has been logged in the NyayLink registry. Please confirm your email address to activate your base credentials."
             : "Your account request has been recorded. Please check your inbox and click the confirmation link to activate your access token."}
         </p>
       </div>

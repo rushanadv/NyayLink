@@ -115,7 +115,7 @@ export function SectionStubs() {
 
               <p className="text-[13px] sm:text-sm text-[#9491A1] leading-relaxed max-w-xl">
                 Navigating Indian courts still relies on tout networks, opaque clerk fees,
-                and dense statutory English. NyayaLink establishes open technological infrastructure:
+                and dense statutory English. NyayLink establishes open technological infrastructure:
                 algorithmic lawyer matching, cross-validated Bar Council rolls, and plain-language intake.
               </p>
             </div>
@@ -318,7 +318,7 @@ export function SectionStubs() {
               <div className="flex items-center justify-between pb-3 border-b border-border-subtle text-xs font-mono text-[#A5A3B2]">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-3.5 h-3.5 text-white/60" />
-                  <span className="text-white font-semibold">NYAYAAI INTAKE INTELLIGENCE</span>
+                  <span className="text-white font-semibold">NYAY AI INTAKE INTELLIGENCE</span>
                 </div>
                 <span className="text-emerald-400 font-mono text-[10px]">BNS & CPC Grounded</span>
               </div>
@@ -555,7 +555,7 @@ export function SectionStubs() {
           </h2>
           <p className="text-[13px] sm:text-sm text-[#9491A1] max-w-3xl leading-relaxed">
             The Advocates Act, 1961 and Rule 36 of the BCI Rules strictly prohibit lawyers from
-            advertising, soliciting briefs, or paying referral commissions. NyayaLink operates purely
+            advertising, soliciting briefs, or paying referral commissions. NyayLink operates purely
             as neutral infrastructure: enabling direct citizen search, transparent milestone escrow,
             and verifiable public enrollment records.
           </p>

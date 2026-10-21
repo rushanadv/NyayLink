@@ -5,7 +5,7 @@ import { MarketingFooter } from "@/components/marketing/marketing-footer";
 import { SmoothScrollProvider } from "@/components/marketing/smooth-scroll-provider";
 
 export const metadata: Metadata = {
-  title: "Verified Advocate Directory | NyayaLink",
+  title: "Verified Advocate Directory | NyayLink",
   description:
     "Search and consult verified Bar Council advocates across India. Filter by practice area, jurisdiction, experience, and spoken language.",
 };

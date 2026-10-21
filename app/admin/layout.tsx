@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 export const metadata: Metadata = {
-  title: "NyayaLink — Operations & Administration",
-  description: "Administrative Management Portal for NyayaLink Legal Services Marketplace",
+  title: "NyayLink — Operations & Administration",
+  description: "Administrative Management Portal for NyayLink Legal Services Marketplace",
 };
 
 const geistSans = Geist({

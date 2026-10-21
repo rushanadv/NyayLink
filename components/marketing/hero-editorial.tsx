@@ -31,7 +31,7 @@ export function HeroEditorial() {
           <div className="flex items-center gap-2.5">
             <span className="w-5 h-px bg-[#205C43]" />
             <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#69736D] font-semibold">
-              NYAYALINK / LEGAL SERVICES
+              NYAYLINK / LEGAL SERVICES
             </span>
           </div>
 
@@ -46,7 +46,7 @@ export function HeroEditorial() {
               />
             </h1>
             <p className="text-base sm:text-lg text-[#69736D] font-light leading-relaxed text-balance pt-1">
-              NyayaLink connects citizens and businesses with verified State Bar Council advocates across India. Explore statutory remedies in plain language and consult certified counsel under transparent milestone escrow.
+              NyayLink connects citizens and businesses with verified State Bar Council advocates across India. Explore statutory remedies in plain language and consult certified counsel under transparent milestone escrow.
             </p>
           </div>
 

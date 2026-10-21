@@ -77,7 +77,7 @@ export function MarketingNavbar() {
               isDarkSubpage ? "text-white" : "text-[#202824]"
             }`}
           >
-            NyayaLink
+            NyayLink
             <span className="w-1.5 h-1.5 rounded-full bg-[#205C43]" />
           </span>
         </Link>

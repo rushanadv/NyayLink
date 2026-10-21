@@ -36,7 +36,7 @@ export function MarketingFooter() {
                   isDarkSubpage ? "text-white" : "text-[#202824]"
                 }`}
               >
-                NyayaLink
+                NyayLink
               </span>
             </div>
             <p className="text-xs leading-relaxed max-w-sm">
@@ -198,9 +198,9 @@ export function MarketingFooter() {
             <strong className={isDarkSubpage ? "text-white/80" : "text-[#202824]"}>
               Regulatory Disclosure:
             </strong>{" "}
-            NyayaLink is an informational infrastructure and technology platform, not a law firm.
+            NyayLink is an informational infrastructure and technology platform, not a law firm.
             In strict compliance with Section 36 of the Advocates Act, 1961, and Bar Council of India
-            Rules, NyayaLink does not advertise legal services, solicit briefs, or receive referral commissions.
+            Rules, NyayLink does not advertise legal services, solicit briefs, or receive referral commissions.
             Advocate-client privilege attaches directly upon mutual consultation acceptance.
           </p>
         </div>
@@ -211,7 +211,7 @@ export function MarketingFooter() {
             isDarkSubpage ? "text-white/40" : "text-[#69736D]"
           }`}
         >
-          <p>© 2026 NyayaLink Technologies. All rights reserved.</p>
+          <p>© 2026 NyayLink Technologies. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <span className="font-mono text-[10px] text-[#205C43] flex items-center gap-1.5 font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-[#205C43] animate-pulse" />

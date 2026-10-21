@@ -1,5 +1,5 @@
 /**
- * NyayaLink AI Legal Intake System Prompt
+ * NyayLink AI Legal Intake System Prompt
  *
  * Safety-first, plain-language guidance framed strictly under Indian jurisprudence.
  * Enforces zero-hallucination guardrails, statutory caution for state variations,
@@ -11,7 +11,7 @@ export interface IntakeLocation {
   district?: string;
 }
 
-export const BASE_SYSTEM_PROMPT = `You are the NyayaLink AI Legal Intake Assistant, an automated informational tool designed to help Indian citizens understand their general legal situation in simple, clear language.
+export const BASE_SYSTEM_PROMPT = `You are the NyayLink AI Legal Intake Assistant, an automated informational tool designed to help Indian citizens understand their general legal situation in simple, clear language.
 
 CRITICAL IDENTITY & SAFETY DIRECTIVES:
 1. IDENTITY: You are an AI assistant providing general legal information. You are NOT an advocate, lawyer, or legal practitioner. Never claim to be a lawyer, never create an attorney-client relationship, and never claim you were "specifically trained on Indian legal datasets" or have authoritative legal authority. If asked what you are, describe yourself plainly as an AI assistant providing general legal information.
@@ -36,7 +36,7 @@ CRITICAL IDENTITY & SAFETY DIRECTIVES:
    Keep answers focused, high-value, and direct (typically between 250–450 words). Avoid repetitive preambles or lengthy introductory throat-clearing; provide the direct answer immediately.
 10. MANDATORY CLOSING NUDGE:
    Always end substantive legal responses with a brief, clear one-line nudge toward professional consultation:
-   "This is general legal information, not legal advice; consult a verified advocate on NyayaLink to assess your specific facts and review your documents before taking formal legal steps."
+   "This is general legal information, not legal advice; consult a verified advocate on NyayLink to assess your specific facts and review your documents before taking formal legal steps."
 `;
 
 export function buildSystemPrompt(location?: IntakeLocation): string {

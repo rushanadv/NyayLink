@@ -5,7 +5,7 @@ import { MarketingFooter } from "@/components/marketing/marketing-footer";
 import { SmoothScrollProvider } from "@/components/marketing/smooth-scroll-provider";
 
 export const metadata: Metadata = {
-  title: "AI Legal Intake Assistant | NyayaLink",
+  title: "AI Legal Intake Assistant | NyayLink",
   description:
     "Confidential, plain-language legal intake powered by Indian legal jurisprudence. Receive preliminary legal clarity, understand remedies, and connect with verified advocates.",
 };

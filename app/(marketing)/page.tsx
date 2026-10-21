@@ -16,7 +16,7 @@ export default function MarketingHomePage() {
       {/* 02: Prominent Client & Advocate Entry Gateways */}
       <AudienceGateways />
 
-      {/* 03: How NyayaLink Works (3 Meaningful Stages) */}
+      {/* 03: How NyayLink Works (3 Meaningful Stages) */}
       <HowItWorks />
 
       {/* 04: Two Audiences, One Platform */}

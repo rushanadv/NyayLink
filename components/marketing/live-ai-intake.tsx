@@ -145,7 +145,7 @@ export function LiveAIIntakeDemo() {
             <Sparkles className="w-3.5 h-3.5" />
           </div>
           <span className="text-xs font-medium text-white">
-            NyayaAI Intake Preview
+            Nyay AI Intake Preview
           </span>
         </div>
         <div className="flex items-center gap-1.5">

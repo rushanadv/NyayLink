@@ -58,7 +58,7 @@ export function AdminSidebar({
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
               <span className="text-sm font-semibold tracking-tight text-[#F5F4FA]">
-                NyayaLink
+                NyayLink
               </span>
               <span className="text-[10px] font-mono text-[#A99AFF]/80">
                 PROD

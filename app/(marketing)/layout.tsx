@@ -8,7 +8,7 @@ import { MarketingNavbar } from "@/components/marketing/marketing-navbar";
 import { MarketingFooter } from "@/components/marketing/marketing-footer";
 
 export const metadata: Metadata = {
-  title: "NyayaLink — Access to Justice, Simplified",
+  title: "NyayLink — Access to Justice, Simplified",
   description:
     "Verified Bar Council lawyers, transparent flat fees, AI-guided legal intake in regional Indian languages, and secure case workspace.",
   keywords: [

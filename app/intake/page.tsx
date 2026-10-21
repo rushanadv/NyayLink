@@ -15,7 +15,7 @@ export default function IntakePage() {
           Plain-Language Legal Clarity & Remedies
         </h1>
         <p className="text-sm sm:text-base text-[#A5A3B2] leading-relaxed">
-          Describe your issue in your everyday language. NyayaAI outlines the relevant
+          Describe your issue in your everyday language. Nyay AI outlines the relevant
           statutory provisions under Bharatiya Nyaya Sanhita, procedural codes, and state
           regulations, helping you prepare before meeting an advocate.
         </p>

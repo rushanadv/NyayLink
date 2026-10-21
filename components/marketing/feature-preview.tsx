@@ -94,7 +94,7 @@ export function FeaturePreview({ activeIndex }: FeaturePreviewProps) {
         {showNotice && (
           <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#141824] border border-border-default text-[11px] text-white/70">
             <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
-            <span>NyayaLink Access Initiative</span>
+            <span>NyayLink Access Initiative</span>
             <button
               onClick={() => setShowNotice(false)}
               className="text-white/40 hover:text-white transition-colors ml-1 text-xs"

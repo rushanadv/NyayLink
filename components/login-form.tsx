@@ -13,12 +13,36 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDemoLoading, setIsDemoLoading] = useState(false);
 
   const router = useRouter();
   const searchParams = useSearchParams();
   // Support both 'intent' and 'role' query parameters as presentation hints
   const roleHint = searchParams.get("role") || searchParams.get("intent");
   const isLawyerIntent = roleHint === "lawyer";
+
+  const handleDemoLogin = async (role: "client" | "lawyer") => {
+    setIsDemoLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/auth/demo-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to authenticate demo account");
+      }
+      router.push(data.redirectUrl || (role === "lawyer" ? "/lawyer/dashboard" : "/dashboard"));
+      router.refresh();
+    } catch (err: unknown) {
+      console.error("[Demo Login Error]:", err);
+      setError(err instanceof Error ? err.message : "Demo authentication failed");
+    } finally {
+      setIsDemoLoading(false);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -92,6 +116,50 @@ export function LoginForm() {
             ? "Access daily cause list alerts, active client dockets, Vakalatnama vault, and retainers."
             : "Review your intake brief, message your verified advocate, and view consultation schedules."}
         </p>
+      </div>
+
+      {/* Quick Demo Access Buttons */}
+      <div className="mb-6 p-4 rounded-2xl bg-[#F8FAF9] border border-[#D5E5D9] shadow-xs">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-[#69736D]">
+            Instant Demo Access
+          </span>
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#EAF3ED] text-[#205C43] border border-[#D5E5D9] font-medium">
+            Test Portals
+          </span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <button
+            type="button"
+            onClick={() => handleDemoLogin("client")}
+            disabled={isDemoLoading || isLoading}
+            className="w-full h-10 px-3.5 rounded-xl bg-[#EAF3ED] hover:bg-[#D8EADB] border border-[#C5DDD0] text-[#174530] text-xs font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-50"
+          >
+            <User className="w-3.5 h-3.5 text-[#205C43]" />
+            <span>Continue as Demo Client</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleDemoLogin("lawyer")}
+            disabled={isDemoLoading || isLoading}
+            className="w-full h-10 px-3.5 rounded-xl bg-white hover:bg-[#F2F7F4] border border-[#D5E5D9] text-[#202824] text-xs font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-50 shadow-xs"
+          >
+            <Briefcase className="w-3.5 h-3.5 text-[#174530]" />
+            <span>Continue as Demo Lawyer</span>
+          </button>
+        </div>
+        <p className="text-[11px] text-[#69736D] mt-2.5 text-center">
+          Establishes an authenticated session with genuine database records.
+        </p>
+      </div>
+
+      <div className="relative mb-6 text-center">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-[#D5E5D9]"></div>
+        </div>
+        <span className="relative px-3 bg-[#FFFFFF] text-[11px] font-mono uppercase tracking-wider text-[#69736D]">
+          or sign in with credentials
+        </span>
       </div>
 
       {/* Login Form */}

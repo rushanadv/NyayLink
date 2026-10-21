@@ -33,7 +33,7 @@ export function TrustCompliance() {
             </h2>
             <p className="text-sm text-[#69736D] leading-relaxed max-w-2xl font-light">
               The Advocates Act, 1961 and Rule 36 of the BCI Rules strictly prohibit advocates from
-              advertising, soliciting briefs, or paying referral commissions. NyayaLink operates purely
+              advertising, soliciting briefs, or paying referral commissions. NyayLink operates purely
               as neutral infrastructure: enabling direct citizen search, transparent milestone escrow,
               and verifiable public enrollment records.
             </p>

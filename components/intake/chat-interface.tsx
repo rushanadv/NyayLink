@@ -29,7 +29,7 @@ const INITIAL_INTRO_MESSAGE: ChatMessage = {
   id: "intro-msg",
   role: "assistant",
   content:
-    "Welcome to NyayaLink's AI Legal Intake. Describe your situation in plain English, Hindi, or any regional language. I'll outline the relevant legal principles under Indian law, standard remedies, and questions to ask counsel.\n\n*Note: I provide general legal orientation, not formal legal advice. No personal records are stored against your identity during this session.*",
+    "Welcome to NyayLink's AI Legal Intake. Describe your situation in plain English, Hindi, or any regional language. I'll outline the relevant legal principles under Indian law, standard remedies, and questions to ask counsel.\n\n*Note: I provide general legal orientation, not formal legal advice. No personal records are stored against your identity during this session.*",
 };
 
 const SUGGESTED_QUERIES = [
@@ -183,8 +183,8 @@ export function ChatInterface() {
 
         // Strip any completion markers from real-time display
         const displayContent = accumulatedText
-          .replace(/__NYAYALINK_DONE__/g, "")
-          .replace(/__NYAYALINK_TRUNCATED__/g, "");
+          .replace(/__NYAY(A)?LINK_DONE__/g, "")
+          .replace(/__NYAY(A)?LINK_TRUNCATED__/g, "");
 
         setMessages((prev) =>
           prev.map((msg) =>
@@ -196,11 +196,15 @@ export function ChatInterface() {
       }
 
       // Detect completion status from markers
-      const isTruncated = accumulatedText.includes("__NYAYALINK_TRUNCATED__");
-      const isDone = accumulatedText.includes("__NYAYALINK_DONE__");
+      const isTruncated =
+        accumulatedText.includes("__NYAYLINK_TRUNCATED__") ||
+        accumulatedText.includes("__NYAYALINK_TRUNCATED__");
+      const isDone =
+        accumulatedText.includes("__NYAYLINK_DONE__") ||
+        accumulatedText.includes("__NYAYALINK_DONE__");
       const cleanFinalText = accumulatedText
-        .replace(/__NYAYALINK_DONE__/g, "")
-        .replace(/__NYAYALINK_TRUNCATED__/g, "")
+        .replace(/__NYAY(A)?LINK_DONE__/g, "")
+        .replace(/__NYAY(A)?LINK_TRUNCATED__/g, "")
         .trim();
 
       // If the stream terminated without either marker and produced text, it was an interrupted connection
@@ -238,7 +242,7 @@ export function ChatInterface() {
             m.id === assistantPlaceholderId
               ? {
                   ...m,
-                  content: m.content.replace(/__NYAYALINK_[A-Z]+__/g, "").trim(),
+                  content: m.content.replace(/__NYAY(A)?LINK_[A-Z]+__/g, "").trim(),
                   isStreaming: false,
                   isInterrupted: true,
                 }
@@ -310,8 +314,8 @@ export function ChatInterface() {
         continuationChunk += chunk;
 
         const liveCombined = (baseText + " " + continuationChunk)
-          .replace(/__NYAYALINK_DONE__/g, "")
-          .replace(/__NYAYALINK_TRUNCATED__/g, "");
+          .replace(/__NYAY(A)?LINK_DONE__/g, "")
+          .replace(/__NYAY(A)?LINK_TRUNCATED__/g, "");
 
         setMessages((prev) =>
           prev.map((msg) =>
@@ -320,11 +324,15 @@ export function ChatInterface() {
         );
       }
 
-      const isTruncated = continuationChunk.includes("__NYAYALINK_TRUNCATED__");
-      const isDone = continuationChunk.includes("__NYAYALINK_DONE__");
+      const isTruncated =
+        continuationChunk.includes("__NYAYLINK_TRUNCATED__") ||
+        continuationChunk.includes("__NYAYALINK_TRUNCATED__");
+      const isDone =
+        continuationChunk.includes("__NYAYLINK_DONE__") ||
+        continuationChunk.includes("__NYAYALINK_DONE__");
       const cleanCombined = (baseText + " " + continuationChunk)
-        .replace(/__NYAYALINK_DONE__/g, "")
-        .replace(/__NYAYALINK_TRUNCATED__/g, "")
+        .replace(/__NYAY(A)?LINK_DONE__/g, "")
+        .replace(/__NYAY(A)?LINK_TRUNCATED__/g, "")
         .trim();
 
       setMessages((prev) =>
@@ -406,7 +414,7 @@ export function ChatInterface() {
           </div>
           <div>
             <h2 className="text-white font-medium text-xs flex items-center gap-1.5">
-              NyayaAI Legal Intake
+              Nyay AI Legal Intake
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             </h2>
             <p className="text-[10px] text-white/50 font-mono">

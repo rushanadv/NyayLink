@@ -59,7 +59,7 @@ export function HowItWorks() {
         </div>
 
         <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#202824] font-normal tracking-tight text-balance">
-          How NyayaLink works.
+          How NyayLink works.
         </h2>
         <p className="text-base text-[#69736D] leading-relaxed max-w-2xl font-light">
           Three structured stages engineered to eliminate procedural opacity and connect citizens directly with verified advocates.

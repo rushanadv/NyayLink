@@ -30,7 +30,7 @@ export default function AuthLayout({
             </div>
             <div className="flex flex-col">
               <span className="text-base font-serif font-medium tracking-tight text-[#202824]">
-                NyayaLink
+                NyayLink
               </span>
               <span className="text-[10px] font-mono tracking-wider text-[#69736D] uppercase">
                 Legal Services
@@ -90,7 +90,7 @@ export default function AuthLayout({
             <span>AES-256 PRIVACY ENCRYPTED</span>
           </div>
           <div>
-            <span>© 2026 NyayaLink</span>
+            <span>© 2026 NyayLink</span>
           </div>
         </div>
       </div>

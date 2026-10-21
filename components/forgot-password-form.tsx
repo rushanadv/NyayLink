@@ -105,7 +105,7 @@ export function ForgotPasswordForm() {
             type="email"
             required
             autoComplete="email"
-            placeholder="advocate@nyayalink.in"
+            placeholder="advocate@nyay.live"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isLoading}

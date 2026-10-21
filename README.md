@@ -1,109 +1,82 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# NyayLink — Legal Services Marketplace
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
+> **Access to Justice, Simplified.**  
+> India's verified legal services marketplace connecting citizens with Bar Council-enrolled advocates through transparent flat fees, AI-guided legal intake, milestone escrow, and secure case dockets.
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+- **Production Domain**: [https://nyay.live](https://nyay.live/)
+- **Repository**: [rushanadv/nyayalink](https://github.com/rushanadv/nyayalink)
+- **Tech Stack**: Next.js 15 (App Router), TypeScript, Tailwind CSS, Supabase (Auth, Postgres, RLS), Framer Motion, Lenis, OpenRouter.
 
-## Features
+---
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Proxy
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Password-based authentication block installed via the [Supabase UI Library](https://supabase.com/ui/docs/nextjs/password-based-auth)
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+## 🏛️ Application Architecture
 
-## Demo
+NyayLink provides three distinct authenticated environments governed strictly by database-level Row Level Security (RLS) on PostgreSQL:
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+### 1. Client Legal Workspace (`/dashboard`)
+- **Matter Management**: Register, track, and review active legal dockets with chronological case timelines.
+- **Advocate Search & Consultations**: Search Bar Council verified advocates across High Courts and request preliminary conferences.
+- **Nyay AI Legal Intake**: Structured, plain-language legal triage grounded in Indian law (BNS, CPC, Consumer Protection, RERA).
+- **Evidentiary Vault**: Encrypted repository for statutory notices, contracts, and case briefs under DPDP Act 2023 compliance.
+- **Client Profile**: Self-service profile updates and authenticated session management.
 
-## Deploy to Vercel
+### 2. Advocate Chambers Portal (`/lawyer/dashboard`)
+- **Client Requests**: Actionable review interface to Accept or Decline incoming consultation requests, schedule appointment times, and provide instructions.
+- **Assigned Dockets**: Real-time management of active legal matters, procedural status changes, and chronological event logging.
+- **Chambers Calendar**: Centralized docket of confirmed conferences and hearing consultations.
+- **Professional Practice Profile**: State Bar Council roll tracking, practice areas, bio, and directory publication controls.
+- **Evidentiary Vault**: Case file repository protected by Section 126 Attorney-Client privilege.
 
-Vercel deployment will guide you through creating a Supabase account and project.
+### 3. Operations Administration (`/admin/dashboard`)
+- Centralized administration console for verified lawyer onboarding, audit trails, invitations, and compliance metrics.
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
+---
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
+## ⚡ Demo Accounts (For Evaluation & Inspection)
 
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
+NyayLink includes two genuine Supabase Auth accounts pre-configured with distinct database roles and sample legal matters:
 
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
+| Role | Email | Destination |
+| :--- | :--- | :--- |
+| **Demo Client** | `demo.client@nyay.live` | `/dashboard` |
+| **Demo Lawyer** | `demo.lawyer@nyay.live` | `/lawyer/dashboard` |
 
-## Clone and run locally
+### Instant Quick Login
+On the login screen (`/auth/login`), click either **Continue as Demo Client** or **Continue as Demo Lawyer**. These shortcuts initiate a server-side SSR authentication handler (`/api/auth/demo-login`), establish authentic Supabase session cookies, verify the user's actual database role in `public.user_roles`, and redirect directly to the respective portal.
 
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
+---
 
-2. Create a Next.js app using the Supabase Starter template npx command
+## 🛠️ Local Development
 
-   ```bash
-   npx create-next-app --example with-supabase with-supabase-app
-   ```
+### 1. Clone & Install
+```bash
+git clone https://github.com/rushanadv/nyayalink.git
+cd nyayalink/nyayalink-app
+npm install
+```
 
-   ```bash
-   yarn create next-app --example with-supabase with-supabase-app
-   ```
+### 2. Environment Variables
+Create a `.env.local` file with your Supabase credentials:
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://<your-project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
+SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key> # Server-side only
+OPENROUTER_API_KEY=<your-openrouter-key>
+```
 
-   ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
-   ```
+### 3. Database Migrations
+Migrations are managed in `supabase/migrations/`:
+```bash
+npx supabase db push # or apply via Supabase CLI
+```
 
-3. Use `cd` to change into the app's directory
+### 4. Run Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-   ```bash
-   cd with-supabase-app
-   ```
+---
 
-4. Rename `.env.example` to `.env.local` and update the following:
-
-  ```env
-  NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=[INSERT SUPABASE PROJECT API PUBLISHABLE OR ANON KEY]
-  ```
-  > [!NOTE]
-  > This example uses `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, which refers to Supabase's new **publishable** key format.
-  > Both legacy **anon** keys and new **publishable** keys can be used with this variable name during the transition period. Supabase's dashboard may show `NEXT_PUBLIC_SUPABASE_ANON_KEY`; its value can be used in this example.
-  > See the [full announcement](https://github.com/orgs/supabase/discussions/29260) for more information.
-
-  Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` can be found in [your Supabase project's API settings](https://supabase.com/dashboard/project/_?showConnect=true)
-
-5. You can now run the Next.js local development server:
-
-   ```bash
-   npm run dev
-   ```
-
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
-
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
-
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
-
-## Feedback and issues
-
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
-
-## More Supabase examples
-
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+## ⚖️ Legal & Regulatory Compliance
+NyayLink is an informational infrastructure and technology platform, not a law firm. In strict compliance with Section 36 of the Advocates Act, 1961, and the Bar Council of India Rules, NyayLink does not advertise legal services, solicit briefs, or receive referral commissions.

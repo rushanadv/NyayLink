@@ -28,7 +28,7 @@ export function AccessDenied({ user, roles }: AccessDeniedProps) {
             Access Prohibited
           </h1>
           <p className="text-xs text-[#A5A3B2] leading-relaxed mb-6">
-            Your account is authenticated, but lacks the administrative credentials required for the NyayaLink Operations Console. Role permissions are verified server-side against <code className="font-mono text-[#F5F4FA] bg-white/[0.06] px-1.5 py-0.5 rounded">public.user_roles</code>.
+            Your account is authenticated, but lacks the administrative credentials required for the NyayLink Operations Console. Role permissions are verified server-side against <code className="font-mono text-[#F5F4FA] bg-white/[0.06] px-1.5 py-0.5 rounded">public.user_roles</code>.
           </p>
 
           <div className="w-full border border-white/[0.06] bg-[#09090F] rounded-xl p-4 mb-6 text-left space-y-2.5 text-xs">

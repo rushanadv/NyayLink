@@ -52,7 +52,7 @@ export function UpdatePasswordForm() {
           Choose New Password
         </h2>
         <p className="text-sm text-[#A5A3B2] mt-2">
-          Set a secure passphrase for your NyayaLink account access.
+          Set a secure passphrase for your NyayLink account access.
         </p>
       </div>
 

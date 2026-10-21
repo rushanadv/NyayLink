@@ -28,7 +28,7 @@ export function TwoAudiences() {
           Two audiences. One unified platform.
         </h2>
         <p className="text-base text-[#69736D] leading-relaxed max-w-2xl font-light">
-          Whether you need structured guidance on a dispute or modern digital infrastructure for your legal practice, NyayaLink connects both sides with transparency and compliance.
+          Whether you need structured guidance on a dispute or modern digital infrastructure for your legal practice, NyayLink connects both sides with transparency and compliance.
         </p>
       </div>
 
@@ -59,7 +59,7 @@ export function TwoAudiences() {
                   Demystifying the Indian legal process for citizens.
                 </h3>
                 <p className="text-sm text-[#69736D] leading-relaxed">
-                  Navigating legal issues often involves confusing jargon, uncertain court fees, and difficulty identifying the right advocate. NyayaLink replaces uncertainty with structured clarity: understand your matter in plain language, verify your advocate&apos;s credentials, and consult with full fee protection.
+                  Navigating legal issues often involves confusing jargon, uncertain court fees, and difficulty identifying the right advocate. NyayLink replaces uncertainty with structured clarity: understand your matter in plain language, verify your advocate&apos;s credentials, and consult with full fee protection.
                 </p>
               </div>
 
@@ -130,7 +130,7 @@ export function TwoAudiences() {
                   Digital chamber workflows for practicing advocates.
                 </h3>
                 <p className="text-sm text-[#69736D] leading-relaxed">
-                  Litigation counsel manage crowded cause lists, manual client onboarding, and paper-based authorizations. NyayaLink equips your practice with modern, compliant tools: automated cause list tracking, digital Vakalatnama execution, and direct retainer settlement.
+                  Litigation counsel manage crowded cause lists, manual client onboarding, and paper-based authorizations. NyayLink equips your practice with modern, compliant tools: automated cause list tracking, digital Vakalatnama execution, and direct retainer settlement.
                 </p>
               </div>
 
