@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { buildSystemPrompt } from "@/lib/intake/system-prompt";
 
+export const maxDuration = 60;
+
 // Configurable Models (server-side only)
 const getPrimaryModel = (): string =>
   process.env.OPENROUTER_MODEL?.trim() || "nvidia/nemotron-3.5-super-vl:free";
 
 const getFallbackModel = (): string =>
-  process.env.OPENROUTER_FALLBACK_MODEL?.trim() || "minimax/minimax-m3.1-flash:free";
+  process.env.OPENROUTER_FALLBACK_MODEL?.trim() || "nvidia/nemotron-3.5-lightning:free";
 
 // In-memory rate limiting: IP -> timestamps array
 const rateLimitMap = new Map<string, number[]>();
@@ -52,15 +54,23 @@ interface RequestBody {
   messages: ChatMessage[];
   state?: string;
   district?: string;
+  isContinuation?: boolean;
 }
 
 async function requestOpenRouter(
   model: string,
   messages: ChatMessage[],
-  apiKey: string
+  apiKey: string,
+  clientSignal?: AbortSignal
 ): Promise<Response> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
+  // 35s connection / initial response timeout
+  const timeoutId = setTimeout(() => controller.abort(), 35000);
+
+  // Propagate client cancellation if the user aborts / navigates away
+  if (clientSignal) {
+    clientSignal.addEventListener("abort", () => controller.abort(), { once: true });
+  }
 
   try {
     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -74,8 +84,8 @@ async function requestOpenRouter(
       body: JSON.stringify({
         model,
         messages,
-        max_tokens: 800,
-        temperature: 0.35,
+        max_tokens: 1200,
+        temperature: 0.3,
         stream: true,
       }),
       signal: controller.signal,
@@ -135,7 +145,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { messages = [], state, district } = body;
+    const { messages = [], state, district, isContinuation } = body;
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json(
@@ -154,10 +164,10 @@ export async function POST(req: NextRequest) {
           typeof m.content === "string" &&
           m.content.trim().length > 0
       )
-      .slice(-8) // Keep last 8 turns for safety, token budgeting and speed
+      .slice(-6) // Keep last 6 turns for optimal TTFT and token economy
       .map((m) => ({
         role: m.role,
-        content: m.content.slice(0, 1500), // Protect against prompt-stuffing
+        content: m.content.slice(0, 1200), // Protect against prompt-stuffing
       }));
 
     if (sanitizedChatMessages.length === 0) {
@@ -173,6 +183,14 @@ export async function POST(req: NextRequest) {
       ...sanitizedChatMessages,
     ];
 
+    if (isContinuation) {
+      fullMessages.push({
+        role: "user",
+        content:
+          "Please continue your legal explanation directly from the exact sentence where it was cut off. Do not repeat what you have already written.",
+      });
+    }
+
     // 5. Attempt Primary Model with Fallback Strategy
     const primaryModel = getPrimaryModel();
     const fallbackModel = getFallbackModel();
@@ -182,7 +200,7 @@ export async function POST(req: NextRequest) {
     let primaryStatus = 0;
 
     try {
-      const primaryRes = await requestOpenRouter(primaryModel, fullMessages, apiKey);
+      const primaryRes = await requestOpenRouter(primaryModel, fullMessages, apiKey, req.signal);
       if (primaryRes.ok && primaryRes.body) {
         activeResponse = primaryRes;
       } else {
@@ -199,11 +217,11 @@ export async function POST(req: NextRequest) {
       console.warn(`[AI Intake] Primary model network error:`, primaryErrorDetail);
     }
 
-    // If Primary failed, retry once with Fallback Model
+    // If Primary failed before emitting any text, retry once with Fallback Model
     if (!activeResponse) {
       console.info(`[AI Intake] Retrying with fallback model (${fallbackModel})...`);
       try {
-        const fallbackRes = await requestOpenRouter(fallbackModel, fullMessages, apiKey);
+        const fallbackRes = await requestOpenRouter(fallbackModel, fullMessages, apiKey, req.signal);
         if (fallbackRes.ok && fallbackRes.body) {
           activeResponse = fallbackRes;
         } else {
@@ -243,12 +261,13 @@ export async function POST(req: NextRequest) {
     const stream = new ReadableStream({
       async start(controller) {
         let buffer = "";
+        let finishReason = "unknown";
+        let hasEmittedTokens = false;
 
         try {
           while (true) {
             const { done, value } = await openRouterReader.read();
             if (done) {
-              controller.close();
               break;
             }
 
@@ -261,8 +280,7 @@ export async function POST(req: NextRequest) {
               if (!trimmed || trimmed.startsWith(":")) continue;
 
               if (trimmed === "data: [DONE]") {
-                controller.close();
-                return;
+                continue;
               }
 
               if (trimmed.startsWith("data: ")) {
@@ -271,6 +289,11 @@ export async function POST(req: NextRequest) {
                   const delta = json.choices?.[0]?.delta?.content;
                   if (delta) {
                     controller.enqueue(encoder.encode(delta));
+                    hasEmittedTokens = true;
+                  }
+                  const reason = json.choices?.[0]?.finish_reason;
+                  if (reason) {
+                    finishReason = reason;
                   }
                 } catch {
                   // Ignore JSON parse errors for fragmented or malformed lines
@@ -278,6 +301,23 @@ export async function POST(req: NextRequest) {
               }
             }
           }
+
+          // Flush decoder remainder
+          const remainder = decoder.decode();
+          if (remainder) {
+            controller.enqueue(encoder.encode(remainder));
+          }
+
+          // Append deterministic completion marker based on finish_reason
+          if (hasEmittedTokens) {
+            if (finishReason === "length") {
+              controller.enqueue(encoder.encode("\n\n__NYAYALINK_TRUNCATED__"));
+            } else {
+              controller.enqueue(encoder.encode("\n\n__NYAYALINK_DONE__"));
+            }
+          }
+
+          controller.close();
         } catch (streamErr) {
           console.error("[AI Intake] Stream reading error:", streamErr);
           controller.error(streamErr);

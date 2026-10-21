@@ -21,6 +21,8 @@ export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   isStreaming?: boolean;
+  isTruncated?: boolean;
+  isInterrupted?: boolean;
 }
 
 const INITIAL_INTRO_MESSAGE: ChatMessage = {
@@ -179,21 +181,45 @@ export function ChatInterface() {
         const chunk = decoder.decode(value, { stream: true });
         accumulatedText += chunk;
 
+        // Strip any completion markers from real-time display
+        const displayContent = accumulatedText
+          .replace(/__NYAYALINK_DONE__/g, "")
+          .replace(/__NYAYALINK_TRUNCATED__/g, "");
+
         setMessages((prev) =>
           prev.map((msg) =>
             msg.id === assistantPlaceholderId
-              ? { ...msg, content: accumulatedText }
+              ? { ...msg, content: displayContent }
               : msg
           )
         );
       }
 
-      // Mark streaming complete & clear any saved retry states
+      // Detect completion status from markers
+      const isTruncated = accumulatedText.includes("__NYAYALINK_TRUNCATED__");
+      const isDone = accumulatedText.includes("__NYAYALINK_DONE__");
+      const cleanFinalText = accumulatedText
+        .replace(/__NYAYALINK_DONE__/g, "")
+        .replace(/__NYAYALINK_TRUNCATED__/g, "")
+        .trim();
+
+      // If the stream terminated without either marker and produced text, it was an interrupted connection
+      const isInterrupted = !isDone && !isTruncated && cleanFinalText.length > 0;
+
       setMessages((prev) =>
         prev.map((msg) =>
-          msg.id === assistantPlaceholderId ? { ...msg, isStreaming: false } : msg
+          msg.id === assistantPlaceholderId
+            ? {
+                ...msg,
+                content: cleanFinalText,
+                isStreaming: false,
+                isTruncated,
+                isInterrupted,
+              }
+            : msg
         )
       );
+
       setFailedPrompt(null);
       setFailedUserMessageId(null);
     } catch (err: unknown) {
@@ -204,10 +230,143 @@ export function ChatInterface() {
         setFailedUserMessageId(activeUserMessageId);
       }
 
-      // Remove the incomplete streaming placeholder
-      setMessages((prev) => prev.filter((m) => m.id !== assistantPlaceholderId));
+      // Preserve partial text if any content was received before the transport failed
+      setMessages((prev) => {
+        const existing = prev.find((m) => m.id === assistantPlaceholderId);
+        if (existing && existing.content.trim().length > 0) {
+          return prev.map((m) =>
+            m.id === assistantPlaceholderId
+              ? {
+                  ...m,
+                  content: m.content.replace(/__NYAYALINK_[A-Z]+__/g, "").trim(),
+                  isStreaming: false,
+                  isInterrupted: true,
+                }
+              : m
+          );
+        }
+        // Only remove placeholder if completely empty
+        return prev.filter((m) => m.id !== assistantPlaceholderId);
+      });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleContinueAnswer = async (messageId: string) => {
+    if (isLoading) return;
+    setIsLoading(true);
+    setApiError(null);
+
+    // Re-mark target message as streaming and clear prior truncation flag
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === messageId
+          ? { ...msg, isStreaming: true, isTruncated: false, isInterrupted: false }
+          : msg
+      )
+    );
+
+    try {
+      // Build conversation history including the partial assistant message
+      const apiMessages = messages
+        .filter((m) => m.id !== "intro-msg" && m.content.trim().length > 0)
+        .map((m) => ({ role: m.role, content: m.content }));
+
+      const response = await fetch("/api/intake/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: apiMessages,
+          state: selectedState !== "All India (General)" ? selectedState : undefined,
+          district: district.trim() || undefined,
+          isContinuation: true,
+        }),
+      });
+
+      if (!response.ok) {
+        let errMessage = "Server encountered an error while continuing the response.";
+        try {
+          const errData = await response.json();
+          if (errData?.error) errMessage = errData.error;
+        } catch {}
+        throw new Error(errMessage);
+      }
+
+      if (!response.body) throw new Error("No response body received from intake service.");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let continuationChunk = "";
+
+      const targetMsg = messages.find((m) => m.id === messageId);
+      const baseText = targetMsg ? targetMsg.content : "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        continuationChunk += chunk;
+
+        const liveCombined = (baseText + " " + continuationChunk)
+          .replace(/__NYAYALINK_DONE__/g, "")
+          .replace(/__NYAYALINK_TRUNCATED__/g, "");
+
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === messageId ? { ...msg, content: liveCombined } : msg
+          )
+        );
+      }
+
+      const isTruncated = continuationChunk.includes("__NYAYALINK_TRUNCATED__");
+      const isDone = continuationChunk.includes("__NYAYALINK_DONE__");
+      const cleanCombined = (baseText + " " + continuationChunk)
+        .replace(/__NYAYALINK_DONE__/g, "")
+        .replace(/__NYAYALINK_TRUNCATED__/g, "")
+        .trim();
+
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === messageId
+            ? {
+                ...msg,
+                content: cleanCombined,
+                isStreaming: false,
+                isTruncated,
+                isInterrupted: !isDone && !isTruncated,
+              }
+            : msg
+        )
+      );
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to continue AI response.";
+      setApiError(msg);
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === messageId
+            ? { ...msg, isStreaming: false, isInterrupted: true }
+            : msg
+        )
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRetryInterrupted = (messageId: string) => {
+    const msgIndex = messages.findIndex((m) => m.id === messageId);
+    let promptToRetry = "";
+    if (msgIndex > 0 && messages[msgIndex - 1].role === "user") {
+      promptToRetry = messages[msgIndex - 1].content;
+    } else {
+      promptToRetry = failedPrompt || "";
+    }
+
+    if (promptToRetry) {
+      setMessages((prev) => prev.filter((m) => m.id !== messageId));
+      handleSendMessage(promptToRetry, true);
     }
   };
 
@@ -329,6 +488,40 @@ export function ChatInterface() {
                     <span className="inline-block w-1.5 h-3.5 bg-[#C5A059] ml-1.5 animate-pulse align-middle" />
                   )}
                 </div>
+
+                {/* Token Limit Truncation Indicator & Continue Action */}
+                {message.isTruncated && !isLoading && (
+                  <div className="mt-3 pt-2.5 border-t border-white/[0.08] flex items-center justify-between gap-2 text-xs">
+                    <span className="text-[#A5A3B2] text-[11px] font-mono">
+                      Explanation reached token limit.
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleContinueAnswer(message.id)}
+                      className="px-2.5 py-1 rounded-lg bg-[#C5A059]/15 border border-[#C5A059]/30 text-[#DFBE7E] hover:bg-[#C5A059]/25 text-[11px] font-medium flex items-center gap-1 transition-colors"
+                    >
+                      <ArrowRight className="w-3 h-3" />
+                      Continue answer
+                    </button>
+                  </div>
+                )}
+
+                {/* Network Interruption Indicator & Retry Action */}
+                {message.isInterrupted && !isLoading && (
+                  <div className="mt-3 pt-2.5 border-t border-red-500/20 flex items-center justify-between gap-2 text-xs">
+                    <span className="text-red-300 text-[11px] font-mono">
+                      Stream disconnected. Partial response preserved.
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleRetryInterrupted(message.id)}
+                      className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/10 text-white hover:bg-white/[0.08] text-[11px] font-medium flex items-center gap-1 transition-colors"
+                    >
+                      <RotateCcw className="w-3 h-3 text-[#C5A059]" />
+                      Retry from here
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           );
