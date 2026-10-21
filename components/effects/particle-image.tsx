@@ -23,8 +23,8 @@ interface ImageParticle {
 export function ParticleImage({
   className = "",
   size = 240,
-  highlightColor = "#C5A059",
-  accentColor = "#DFBE7E",
+  highlightColor = "#205C43",
+  accentColor = "#174530",
 }: ParticleImageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -267,7 +267,7 @@ export function ParticleImage({
         viewBox="0 0 240 240"
         fill="none"
         stroke="currentColor"
-        className={`w-full h-full text-[#DFBE7E] transition-opacity duration-700 ${
+        className={`w-full h-full text-[#205C43] transition-opacity duration-700 ${
           animationCompleted || shouldReduceMotion ? "opacity-100" : "opacity-0"
         }`}
         strokeWidth="3.5"
@@ -276,37 +276,37 @@ export function ParticleImage({
         aria-hidden="true"
       >
         {/* Apex Finial */}
-        <circle cx="120" cy="55" r="5" fill="#C5A059" stroke="#C5A059" />
+        <circle cx="120" cy="55" r="5" fill="#205C43" stroke="#205C43" />
 
         {/* Central Vertical Pillar */}
-        <line x1="120" y1="60" x2="120" y2="185" stroke="#C5A059" />
+        <line x1="120" y1="60" x2="120" y2="185" stroke="#205C43" />
 
         {/* Pedestal Base */}
-        <line x1="82" y1="185" x2="158" y2="185" stroke="#C5A059" />
-        <line x1="96" y1="192" x2="144" y2="192" stroke="#DFBE7E" />
+        <line x1="82" y1="185" x2="158" y2="185" stroke="#205C43" />
+        <line x1="96" y1="192" x2="144" y2="192" stroke="#174530" />
 
         {/* Horizontal Balance Beam */}
-        <line x1="48" y1="85" x2="192" y2="85" stroke="#DFBE7E" />
-        <circle cx="120" cy="85" r="4.5" fill="#DFBE7E" />
+        <line x1="48" y1="85" x2="192" y2="85" stroke="#174530" />
+        <circle cx="120" cy="85" r="4.5" fill="#174530" />
 
         {/* Left Scale Strings & Pan */}
-        <line x1="65" y1="85" x2="43" y2="130" stroke="#C5A059" strokeWidth="2.5" />
-        <line x1="65" y1="85" x2="87" y2="130" stroke="#C5A059" strokeWidth="2.5" />
+        <line x1="65" y1="85" x2="43" y2="130" stroke="#205C43" strokeWidth="2.5" />
+        <line x1="65" y1="85" x2="87" y2="130" stroke="#205C43" strokeWidth="2.5" />
         <path
           d="M 41 130 A 24 24 0 0 0 89 130"
-          stroke="#DFBE7E"
+          stroke="#174530"
           strokeWidth="3.5"
-          fill="rgba(197, 160, 89, 0.08)"
+          fill="rgba(32, 92, 67, 0.08)"
         />
 
         {/* Right Scale Strings & Pan */}
-        <line x1="175" y1="85" x2="153" y2="130" stroke="#C5A059" strokeWidth="2.5" />
-        <line x1="175" y1="85" x2="197" y2="130" stroke="#C5A059" strokeWidth="2.5" />
+        <line x1="175" y1="85" x2="153" y2="130" stroke="#205C43" strokeWidth="2.5" />
+        <line x1="175" y1="85" x2="197" y2="130" stroke="#205C43" strokeWidth="2.5" />
         <path
           d="M 151 130 A 24 24 0 0 0 199 130"
-          stroke="#DFBE7E"
+          stroke="#174530"
           strokeWidth="3.5"
-          fill="rgba(197, 160, 89, 0.08)"
+          fill="rgba(32, 92, 67, 0.08)"
         />
       </svg>
 

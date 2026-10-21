@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Geist, JetBrains_Mono } from "next/font/google";
 import { SmoothScrollProvider } from "@/components/marketing/smooth-scroll-provider";
 import { ScrollBackground } from "@/components/marketing/scroll-background";
+import { CinematicVideoBackground } from "@/components/marketing/cinematic-video-background";
 import { ScrollProgress } from "@/components/marketing/scroll-progress";
 import { MarketingNavbar } from "@/components/marketing/marketing-navbar";
 import { MarketingFooter } from "@/components/marketing/marketing-footer";
@@ -46,11 +47,14 @@ export default function MarketingLayout({
 }) {
   return (
     <div
-      className={`${fontSerif.variable} ${fontSans.variable} ${fontMono.variable} font-sans min-h-screen bg-transparent text-[#F5F4FA] antialiased selection:bg-[#C5A059]/30 selection:text-white relative`}
+      className={`${fontSerif.variable} ${fontSans.variable} ${fontMono.variable} font-sans min-h-screen bg-[#FFFFFF] text-[#202824] antialiased selection:bg-[#205C43]/20 selection:text-[#202824] relative`}
     >
       <SmoothScrollProvider>
         {/* Dynamic Scroll-Reactive Ambiance Background */}
         <ScrollBackground />
+
+        {/* Cinematic Gold-Ink Video Background with Forest Green Backing */}
+        <CinematicVideoBackground />
 
         {/* Floating Vertical Section Scroll Progress Rail */}
         <ScrollProgress />

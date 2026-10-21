@@ -54,28 +54,28 @@ export function ScrollProgress() {
   }, []);
 
   const handleSectionClick = (id: string) => {
-    scrollTo(`#${id}`, { offset: -60 });
+    scrollTo(`#${id}`, { offset: -70 });
     setActiveSection(id);
   };
 
   return (
     <nav
-      className="fixed bottom-8 left-6 z-40 hidden lg:flex flex-col items-start p-2 rounded-full bg-[#0C0F17]/85 backdrop-blur-md border border-border-default shadow-2xl shadow-black/60 transition-all select-none"
+      className="fixed bottom-8 left-6 z-40 hidden lg:flex flex-col items-start p-2 rounded-full bg-white/95 backdrop-blur-md border border-[#D5E5D9] shadow-lg shadow-[#202824]/5 transition-all select-none"
       aria-label="Section Navigation Rail"
     >
       <div className="relative flex flex-col gap-3 items-center py-1">
-        {/* Continuous Scrubber Track Container (Center of first dot to center of last dot) */}
+        {/* Continuous Scrubber Track Container */}
         <div
           aria-hidden="true"
           className="absolute top-2.5 bottom-2.5 left-1/2 -translate-x-1/2 w-[2px] pointer-events-none"
         >
           {/* Base Track */}
-          <div className="absolute inset-0 w-full bg-border-strong rounded-full" />
+          <div className="absolute inset-0 w-full bg-[#E2ECE5] rounded-full" />
 
           {/* Continuous Active Fill Line (0 to 100% of scroll progress) */}
           {!shouldReduceMotion && (
             <motion.div
-              className="absolute top-0 left-0 w-full bg-gradient-to-b from-white to-white/40 rounded-full origin-top shadow-[0_0_8px_rgba(255,255,255,0.4)]"
+              className="absolute top-0 left-0 w-full bg-gradient-to-b from-[#202824] to-[#205C43] rounded-full origin-top"
               style={{ height: fillHeight }}
             />
           )}
@@ -91,7 +91,7 @@ export function ScrollProgress() {
               onClick={() => handleSectionClick(sec.id)}
               onMouseEnter={() => setHoveredSection(sec.id)}
               onMouseLeave={() => setHoveredSection(null)}
-              className="group relative z-10 flex items-center justify-center w-5 h-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-strong rounded-full"
+              className="group relative z-10 flex items-center justify-center w-5 h-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#205C43] rounded-full"
               aria-label={`Jump to section: ${sec.name}`}
               aria-current={isActive ? "true" : undefined}
             >
@@ -99,23 +99,23 @@ export function ScrollProgress() {
               <div
                 className={`rounded-full transition-all duration-300 ${
                   isActive
-                    ? "w-2.5 h-2.5 bg-white ring-4 ring-white/20 shadow-[0_0_10px_rgba(255,255,255,0.5)] scale-110"
+                    ? "w-2.5 h-2.5 bg-[#205C43] ring-4 ring-[#205C43]/25 scale-110"
                     : isHovered
-                    ? "w-2.5 h-2.5 bg-white/80 ring-2 ring-white/30 scale-125"
-                    : "w-2 h-2 bg-[#0C0F17] ring-1.5 ring-white/30 group-hover:ring-white/70"
+                    ? "w-2.5 h-2.5 bg-[#174530] ring-2 ring-[#205C43]/20 scale-125"
+                    : "w-2 h-2 bg-white ring-1.5 ring-[#D5E5D9] group-hover:ring-[#205C43]"
                 }`}
               />
 
               {/* Tooltip Label on Hover / Active */}
               {(isHovered || isActive) && (
                 <div
-                  className={`absolute left-8 px-2.5 py-1 rounded-lg text-[11px] font-mono whitespace-nowrap transition-all duration-200 pointer-events-none shadow-lg ${
+                  className={`absolute left-8 px-2.5 py-1 rounded-lg text-[11px] font-mono whitespace-nowrap transition-all duration-200 pointer-events-none shadow-md ${
                     isActive
-                      ? "bg-[#141824] text-white border border-border-strong opacity-100 translate-x-0"
-                      : "bg-[#11141D] text-[#A5A3B2] border border-border-default opacity-90 translate-x-0"
+                      ? "bg-[#205C43] text-white border border-[#174530] opacity-100 translate-x-0"
+                      : "bg-white text-[#69736D] border border-[#D5E5D9] opacity-95 translate-x-0"
                   }`}
                 >
-                  <span className="text-white mr-1.5 font-bold">
+                  <span className={isActive ? "text-[#EAF3ED] mr-1.5 font-bold" : "text-[#205C43] mr-1.5 font-bold"}>
                     {sec.number}
                   </span>
                   <span>{sec.name}</span>

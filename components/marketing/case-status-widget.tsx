@@ -29,7 +29,7 @@ export function CaseStatusWidget() {
       initial={{ opacity: 0, y: -6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.15 }}
-      className="inline-flex items-center gap-2.5 px-3 py-1 rounded-full bg-surface-raised border border-border-subtle hover:border-border-strong transition-colors text-xs select-none"
+      className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white border border-[#D5E5D9] hover:border-[#205C43]/40 transition-colors text-xs select-none shadow-xs"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       aria-label="Platform Highlights"
@@ -37,19 +37,19 @@ export function CaseStatusWidget() {
     >
       {/* Ambient Pulsing Feed Indicator */}
       <span className="relative flex h-1.5 w-1.5">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400/60 opacity-75" />
-        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400/80" />
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#205C43]/60 opacity-75" />
+        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#205C43]" />
       </span>
 
-      <span className="font-mono text-[10px] uppercase tracking-wider text-white/40 font-medium hidden sm:inline-flex items-center gap-1">
-        <Activity className="w-2.5 h-2.5 text-white/30" />
-        Feed
+      <span className="font-mono text-[10px] uppercase tracking-wider text-[#69736D] font-semibold hidden sm:inline-flex items-center gap-1">
+        <Activity className="w-2.5 h-2.5 text-[#205C43]" />
+        Live Registry
       </span>
 
-      <div className="h-2.5 w-px bg-border-default hidden sm:block" />
+      <div className="h-2.5 w-px bg-[#D5E5D9] hidden sm:block" />
 
       {/* Rotating Stat Content */}
-      <div className="overflow-hidden min-w-[170px] sm:min-w-[200px] h-4 relative flex items-center">
+      <div className="overflow-hidden min-w-[170px] sm:min-w-[210px] h-4 relative flex items-center">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStat.id}
@@ -59,13 +59,13 @@ export function CaseStatusWidget() {
             transition={{ duration: 0.25 }}
             className="flex items-center gap-1.5 whitespace-nowrap text-[11px]"
           >
-            <span className="font-medium text-white/90 tracking-tight">
+            <span className="font-semibold text-[#202824] tracking-tight">
               {currentStat.metric}
             </span>
-            <span className="text-white/50 font-normal">
+            <span className="text-[#69736D] font-normal">
               {currentStat.label}
             </span>
-            <span className="text-white/30 text-[10px] hidden md:inline">
+            <span className="text-[#69736D]/80 text-[10px] hidden md:inline">
               · {currentStat.sublabel}
             </span>
           </motion.div>
@@ -75,7 +75,7 @@ export function CaseStatusWidget() {
       {/* Dismiss button */}
       <button
         onClick={() => setIsDismissed(true)}
-        className="text-white/40 hover:text-white transition-colors p-0.5 rounded-full hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-border-strong"
+        className="text-[#69736D] hover:text-[#202824] transition-colors p-0.5 rounded-full hover:bg-[#EAF3ED] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#205C43]"
         aria-label="Dismiss status notification"
       >
         <X className="w-3 h-3" />

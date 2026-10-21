@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { Scale, ShieldCheck, Lock } from "lucide-react";
 
 export default function AuthLayout({
   children,
@@ -7,94 +8,95 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen w-full bg-[#09090F] text-[#F5F4FA] font-sans flex flex-col md:flex-row antialiased selection:bg-[#A99AFF]/30 selection:text-white relative overflow-hidden">
-      {/* LEFT SIDE — ATMOSPHERIC BRAND WORLD (58% Desktop) */}
-      <div className="relative w-full md:w-[58%] lg:w-[60%] flex flex-col justify-between p-8 sm:p-12 lg:p-16 border-b md:border-b-0 md:border-r border-white/[0.06] overflow-hidden bg-gradient-to-b from-[#0F0E1A] via-[#09090F] to-[#09090F]">
-        {/* Atmospheric Radial Light Field & Luminous Depth (Dimension 40% + Wope 25%) */}
+    <div className="min-h-screen w-full bg-white text-[#202824] font-sans flex flex-col md:flex-row antialiased selection:bg-[#205C43]/20 selection:text-[#202824] relative overflow-hidden">
+      {/* LEFT SIDE — EDITORIAL BRAND WORLD (58% Desktop) */}
+      <div className="relative w-full md:w-[54%] lg:w-[58%] flex flex-col justify-between p-8 sm:p-12 lg:p-16 border-b md:border-b-0 md:border-r border-[#D5E5D9] overflow-hidden bg-gradient-to-b from-white via-[#FAFCFB] to-[#EAF3ED]/40">
+        {/* Subtle Architectural Atmosphere */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {/* Upper luminous violet glow */}
-          <div className="absolute -top-[25%] -left-[10%] w-[650px] h-[650px] rounded-full bg-gradient-to-br from-[#7864DF]/15 via-[#A99AFF]/08 to-transparent blur-[120px]" />
-          
-          {/* Center horizon depth field */}
-          <div className="absolute top-[45%] left-[20%] w-[500px] h-[350px] rounded-full bg-gradient-to-tr from-[#6F76DB]/10 to-transparent blur-[100px]" />
+          {/* Faint green luminous ambient light */}
+          <div className="absolute -top-[20%] -left-[10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-[#205C43]/8 to-transparent blur-[100px]" />
 
-          {/* Architectural hairline grid lines for sense of depth */}
-          <div 
-            className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#A99AFF_1px,transparent_1px),linear-gradient(to_bottom,#A99AFF_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" 
+          {/* Architectural micro hairline grid */}
+          <div
+            className="absolute inset-0 opacity-[0.02] bg-[linear-gradient(to_right,#202824_1px,transparent_1px),linear-gradient(to_bottom,#202824_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]"
           />
-
-          {/* Delicate luminous horizon line across left canvas */}
-          <div className="absolute top-[62%] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#A99AFF]/20 to-transparent" />
         </div>
 
-        {/* TOP: Brand Wordmark & Security Tier */}
+        {/* TOP: Brand Wordmark & Security Status */}
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <Link href="/" className="group flex items-center gap-3 transition-opacity hover:opacity-90">
-            {/* Custom geometric monogram */}
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1E1C30] to-[#121120] border border-[#A99AFF]/25 flex items-center justify-center shadow-[0_0_15px_rgba(169,154,255,0.15)] group-hover:border-[#A99AFF]/40 transition-colors">
-              <span className="font-mono text-xs font-bold text-[#A99AFF] tracking-wider">NL</span>
+            <div className="w-8 h-8 rounded-lg bg-[#EAF3ED] border border-[#D5E5D9] flex items-center justify-center shadow-xs text-[#205C43]">
+              <Scale className="w-4 h-4 text-[#205C43]" />
             </div>
             <div className="flex flex-col">
-              <span className="text-base font-semibold tracking-tight text-[#F5F4FA]">
+              <span className="text-base font-serif font-medium tracking-tight text-[#202824]">
                 NyayaLink
               </span>
-              <span className="text-[10px] font-mono tracking-wider text-[#6F6E7D] uppercase">
-                Obsidian Architecture
+              <span className="text-[10px] font-mono tracking-wider text-[#69736D] uppercase">
+                Legal Services
               </span>
             </div>
           </Link>
 
-          <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#141322] border border-white/[0.06] text-[11px] font-mono text-[#A5A3B2] w-fit">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Govt & Bar Verifications Active</span>
+          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#D5E5D9] text-[11px] font-mono text-[#69736D] w-fit shadow-xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#205C43] animate-pulse" />
+            <span>Bar Council Roll Verification Active</span>
           </div>
         </div>
 
         {/* CENTER: Editorial Typographic Anchor (Desktop/Tablet Only) */}
         <div className="hidden md:block relative z-10 my-12 md:my-auto max-w-xl space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#A99AFF]/10 border border-[#A99AFF]/20 text-xs font-mono text-[#A99AFF]">
-            <span>LEGAL-TECH INFRASTRUCTURE</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#EAF3ED] border border-[#D5E5D9] text-xs font-mono text-[#205C43] font-semibold">
+            <span>VERIFIED ACCESS GATEWAY</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-[#F5F4FA] leading-[1.08] text-balance">
-            A clearer path to justice.
+          <h1 className="text-4xl sm:text-5xl font-serif font-normal tracking-tight text-[#202824] leading-[1.1] text-balance">
+            Find the right legal path forward.
           </h1>
 
-          <p className="text-base sm:text-lg text-[#A5A3B2] leading-relaxed font-normal max-w-lg">
-            Institutional-grade platform connecting citizens with verified advocates across High Courts and district jurisdictions throughout India.
+          <p className="text-base text-[#69736D] leading-relaxed font-light max-w-lg">
+            Institutional platform connecting citizens with verified State Bar Council advocates across High Courts and district jurisdictions throughout India.
           </p>
 
-          {/* Key Value Pill Highlights */}
-          <div className="pt-4 grid grid-cols-2 gap-3 max-w-md">
-            <div className="p-3.5 rounded-lg bg-[#111119]/70 border border-white/[0.06] backdrop-blur-sm">
-              <div className="text-xs font-mono text-[#A99AFF] mb-1">ZERO-TRUST AUDIT</div>
-              <div className="text-xs text-[#A5A3B2]">Continuous immutable logging of all administrative actions.</div>
+          {/* Key Value Highlight Cards */}
+          <div className="pt-2 grid grid-cols-2 gap-3 max-w-md text-xs">
+            <div className="p-4 rounded-xl bg-white border border-[#D5E5D9] shadow-xs space-y-1">
+              <div className="flex items-center gap-1.5 font-mono text-[10px] text-[#205C43] font-bold uppercase tracking-wider">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#205C43]" />
+                <span>BCI RULE 36</span>
+              </div>
+              <p className="text-[#69736D] text-[11px] leading-snug">
+                Strictly neutral directory. Zero client solicitation or referral commissions.
+              </p>
             </div>
-            <div className="p-3.5 rounded-lg bg-[#111119]/70 border border-white/[0.06] backdrop-blur-sm">
-              <div className="text-xs font-mono text-[#A99AFF] mb-1">BAR COUNCIL CHECK</div>
-              <div className="text-xs text-[#A5A3B2]">Real-time enrollment verification before directory listing.</div>
+
+            <div className="p-4 rounded-xl bg-white border border-[#D5E5D9] shadow-xs space-y-1">
+              <div className="flex items-center gap-1.5 font-mono text-[10px] text-[#174530] font-bold uppercase tracking-wider">
+                <Lock className="w-3.5 h-3.5 text-[#174530]" />
+                <span>MILESTONE ESCROW</span>
+              </div>
+              <p className="text-[#69736D] text-[11px] leading-snug">
+                Triple-layer escrow protection with transparent consultation fees.
+              </p>
             </div>
           </div>
         </div>
 
         {/* BOTTOM: Institutional Metadata (Desktop/Tablet Only) */}
-        <div className="hidden md:flex relative z-10 pt-6 border-t border-white/[0.06] flex-wrap items-center justify-between gap-4 text-xs font-mono text-[#6F6E7D]">
-          <div className="flex items-center gap-4">
+        <div className="hidden md:flex relative z-10 pt-6 border-t border-[#D5E5D9] flex-wrap items-center justify-between gap-4 text-xs font-mono text-[#69736D]">
+          <div className="flex items-center gap-3">
             <span>SECURE GATEWAY v2.4</span>
-            <span className="hidden sm:inline">•</span>
-            <span className="hidden sm:inline">AES-256 GCM ENCRYPTED</span>
+            <span>•</span>
+            <span>AES-256 PRIVACY ENCRYPTED</span>
           </div>
           <div>
-            <span>© 2026 NyayaLink Republic of India</span>
+            <span>© 2026 NyayaLink</span>
           </div>
         </div>
       </div>
 
       {/* RIGHT SIDE — AUTHENTICATION SURFACE (42% Desktop) */}
-      <div className="w-full md:w-[42%] lg:w-[40%] flex items-center justify-center p-6 sm:p-10 lg:p-12 bg-[#09090F] relative">
-        {/* Subtle right-side ambient vignette */}
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(120,100,223,0.05),transparent_60%)]" />
-
+      <div className="w-full md:w-[46%] lg:w-[42%] flex items-center justify-center p-6 sm:p-10 lg:p-14 bg-white relative">
         <div className="w-full max-w-md relative z-10">
           {children}
         </div>

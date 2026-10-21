@@ -25,8 +25,8 @@ interface Particle {
 export function ParticleText({
   text,
   className = "",
-  highlightColor = "#C5A059",
-  textColor = "#F5F4FA",
+  highlightColor = "#205C43",
+  textColor = "#202824",
   particleSize = 1.3,
   duration = 1400,
 }: ParticleTextProps) {
@@ -253,9 +253,7 @@ export function ParticleText({
       {/* Real accessible DOM text element for screen readers & crisp settled display */}
       <span
         ref={textRef}
-        className={`${className} transition-opacity duration-500 ${
-          animationCompleted ? "opacity-100" : "opacity-0"
-        }`}
+        className={className}
       >
         {text}
       </span>

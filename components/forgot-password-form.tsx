@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { KeyRound, Mail, ArrowLeft } from "lucide-react";
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
@@ -35,27 +36,26 @@ export function ForgotPasswordForm() {
   if (success) {
     return (
       <div className="w-full space-y-6">
-        <div className="w-12 h-12 rounded-xl bg-[#A99AFF]/15 border border-[#A99AFF]/30 flex items-center justify-center text-[#A99AFF] shadow-[0_0_20px_rgba(169,154,255,0.2)]">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
+        <div className="w-12 h-12 rounded-2xl bg-[#EAF3ED] border border-[#D5E5D9] flex items-center justify-center text-[#205C43] shadow-xs">
+          <Mail className="w-6 h-6" />
         </div>
 
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight text-[#F5F4FA]">
+          <h2 className="text-2xl font-serif font-normal tracking-tight text-[#202824]">
             Check your inbox
           </h2>
-          <p className="text-sm text-[#A5A3B2] mt-2 leading-relaxed">
-            We sent a secure password reset link to <strong className="text-[#F5F4FA] font-mono">{email}</strong>. Please follow the link in your email to choose a new password.
+          <p className="text-sm text-[#69736D] mt-2 leading-relaxed">
+            We sent a secure password reset link to <strong className="text-[#202824] font-mono">{email}</strong>. Please follow the instructions in the email to select a new password.
           </p>
         </div>
 
-        <div className="pt-4 border-t border-white/[0.06]">
+        <div className="pt-4 border-t border-[#D5E5D9]">
           <Link
             href="/auth/login"
-            className="inline-flex items-center gap-2 text-xs font-mono text-[#A99AFF] hover:text-[#C4BCFF] transition-colors"
+            className="inline-flex items-center gap-2 text-xs font-mono font-semibold text-[#205C43] hover:text-[#174530] transition-colors"
           >
-            ← Return to sign in
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Return to sign in</span>
           </Link>
         </div>
       </div>
@@ -65,36 +65,37 @@ export function ForgotPasswordForm() {
   return (
     <div className="w-full">
       <div className="mb-8">
-        <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#191923] border border-white/[0.06] text-[11px] font-mono text-[#A99AFF] mb-4">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EAF3ED] border border-[#D5E5D9] text-[11px] font-mono text-[#205C43] mb-4 shadow-xs">
+          <KeyRound className="w-3.5 h-3.5 text-[#205C43]" />
           <span>ACCOUNT RECOVERY</span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#F5F4FA]">
+        <h2 className="text-2xl sm:text-3xl font-serif tracking-tight text-[#202824]">
           Reset Password
         </h2>
-        <p className="text-sm text-[#A5A3B2] mt-2">
-          Enter your registered email address to receive password restoration instructions.
+        <p className="text-sm text-[#69736D] mt-2">
+          Enter your registered email address to receive secure password recovery instructions.
         </p>
       </div>
 
       <form onSubmit={handleForgotPassword} className="space-y-5">
         {error && (
-          <div className="p-3.5 rounded-lg bg-red-950/40 border border-red-500/25 text-red-200 text-xs flex items-start gap-2.5">
+          <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-start gap-2.5">
             <svg
-              className="w-4 h-4 text-red-400 shrink-0 mt-0.5"
+              className="w-4 h-4 text-red-600 shrink-0 mt-0.5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
-            <span className="leading-relaxed">{error}</span>
+            <span className="leading-relaxed font-medium">{error}</span>
           </div>
         )}
 
         <div className="space-y-1.5">
           <label
             htmlFor="recovery-email"
-            className="block text-xs font-mono font-medium text-[#A5A3B2] tracking-wide uppercase"
+            className="block text-xs font-mono font-semibold text-[#202824] tracking-wide uppercase"
           >
             Email Address
           </label>
@@ -108,18 +109,18 @@ export function ForgotPasswordForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isLoading}
-            className="w-full h-11 px-3.5 rounded-lg bg-[#111119] border border-white/[0.08] text-[#F5F4FA] placeholder-[#6F6E7D] text-sm focus:outline-none focus:border-[#A99AFF] focus:ring-1 focus:ring-[#A99AFF]/30 transition-colors disabled:opacity-50"
+            className="w-full h-11 px-3.5 rounded-xl bg-white border border-[#D5E5D9] text-[#202824] placeholder-[#69736D] text-sm focus:outline-none focus:border-[#205C43] focus:ring-2 focus:ring-[#205C43]/15 shadow-xs transition-colors disabled:opacity-50"
           />
         </div>
 
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full h-11 rounded-lg bg-gradient-to-r from-[#A99AFF] to-[#8C7BFF] hover:from-[#B9ACFF] hover:to-[#9B8BFF] text-[#09090F] font-semibold text-sm transition-all duration-200 shadow-[0_0_20px_rgba(169,154,255,0.22)] hover:shadow-[0_0_25px_rgba(169,154,255,0.35)] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
+          className="w-full h-11 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white font-semibold text-sm transition-all duration-200 shadow-sm active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
         >
           {isLoading ? (
             <>
-              <svg className="animate-spin h-4 w-4 text-[#09090F]" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
               </svg>
@@ -130,10 +131,10 @@ export function ForgotPasswordForm() {
           )}
         </button>
 
-        <div className="pt-4 border-t border-white/[0.06] text-center">
+        <div className="pt-4 border-t border-[#D5E5D9] text-center">
           <Link
             href="/auth/login"
-            className="text-xs text-[#A5A3B2] hover:text-[#F5F4FA] transition-colors font-mono"
+            className="text-xs text-[#69736D] hover:text-[#202824] transition-colors font-mono"
           >
             ← Back to sign in
           </Link>

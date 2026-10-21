@@ -29,24 +29,35 @@
     --chart-4: 43 74% 66%;
     --radius: 0.5rem;
 
-    /* NyayaLink Legal Marketplace Tokens */
-    --nyaya-bg: #090B10;
-    --nyaya-surface: #0C0F17;
-    --nyaya-card: #11141D;
-    --nyaya-gold: #C5A059;
-    --nyaya-gold-light: #DFBE7E;
-    --nyaya-gold-dark: #9A7B39;
-    --nyaya-gold-muted: rgba(197, 160, 89, 0.18);
-    --nyaya-gold-glow: rgba(197, 160, 89, 0.12);
-    --nyaya-border: rgba(255, 255, 255, 0.08);
-    --nyaya-border-gold: rgba(197, 160, 89, 0.25);
+    /* NyayaLink Legal Marketplace Tokens - White & Forest Green Design System */
+    --nyaya-bg: #FFFFFF;
+    --nyaya-surface: #FFFFFF;
+    --nyaya-card: #FFFFFF;
+    --nyaya-mint: #EAF3ED;
+    --nyaya-mint-subtle: #F3F8F5;
+    --nyaya-green: #205C43;
+    --nyaya-green-hover: #174530;
+    --nyaya-green-border: #D5E5D9;
+    --nyaya-text: #202824;
+    --nyaya-text-muted: #69736D;
+    --nyaya-hover: #F2F7F4;
+
     /* Semantic Design Tokens */
-    --nyaya-accent: #C5A059;
-    --border-subtle: rgba(255, 255, 255, 0.06);
-    --border-default: rgba(255, 255, 255, 0.10);
-    --border-strong: rgba(255, 255, 255, 0.18);
-    --surface-raised: rgba(255, 255, 255, 0.03);
-    --surface-hover: rgba(255, 255, 255, 0.06);
+    --nyaya-accent: #205C43;
+    --border-subtle: #E2ECE5;
+    --border-default: #D5E5D9;
+    --border-strong: #B3CBB9;
+    --surface-raised: #FFFFFF;
+    --surface-hover: #F2F7F4;
+
+    /* Backward compatibility aliases */
+    --nyaya-gold: #205C43;
+    --nyaya-gold-light: #2A7556;
+    --nyaya-gold-dark: #174530;
+    --nyaya-gold-muted: rgba(32, 92, 67, 0.12);
+    --nyaya-gold-glow: rgba(32, 92, 67, 0.15);
+    --nyaya-border: #D5E5D9;
+    --nyaya-border-gold: rgba(32, 92, 67, 0.35);
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -85,44 +96,56 @@
   }
 }
 
-/* Custom dark scrollbar */
+/* Custom light scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #090B10;
+  background: #FFFFFF;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
+  background: var(--border-default);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--nyaya-green);
 }
 
-/* NyayaLink Custom Utilities */
+/* NyayaLink Custom Utilities - White & Green System */
+.nyaya-green-glow {
+  box-shadow: 0 0 35px -5px rgba(32, 92, 67, 0.2);
+}
+
+.nyaya-green-glow-subtle {
+  box-shadow: 0 0 20px -3px rgba(32, 92, 67, 0.12);
+}
+
 .nyaya-gold-glow {
-  box-shadow: 0 0 35px -5px rgba(197, 160, 89, 0.2);
+  box-shadow: 0 0 35px -5px rgba(32, 92, 67, 0.2);
 }
 
 .nyaya-gold-glow-subtle {
-  box-shadow: 0 0 20px -3px rgba(197, 160, 89, 0.12);
+  box-shadow: 0 0 20px -3px rgba(32, 92, 67, 0.12);
 }
 
 .nyaya-border-subtle {
   border-color: var(--border-subtle);
 }
 
+.nyaya-green-border {
+  border-color: var(--nyaya-green-border);
+}
+
 .nyaya-gold-border {
-  border-color: rgba(197, 160, 89, 0.25);
+  border-color: var(--nyaya-green-border);
 }
 
 .nyaya-glass-card {
-  background: rgba(12, 15, 23, 0.85);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-default);
 }
 
 /* Lenis smooth scrolling baseline */

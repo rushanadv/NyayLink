@@ -7,10 +7,9 @@ export interface SectionItem {
 
 export const SECTIONS: SectionItem[] = [
   { id: "hero", name: "Overview", shortLabel: "Hero", number: "01" },
-  { id: "problem", name: "The Challenge", shortLabel: "Problem", number: "02" },
-  { id: "marketplace", name: "Lawyer Network", shortLabel: "Marketplace", number: "03" },
-  { id: "ai-advisory", name: "AI Intake Engine", shortLabel: "AI Advisory", number: "04" },
-  { id: "lawyer-saas", name: "Advocate Portal", shortLabel: "Lawyer SaaS", number: "05" },
-  { id: "trust", name: "Legal Compliance", shortLabel: "Trust", number: "06" },
-  { id: "cta", name: "Get Started", shortLabel: "Action", number: "07" },
+  { id: "gateways", name: "Client & Advocate Entry", shortLabel: "Entry", number: "02" },
+  { id: "how-it-works", name: "How It Works", shortLabel: "Process", number: "03" },
+  { id: "audiences", name: "Two Audiences, One Platform", shortLabel: "Platform", number: "04" },
+  { id: "trust", name: "Legal Ethics & Compliance", shortLabel: "Trust", number: "05" },
+  { id: "cta", name: "Begin Consultation", shortLabel: "Action", number: "06" },
 ];

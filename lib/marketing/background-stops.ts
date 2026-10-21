@@ -1,10 +1,10 @@
 /**
- * Restrained Tonal Palette for GPU-Accelerated Scroll Background
+ * White and Forest Green Palette for GPU-Accelerated Scroll Background
  * 
- * Single directional color journey:
- * 1. layer-start (Top / Hero): Deep indigo-navy (#090B10)
- * 2. layer-mid (Middle): Warm near-black with faint gold undertone (#120F0A), catching the #C5A059 gold accent
- * 3. layer-end (Bottom / Footer): Pure pitch black (#000000)
+ * Clean, luminous white-dominant canvas with selective pale mint nuances:
+ * 1. layer-start (Top / Hero): Pure luminous white (#FFFFFF)
+ * 2. layer-mid (Middle): Clean white with subtle pale mint warmth (#FFFFFF -> rgba(234, 243, 237, 0.45) -> #FFFFFF)
+ * 3. layer-end (Bottom / Footer): Luminous white resolving into pristine footer (#FFFFFF)
  */
 
 export interface PaletteStop {
@@ -20,21 +20,21 @@ export const PALETTE_STOPS: {
 } = {
   start: {
     id: "layer-start",
-    name: "Deep Indigo Navy",
+    name: "Luminous Pure White",
     gradient:
-      "radial-gradient(ellipse 130% 90% at 50% -10%, #131A2B 0%, #0D131F 50%, #090B10 100%)",
+      "radial-gradient(ellipse 130% 90% at 50% -10%, #FFFFFF 0%, #FFFFFF 60%, #FAFCFB 100%)",
   },
   mid: {
     id: "layer-mid",
-    name: "Warm Gold Charcoal",
+    name: "Pristine White & Pale Mint",
     gradient:
-      "radial-gradient(ellipse 130% 90% at 50% 30%, rgba(197, 160, 89, 0.12) 0%, #1A150D 40%, #120F0A 75%, #0A0906 100%)",
+      "radial-gradient(ellipse 130% 90% at 50% 30%, rgba(234, 243, 237, 0.45) 0%, #FFFFFF 50%, #FAFCFB 100%)",
   },
   end: {
     id: "layer-end",
-    name: "Pitch Black",
+    name: "Architectural White Canvas",
     gradient:
-      "radial-gradient(ellipse 130% 90% at 50% 60%, #0B0D12 0%, #050608 55%, #000000 100%)",
+      "radial-gradient(ellipse 130% 90% at 50% 60%, #FFFFFF 0%, #F5F9F6 60%, #FFFFFF 100%)",
   },
 };
 

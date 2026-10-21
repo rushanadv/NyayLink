@@ -22,19 +22,19 @@ export function ScrollBackground() {
   const activeProgress = scrollProgress ?? nativeScrollYProgress;
 
   // 3 GPU-accelerated compositor layers with opacity-only crossfading:
-  // Layer 1 (Start / Top): Deep indigo-navy (#090B10) - fades 1 -> 0 in the first half
+  // Layer 1 (Start / Top): Luminous pure white (#FFFFFF)
   const opacityStart = useTransform(activeProgress, [0, 0.5], [1, 0]);
 
-  // Layer 2 (Mid / Middle): Warm near-black with faint gold undertone (#120F0A) - fades 0 -> 1 -> 0 across the middle
+  // Layer 2 (Mid / Middle): Crisp white with subtle pale mint warmth (#FFFFFF -> #EAF3ED)
   const opacityMid = useTransform(activeProgress, [0.15, 0.5, 0.85], [0, 1, 0]);
 
-  // Layer 3 (End / Bottom): Pure pitch black (#000000) - fades 0 -> 1 in the back half
+  // Layer 3 (End / Bottom): Pristine white resolving into footer (#FFFFFF)
   const opacityEnd = useTransform(activeProgress, [0.5, 1.0], [0, 1]);
 
   if (shouldReduceMotion) {
     return (
       <div
-        className="fixed inset-0 pointer-events-none z-0 bg-[#090B10]"
+        className="fixed inset-0 pointer-events-none z-0 bg-white"
         style={{ background: STATIC_HERO_GRADIENT }}
         aria-hidden="true"
       />
@@ -43,10 +43,10 @@ export function ScrollBackground() {
 
   return (
     <div
-      className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-[#000000]"
+      className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-white"
       aria-hidden="true"
     >
-      {/* Layer 1: Start (Deep indigo-navy) */}
+      {/* Layer 1: Start (Luminous pure white) */}
       <motion.div
         data-layer="layer-start"
         className="absolute inset-0"
@@ -58,7 +58,7 @@ export function ScrollBackground() {
         }}
       />
 
-      {/* Layer 2: Mid (Warm near-black with subtle gold accent undertone) */}
+      {/* Layer 2: Mid (Pristine white & pale mint) */}
       <motion.div
         data-layer="layer-mid"
         className="absolute inset-0"
@@ -70,7 +70,7 @@ export function ScrollBackground() {
         }}
       />
 
-      {/* Layer 3: End (Pure black resolving to footer) */}
+      {/* Layer 3: End (Grounded white canvas) */}
       <motion.div
         data-layer="layer-end"
         className="absolute inset-0"
@@ -84,19 +84,19 @@ export function ScrollBackground() {
 
       {/* Atmospheric depth lighting overlay */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-25 mix-blend-screen"
+        className="absolute inset-0 pointer-events-none opacity-40"
         style={{
           background:
-            "radial-gradient(ellipse 80% 60% at 50% 20%, rgba(255, 255, 255, 0.03) 0%, transparent 70%)",
+            "radial-gradient(ellipse 80% 60% at 50% 15%, rgba(32, 92, 67, 0.025) 0%, transparent 70%)",
         }}
       />
 
-      {/* Architectural micro grid pattern */}
+      {/* Architectural micro grid pattern on clean white */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-[0.03]"
+        className="absolute inset-0 pointer-events-none opacity-[0.02]"
         style={{
           backgroundImage:
-            "linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)",
+            "linear-gradient(to right, #202824 1px, transparent 1px), linear-gradient(to bottom, #202824 1px, transparent 1px)",
           backgroundSize: "64px 64px",
         }}
       />
