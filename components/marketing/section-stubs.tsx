@@ -4,6 +4,8 @@ import React, { useRef } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion, useInView, type Variants } from "framer-motion";
 import { CountUp } from "@/components/ui/count-up";
+import { ParticleImage } from "@/components/effects/particle-image";
+import { MomentumRing } from "@/components/effects/momentum-ring";
 import {
   ArrowRight,
   ShieldCheck,
@@ -100,20 +102,33 @@ export function SectionStubs() {
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-28"
       >
         <div className="p-8 sm:p-12 lg:p-16 rounded-3xl bg-[#0C0F17]/85 border border-white/[0.08] backdrop-blur-md shadow-2xl shadow-black/50">
-          <div className="flex items-center gap-2 mb-5">
-            <span className="font-mono text-xs uppercase tracking-widest text-[#C5A059] font-medium px-2.5 py-1 rounded bg-[#C5A059]/10 border border-[#C5A059]/25">
-              02 / THE CHALLENGE
-            </span>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            {/* Left Column: Challenge Description */}
+            <div className="lg:col-span-7 space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="font-mono text-xs uppercase tracking-widest text-[#C5A059] font-medium px-2.5 py-1 rounded bg-[#C5A059]/10 border border-[#C5A059]/25">
+                  02 / THE CHALLENGE
+                </span>
+              </div>
+              <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-white font-normal leading-snug tracking-tight text-balance">
+                Indian citizens face 5 crore pending cases and opaque legal costs.
+              </h2>
+              <p className="text-sm sm:text-base text-[#A5A3B2] leading-relaxed">
+                Finding the right advocate often relies on informal broker networks,
+                unclear fee schedules, and intimidating legal language. NyayaLink
+                bridges this divide with algorithmic lawyer matching, verified Bar
+                Council profiles, and plain-language vernacular intake.
+              </p>
+            </div>
+
+            {/* Right Column: Particle Scales of Justice Visual */}
+            <div className="lg:col-span-5 flex flex-col items-center justify-center p-6 sm:p-8 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-center">
+              <ParticleImage size={230} />
+              <p className="mt-4 font-mono text-[11px] uppercase tracking-wider text-[#C5A059]">
+                From procedural confusion to structured legal clarity.
+              </p>
+            </div>
           </div>
-          <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-white font-normal max-w-2xl leading-snug tracking-tight text-balance">
-            Indian citizens face 5 crore pending cases and opaque legal costs.
-          </h2>
-          <p className="mt-4 text-sm sm:text-base text-[#A5A3B2] max-w-3xl leading-relaxed">
-            Finding the right advocate often relies on informal broker networks,
-            unclear fee schedules, and intimidating legal language. NyayaLink
-            bridges this divide with algorithmic lawyer matching, verified Bar
-            Council profiles, and plain-language vernacular intake.
-          </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-10 pt-8 border-t border-white/[0.06]">
             <div className="space-y-1">
@@ -505,6 +520,9 @@ export function SectionStubs() {
             a neutral technology platform enabling direct citizen access, transparent fee
             escrow, and verifiable public directory records.
           </p>
+
+          {/* 3D Dynamic Momentum Ring */}
+          <MomentumRing className="my-4" />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-white/[0.06] text-xs">
             <div className="p-3 rounded-xl bg-black/40 border border-white/5 flex items-center gap-3">

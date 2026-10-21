@@ -14,6 +14,7 @@ import { FEATURES } from "@/lib/marketing/features-data";
 import { FeaturePreview } from "./feature-preview";
 import { CaseStatusWidget } from "./case-status-widget";
 import { MagneticWrapper } from "@/components/ui/magnetic-wrapper";
+import { ParticleText } from "@/components/effects/particle-text";
 
 export function HeroSplit() {
   const [activeFeature, setActiveFeature] = useState<number>(0);
@@ -78,8 +79,13 @@ export function HeroSplit() {
 
           {/* Large Serif 2-Line Headline */}
           <div className="space-y-1">
-            <h1 className="font-serif text-3xl sm:text-4xl lg:text-[44px] font-normal tracking-tight text-white leading-[1.12] text-balance">
-              Justice, within reach.
+            <h1 className="tracking-tight text-white leading-[1.12]">
+              <ParticleText
+                text="Justice, within reach."
+                className="font-serif text-3xl sm:text-4xl lg:text-[44px] font-normal tracking-tight text-white block text-balance"
+                highlightColor="#C5A059"
+                textColor="#F5F4FA"
+              />
               <span className="block text-white/80 font-sans text-2xl sm:text-3xl lg:text-[32px] mt-1.5 font-light tracking-tight text-balance">
                 Verified lawyers, clear fees, your language.
               </span>
