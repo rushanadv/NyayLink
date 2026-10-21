@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { requireLawyerOrRedirect } from "@/lib/lawyer/auth";
 import Link from "next/link";
-import { Scale, Briefcase, Calendar, ShieldCheck, ArrowLeft, LogOut } from "lucide-react";
+import { Scale, Briefcase, Calendar, ShieldCheck, ArrowLeft } from "lucide-react";
 import { LogoutButton } from "@/components/logout-button";
 
 function LawyerDashboardSkeleton() {

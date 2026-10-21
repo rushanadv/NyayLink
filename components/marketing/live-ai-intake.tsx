@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence, useInView, useReducedMotion } from "framer-motion";
-import { Sparkles, Scale, FileText, CheckCircle2 } from "lucide-react";
+import { motion, useInView, useReducedMotion } from "framer-motion";
+import { Sparkles, Scale, CheckCircle2 } from "lucide-react";
 
 export interface AIIntakeScenario {
   id: string;
@@ -21,7 +21,7 @@ export const AI_INTAKE_SCENARIOS: AIIntakeScenario[] = [
   {
     id: "tenancy-deposit",
     category: "Tenancy & Security Deposit",
-    groundingTag: "Model Tenancy Act & Contract Act Grounded",
+    groundingTag: "Model Tenancy Provisions (Sample)",
     userQuery:
       "My landlord has withheld my ₹85,000 security deposit for 5 months without explanation or damages list. What legal notice can I send?",
     legalRightsTitle: "Statutory Rights Under Model Tenancy Provisions",
@@ -35,7 +35,7 @@ export const AI_INTAKE_SCENARIOS: AIIntakeScenario[] = [
   {
     id: "rera-delayed-possession",
     category: "Real Estate & RERA",
-    groundingTag: "RERA Section 18 & Consumer Protection Grounded",
+    groundingTag: "RERA Section 18 (Sample)",
     userQuery:
       "My builder delayed flat possession by 14 months past the RERA agreement date without an occupancy certificate. Can I seek a full refund?",
     legalRightsTitle: "Statutory Rights Under RERA Section 18",
@@ -49,7 +49,7 @@ export const AI_INTAKE_SCENARIOS: AIIntakeScenario[] = [
   {
     id: "cheque-bounce-138",
     category: "Commercial & Banking Law",
-    groundingTag: "Section 138 Negotiable Instruments Act Grounded",
+    groundingTag: "Section 138 NI Act (Sample)",
     userQuery:
       "A commercial client's cheque for ₹3,40,000 bounced with remark 'Funds Insufficient'. What is the mandatory legal procedure to recover?",
     legalRightsTitle: "Criminal Remedy Under Section 138 NI Act",
@@ -145,12 +145,17 @@ export function LiveAIIntakeDemo() {
             <Sparkles className="w-3.5 h-3.5" />
           </div>
           <span className="text-xs font-medium text-white">
-            NyayaAI Intake Assistant
+            NyayaAI Intake Preview
           </span>
         </div>
-        <span className="font-mono text-[10px] text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded-lg border border-emerald-500/20">
-          {currentScenario.groundingTag}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono text-[10px] text-white/50 bg-surface-raised px-2 py-0.5 rounded-lg border border-border-default">
+            Illustrative Demo
+          </span>
+          <span className="hidden sm:inline-block font-mono text-[10px] text-white/60 bg-surface-raised px-2 py-0.5 rounded-lg border border-border-subtle">
+            {currentScenario.groundingTag}
+          </span>
+        </div>
       </div>
 
       {/* Scripted Live Chat Thread */}
@@ -198,8 +203,8 @@ export function LiveAIIntakeDemo() {
                 <Scale className="w-3.5 h-3.5 text-white/70" />
                 <span>{currentScenario.legalRightsTitle}</span>
               </div>
-              <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/50 px-1.5 py-0.5 rounded-lg border border-emerald-500/20">
-                Verified Code
+              <span className="text-[10px] font-mono text-white/60 bg-surface-raised px-1.5 py-0.5 rounded-lg border border-border-subtle">
+                Sample Structure
               </span>
             </div>
 

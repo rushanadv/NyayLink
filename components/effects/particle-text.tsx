@@ -129,7 +129,7 @@ export function ParticleText({
       const data = imgData.data;
 
       // Grid sampling with adaptive step size to keep particle count ~1500-2200
-      let step = 2;
+      const step = 2;
       const rawPoints: { x: number; y: number; brightness: number }[] = [];
       for (let y = 0; y < height; y += step) {
         for (let x = 0; x < width; x += step) {

@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { buildSystemPrompt } from "@/lib/intake/system-prompt";
 
-// Models
-const PRIMARY_MODEL = "nvidia/nemotron-3.5-super-vl:free";
-const FALLBACK_MODEL = "minimax/minimax-m3:free";
+// Configurable Models (server-side only)
+const getPrimaryModel = (): string =>
+  process.env.OPENROUTER_MODEL?.trim() || "nvidia/nemotron-3.5-super-vl:free";
+
+const getFallbackModel = (): string =>
+  process.env.OPENROUTER_FALLBACK_MODEL?.trim() || "minimax/minimax-m3.1-flash:free";
 
 // In-memory rate limiting: IP -> timestamps array
 const rateLimitMap = new Map<string, number[]>();
@@ -56,22 +59,31 @@ async function requestOpenRouter(
   messages: ChatMessage[],
   apiKey: string
 ): Promise<Response> {
-  return await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "HTTP-Referer": "https://nyayalink.in",
-      "X-Title": "NyayaLink Legal Intake Assistant",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      max_tokens: 800,
-      temperature: 0.35,
-      stream: true,
-    }),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
+
+  try {
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "HTTP-Referer": "https://nyay.live",
+        "X-Title": "NyayaLink Legal Intake Assistant",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        max_tokens: 800,
+        temperature: 0.35,
+        stream: true,
+      }),
+      signal: controller.signal,
+    });
+    return res;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -162,12 +174,15 @@ export async function POST(req: NextRequest) {
     ];
 
     // 5. Attempt Primary Model with Fallback Strategy
+    const primaryModel = getPrimaryModel();
+    const fallbackModel = getFallbackModel();
+
     let activeResponse: Response | null = null;
     let primaryErrorDetail = "";
     let primaryStatus = 0;
 
     try {
-      const primaryRes = await requestOpenRouter(PRIMARY_MODEL, fullMessages, apiKey);
+      const primaryRes = await requestOpenRouter(primaryModel, fullMessages, apiKey);
       if (primaryRes.ok && primaryRes.body) {
         activeResponse = primaryRes;
       } else {
@@ -175,7 +190,7 @@ export async function POST(req: NextRequest) {
         const errText = await primaryRes.text();
         primaryErrorDetail = errText;
         console.warn(
-          `[AI Intake] Primary model (${PRIMARY_MODEL}) failed [${primaryStatus}]:`,
+          `[AI Intake] Primary model (${primaryModel}) failed [${primaryStatus}]:`,
           errText.slice(0, 200)
         );
       }
@@ -186,24 +201,24 @@ export async function POST(req: NextRequest) {
 
     // If Primary failed, retry once with Fallback Model
     if (!activeResponse) {
-      console.info(`[AI Intake] Retrying with fallback model (${FALLBACK_MODEL})...`);
+      console.info(`[AI Intake] Retrying with fallback model (${fallbackModel})...`);
       try {
-        const fallbackRes = await requestOpenRouter(FALLBACK_MODEL, fullMessages, apiKey);
+        const fallbackRes = await requestOpenRouter(fallbackModel, fullMessages, apiKey);
         if (fallbackRes.ok && fallbackRes.body) {
           activeResponse = fallbackRes;
         } else {
           const fallbackStatus = fallbackRes.status;
           const fallbackErrText = await fallbackRes.text();
           console.error(
-            `[AI Intake] Fallback model (${FALLBACK_MODEL}) also failed [${fallbackStatus}]:`,
+            `[AI Intake] Fallback model (${fallbackModel}) also failed [${fallbackStatus}]:`,
             fallbackErrText.slice(0, 200)
           );
 
           // Build a clear, diagnostic error message highlighting model slug issues if any 404 occurred
           const is404 = primaryStatus === 404 || fallbackStatus === 404;
           const errorMsg = is404
-            ? `OpenRouter returned 404 for one or more model IDs. The model slug may no longer be available in OpenRouter's free catalog.\nPrimary (${PRIMARY_MODEL}): [${primaryStatus}] ${primaryErrorDetail.slice(0, 160)}\nFallback (${FALLBACK_MODEL}): [${fallbackStatus}] ${fallbackErrText.slice(0, 160)}`
-            : `OpenRouter query failed on both models.\nPrimary (${PRIMARY_MODEL}): [${primaryStatus}] ${primaryErrorDetail.slice(0, 160)}\nFallback (${FALLBACK_MODEL}): [${fallbackStatus}] ${fallbackErrText.slice(0, 160)}`;
+            ? `OpenRouter returned 404 for one or more model IDs. The model slug may no longer be available in OpenRouter's free catalog.\nPrimary (${primaryModel}): [${primaryStatus}] ${primaryErrorDetail.slice(0, 160)}\nFallback (${fallbackModel}): [${fallbackStatus}] ${fallbackErrText.slice(0, 160)}`
+            : `OpenRouter query failed on both models.\nPrimary (${primaryModel}): [${primaryStatus}] ${primaryErrorDetail.slice(0, 160)}\nFallback (${fallbackModel}): [${fallbackStatus}] ${fallbackErrText.slice(0, 160)}`;
 
           return NextResponse.json({ error: errorMsg }, { status: 502 });
         }
@@ -212,7 +227,7 @@ export async function POST(req: NextRequest) {
           fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr);
         return NextResponse.json(
           {
-            error: `Both models failed.\nPrimary (${PRIMARY_MODEL}): ${primaryErrorDetail}\nFallback (${FALLBACK_MODEL}): ${fallbackMsg}`,
+            error: `Both models failed.\nPrimary (${primaryModel}): ${primaryErrorDetail}\nFallback (${fallbackModel}): ${fallbackMsg}`,
           },
           { status: 502 }
         );

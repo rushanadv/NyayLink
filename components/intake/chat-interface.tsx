@@ -60,9 +60,12 @@ export function ChatInterface() {
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_INTRO_MESSAGE]);
   const [input, setInput] = useState("");
   const [selectedState, setSelectedState] = useState("All India (General)");
-  const [district, setDistrict] = useState("");
+  const [district] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+
+  const [failedPrompt, setFailedPrompt] = useState<string | null>(null);
+  const [failedUserMessageId, setFailedUserMessageId] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -81,21 +84,21 @@ export function ChatInterface() {
     }
   };
 
-  const handleSendMessage = async (textToSend?: string) => {
-    const text = (textToSend ?? input).trim();
-    if (!text || isLoading) return;
+  const handleSendMessage = async (textToSend?: string, isRetry = false) => {
+    if (isLoading) return;
 
-    setApiError(null);
-    setInput("");
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
+    let text = "";
+    let activeUserMessageId = failedUserMessageId;
+
+    if (isRetry) {
+      text = failedPrompt?.trim() || "";
+      if (!text) return;
+    } else {
+      text = (textToSend ?? input).trim();
+      if (!text) return;
     }
 
-    const userMessage: ChatMessage = {
-      id: `user-${Date.now()}`,
-      role: "user",
-      content: text,
-    };
+    setApiError(null);
 
     const assistantPlaceholderId = `assistant-${Date.now()}`;
     const assistantMessage: ChatMessage = {
@@ -105,14 +108,36 @@ export function ChatInterface() {
       isStreaming: true,
     };
 
-    const newHistory = [...messages, userMessage];
-    setMessages([...newHistory, assistantMessage]);
+    let newHistory: ChatMessage[] = [];
+
+    if (isRetry) {
+      // In retry mode, keep the existing user message already in conversation history; do NOT duplicate it
+      newHistory = [...messages.filter((m) => m.id !== assistantPlaceholderId)];
+      setMessages([...newHistory, assistantMessage]);
+    } else {
+      // New user inquiry: clear input and add user message
+      setInput("");
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "auto";
+      }
+
+      activeUserMessageId = `user-${Date.now()}`;
+      const userMessage: ChatMessage = {
+        id: activeUserMessageId,
+        role: "user",
+        content: text,
+      };
+
+      newHistory = [...messages, userMessage];
+      setMessages([...newHistory, assistantMessage]);
+    }
+
     setIsLoading(true);
 
     try {
-      // Build server payload excluding the initial hardcoded intro message
+      // Build server payload excluding the initial hardcoded intro message and any empty streaming placeholders
       const apiMessages = newHistory
-        .filter((m) => m.id !== "intro-msg")
+        .filter((m) => m.id !== "intro-msg" && m.id !== assistantPlaceholderId && m.content.trim().length > 0)
         .map((m) => ({ role: m.role, content: m.content }));
 
       const response = await fetch("/api/intake/chat", {
@@ -163,20 +188,41 @@ export function ChatInterface() {
         );
       }
 
-      // Mark streaming complete
+      // Mark streaming complete & clear any saved retry states
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === assistantPlaceholderId ? { ...msg, isStreaming: false } : msg
         )
       );
+      setFailedPrompt(null);
+      setFailedUserMessageId(null);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to connect to AI intake.";
       setApiError(msg);
+      setFailedPrompt(text);
+      if (activeUserMessageId) {
+        setFailedUserMessageId(activeUserMessageId);
+      }
 
       // Remove the incomplete streaming placeholder
       setMessages((prev) => prev.filter((m) => m.id !== assistantPlaceholderId));
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleRestorePrompt = () => {
+    if (failedPrompt) {
+      setInput(failedPrompt);
+      if (failedUserMessageId) {
+        setMessages((prev) => prev.filter((m) => m.id !== failedUserMessageId));
+      }
+      setFailedPrompt(null);
+      setFailedUserMessageId(null);
+      setApiError(null);
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+      }
     }
   };
 
@@ -305,12 +351,26 @@ export function ChatInterface() {
               <p className="text-white/80 leading-relaxed font-mono text-[11px]">
                 {apiError}
               </p>
-              <button
-                onClick={() => handleSendMessage()}
-                className="mt-1 text-[11px] text-[#DFBE7E] hover:underline flex items-center gap-1"
-              >
-                <RotateCcw className="w-3 h-3" /> Try sending again
-              </button>
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={() => handleSendMessage(undefined, true)}
+                  disabled={isLoading}
+                  className="text-[11px] text-[#DFBE7E] hover:underline flex items-center gap-1 font-medium disabled:opacity-50"
+                >
+                  <RotateCcw className="w-3 h-3" /> Resubmit failed question
+                </button>
+                {failedPrompt && (
+                  <button
+                    type="button"
+                    onClick={handleRestorePrompt}
+                    disabled={isLoading}
+                    className="text-[11px] text-white/70 hover:text-white hover:underline flex items-center gap-1 disabled:opacity-50"
+                  >
+                    <span>Restore question to input</span>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         )}

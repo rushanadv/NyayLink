@@ -9,15 +9,15 @@ import {
   MapPin,
   Clock,
   Languages as LanguagesIcon,
-  Filter,
   X,
   ArrowRight,
   Scale,
-  Briefcase,
   ShieldCheck,
   ChevronDown,
   AlertCircle,
   Users,
+  RotateCcw,
+  Sparkles,
 } from "lucide-react";
 import { MagneticWrapper } from "@/components/ui/magnetic-wrapper";
 
@@ -37,6 +37,8 @@ interface LawyerDirectoryClientProps {
   initialLawyers: PublicLawyer[];
   isAuthenticated: boolean;
   loadWarning?: string;
+  directoryState?: "live" | "empty" | "error" | "dev_demo";
+  errorMessage?: string;
 }
 
 // Helper to get initials from professional name (e.g. "Adv. Rajesh Sharma" -> "RS")
@@ -53,6 +55,8 @@ export function LawyerDirectoryClient({
   initialLawyers,
   isAuthenticated,
   loadWarning,
+  directoryState = "live",
+  errorMessage,
 }: LawyerDirectoryClientProps) {
   const shouldReduceMotion = useReducedMotion();
   const [searchQuery, setSearchQuery] = useState("");
@@ -173,9 +177,9 @@ export function LawyerDirectoryClient({
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
       {/* Page Header */}
       <div className="space-y-4 max-w-3xl">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#191923] border border-white/[0.08] text-xs font-mono text-[#DFBE7E]">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#191923] border border-border-default text-xs font-mono text-white/80">
           <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059]" />
-          <span>03 / VERIFIED ADVOCATE DIRECTORY</span>
+          <span>03 // VERIFIED ADVOCATE DIRECTORY</span>
         </div>
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-white tracking-tight leading-[1.15] text-balance">
           Find Verified Bar Council Advocates
@@ -189,30 +193,48 @@ export function LawyerDirectoryClient({
 
         {/* Badges / Guarantees Row */}
         <div className="flex flex-wrap items-center gap-3 pt-2 text-xs text-[#A5A3B2]">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.02] border border-white/[0.06]">
-            <Users className="w-3.5 h-3.5 text-[#C5A059]" />
-            <span className="text-white/90">480+ Verified Advocates</span>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-raised border border-border-subtle">
+            <Users className="w-3.5 h-3.5 text-white/70" />
+            <span className="text-white/90">
+              {initialLawyers.length > 0
+                ? `${initialLawyers.length} Enrolled Advocates`
+                : "National Bar Roll"}
+            </span>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-raised border border-border-subtle">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
             <span className="text-white/90">BCI Credentials Validated</span>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.02] border border-white/[0.06]">
-            <Scale className="w-3.5 h-3.5 text-[#C5A059]" />
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-raised border border-border-subtle">
+            <Scale className="w-3.5 h-3.5 text-white/70" />
             <span className="text-white/90">Section 36 Compliant</span>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.02] border border-white/[0.06]">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#C5A059]" />
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-raised border border-border-subtle">
+            <ShieldCheck className="w-3.5 h-3.5 text-white/70" />
             <span className="text-white/90">Milestone Escrow Protection</span>
           </div>
         </div>
 
-        {/* Graceful Degradation Notice (visible if live DB query fails or recovers) */}
-        {loadWarning && (
+        {/* Development Demo Notice */}
+        {directoryState === "dev_demo" && (
           <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-200 text-xs flex items-start gap-3 mt-4">
             <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
             <div className="space-y-0.5">
-              <p className="font-semibold text-amber-300">Live Sync Notice</p>
+              <p className="font-semibold text-amber-300">Development Demo Mode Active</p>
+              <p className="text-amber-200/80 leading-relaxed">
+                Displaying 6 local demonstration advocate profiles for development and UI testing.
+                These are simulated profiles, NOT live verified advocates.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Diagnostic Notice */}
+        {loadWarning && directoryState !== "dev_demo" && (
+          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-200 text-xs flex items-start gap-3 mt-4">
+            <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <p className="font-semibold text-amber-300">Directory Notice</p>
               <p className="text-amber-200/80 leading-relaxed">{loadWarning}</p>
             </div>
           </div>
@@ -356,8 +378,68 @@ export function LawyerDirectoryClient({
         </div>
       </div>
 
-      {/* Results Grid / Empty State */}
-      {filteredLawyers.length > 0 ? (
+      {/* Distinct States: 1. Backend Error, 2. Database Empty, 3. Filtered Empty, 4. Results Grid */}
+      {directoryState === "error" ? (
+        /* State 3: Backend Failure */
+        <div className="p-10 sm:p-14 rounded-xl bg-surface-raised border border-red-500/30 text-center space-y-4 max-w-xl mx-auto shadow-2xl">
+          <div className="w-12 h-12 rounded-xl bg-red-950/40 border border-red-500/30 flex items-center justify-center text-red-400 mx-auto">
+            <AlertCircle className="w-6 h-6" />
+          </div>
+          <h2 className="text-xl font-serif text-white font-medium">
+            Directory Service Temporarily Unavailable
+          </h2>
+          <p className="text-xs sm:text-sm text-[#A5A3B2] leading-relaxed max-w-md mx-auto">
+            {errorMessage ||
+              "We are having trouble connecting to our Bar Council verification registry right now. Our technical team has been notified. You can retry the connection or start an AI Legal Intake session."}
+          </p>
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
+            <button
+              onClick={() => window.location.reload()}
+              className="px-5 py-2.5 rounded-lg bg-[#C5A059] hover:bg-[#DFBE7E] text-xs font-semibold text-[#090B10] transition-colors flex items-center gap-1.5 shadow-md shadow-[#C5A059]/15"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              Retry Connection
+            </button>
+            <Link
+              href="/intake"
+              className="px-5 py-2.5 rounded-lg bg-surface-raised hover:bg-surface-hover text-xs font-semibold text-white border border-border-default transition-colors flex items-center gap-1.5"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#C5A059]" />
+              Start AI Legal Intake
+            </Link>
+          </div>
+        </div>
+      ) : directoryState === "empty" || initialLawyers.length === 0 ? (
+        /* State 2: Honest Database Empty State */
+        <div className="p-10 sm:p-14 rounded-xl bg-surface-raised border border-border-default text-center space-y-4 max-w-xl mx-auto shadow-2xl">
+          <div className="w-12 h-12 rounded-xl bg-surface-raised border border-border-strong flex items-center justify-center text-white mx-auto">
+            <Scale className="w-6 h-6 text-[#C5A059]" />
+          </div>
+          <h2 className="text-xl font-serif text-white font-medium">
+            Advocate Directory Initializing
+          </h2>
+          <p className="text-xs sm:text-sm text-[#A5A3B2] leading-relaxed max-w-md mx-auto">
+            No advocate profiles are currently published on the live registry. As independent advocates complete Bar Council enrollment validation and grant publication consent under Rule 36, their verified profiles will appear here.
+          </p>
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href="/intake"
+              className="px-5 py-2.5 rounded-lg bg-[#C5A059] hover:bg-[#DFBE7E] text-xs font-semibold text-[#090B10] transition-colors flex items-center gap-1.5 shadow-md shadow-[#C5A059]/15"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#090B10]" />
+              Start AI Legal Intake
+            </Link>
+            <Link
+              href="/auth/login?intent=lawyer"
+              className="px-5 py-2.5 rounded-lg bg-surface-raised hover:bg-surface-hover text-xs font-semibold text-white border border-border-default transition-colors flex items-center gap-1.5"
+            >
+              <Users className="w-3.5 h-3.5 text-white/70" />
+              Enroll as an Advocate
+            </Link>
+          </div>
+        </div>
+      ) : filteredLawyers.length > 0 ? (
+        /* State 1: Live Results Grid */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredLawyers.map((lawyer) => {
             const initials = getInitials(lawyer.professional_name);
@@ -367,11 +449,11 @@ export function LawyerDirectoryClient({
                 key={lawyer.id}
                 whileHover={shouldReduceMotion ? undefined : { scale: 1.018 }}
                 transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                className="relative p-6 rounded-2xl bg-[#0C0F17]/95 border border-white/[0.08] transition-colors shadow-xl hover:shadow-2xl hover:shadow-black/70 flex flex-col justify-between group overflow-hidden"
+                className="relative p-6 rounded-xl bg-[#0C0F17]/95 border border-border-default hover:border-border-strong transition-colors shadow-xl hover:shadow-2xl hover:shadow-black/70 flex flex-col justify-between group overflow-hidden"
               >
                 {/* 1px Crisp Gold-to-Transparent Gradient Border on Hover */}
                 <div
-                  className="absolute inset-0 rounded-2xl pointer-events-none p-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  className="absolute inset-0 rounded-xl pointer-events-none p-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                   style={{
                     background:
                       "linear-gradient(135deg, rgba(197, 160, 89, 0.8) 0%, rgba(197, 160, 89, 0.25) 45%, transparent 85%)",
@@ -386,7 +468,7 @@ export function LawyerDirectoryClient({
                   {/* Card Header */}
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-3.5">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#252E46] to-[#121622] flex items-center justify-center font-serif text-sm font-semibold text-[#DFBE7E] border border-white/10 group-hover:border-[#C5A059]/30 transition-colors shrink-0 shadow-inner">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#252E46] to-[#121622] flex items-center justify-center font-serif text-sm font-semibold text-[#DFBE7E] border border-border-default group-hover:border-[#C5A059]/30 transition-colors shrink-0 shadow-inner">
                         {initials}
                       </div>
                       <div>
@@ -394,8 +476,8 @@ export function LawyerDirectoryClient({
                           {lawyer.professional_name}
                         </h3>
                         <div className="flex items-center gap-1.5 mt-1">
-                          <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/20 flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                          <span className="text-[10px] font-mono text-[#DFBE7E] bg-[#C5A059]/10 px-2 py-0.5 rounded-lg border border-[#C5A059]/30 flex items-center gap-1 font-semibold">
+                            <CheckCircle2 className="w-3 h-3 text-[#C5A059]" />
                             BCI Verified
                           </span>
                         </div>
@@ -404,13 +486,13 @@ export function LawyerDirectoryClient({
                   </div>
 
                   {/* Location & Experience Meta */}
-                  <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-white/[0.06] text-xs text-[#A5A3B2]">
+                  <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-border-subtle text-xs text-[#A5A3B2]">
                     <div className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-[#C5A059] shrink-0" />
+                      <MapPin className="w-3.5 h-3.5 text-white/70 shrink-0" />
                       <span className="truncate">{lawyer.city}, {lawyer.state}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-[#C5A059] shrink-0" />
+                      <Clock className="w-3.5 h-3.5 text-white/70 shrink-0" />
                       <span>{lawyer.experience_years} Years Experience</span>
                     </div>
                   </div>
@@ -431,7 +513,7 @@ export function LawyerDirectoryClient({
                       {lawyer.practice_areas.map((pa) => (
                         <span
                           key={pa}
-                          className="px-2.5 py-0.5 rounded-full bg-white/[0.03] text-[11px] font-medium text-white/80 border border-white/[0.08]"
+                          className="px-2.5 py-0.5 rounded-lg bg-surface-raised text-[11px] font-medium text-white/80 border border-border-subtle"
                         >
                           {pa}
                         </span>
@@ -441,7 +523,7 @@ export function LawyerDirectoryClient({
 
                   {/* Languages Spoken */}
                   <div className="mt-3.5 flex items-center gap-1.5 text-[11px] text-[#A5A3B2]">
-                    <LanguagesIcon className="w-3.5 h-3.5 text-[#C5A059] shrink-0" />
+                    <LanguagesIcon className="w-3.5 h-3.5 text-white/70 shrink-0" />
                     <span className="truncate">
                       {lawyer.languages.join(", ")}
                     </span>
@@ -449,7 +531,7 @@ export function LawyerDirectoryClient({
                 </div>
 
                 {/* Card Action */}
-                <div className="pt-5 mt-5 border-t border-white/[0.06] relative z-[1]">
+                <div className="pt-5 mt-5 border-t border-border-subtle relative z-[1]">
                   <MagneticWrapper className="w-full" maxDisplacement={6}>
                     <Link
                       href={consultationHref}
@@ -465,10 +547,10 @@ export function LawyerDirectoryClient({
           })}
         </div>
       ) : (
-        /* Empty / No Results State */
-        <div className="p-12 sm:p-16 rounded-2xl bg-[#0C0F17]/80 border border-white/[0.08] text-center space-y-4 max-w-xl mx-auto shadow-2xl">
-          <div className="w-12 h-12 rounded-xl bg-[#C5A059]/10 border border-[#C5A059]/25 flex items-center justify-center text-[#DFBE7E] mx-auto">
-            <Scale className="w-6 h-6" />
+        /* Filter Empty State (when user filters match 0 results) */
+        <div className="p-12 sm:p-16 rounded-xl bg-surface-raised border border-border-default text-center space-y-4 max-w-xl mx-auto shadow-2xl">
+          <div className="w-12 h-12 rounded-xl bg-surface-raised border border-border-default flex items-center justify-center text-[#DFBE7E] mx-auto">
+            <Scale className="w-6 h-6 text-[#C5A059]" />
           </div>
           <h2 className="text-xl font-serif text-white font-medium">
             No advocates match these filters
@@ -480,7 +562,7 @@ export function LawyerDirectoryClient({
           <div className="pt-2">
             <button
               onClick={clearAllFilters}
-              className="px-5 py-2.5 rounded-lg bg-[#191923] hover:bg-[#22212D] text-xs font-semibold text-white border border-white/10 transition-colors"
+              className="px-5 py-2.5 rounded-lg bg-surface-raised hover:bg-surface-hover text-xs font-semibold text-white border border-border-default transition-colors"
             >
               Clear All Filters
             </button>

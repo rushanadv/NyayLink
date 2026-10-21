@@ -38,8 +38,10 @@ async function ClientDashboardContent() {
     .from("user_roles")
     .select("role")
     .eq("user_id", user.id);
-
   const roles = roleRecords?.map((r) => r.role) || ["client"];
+  if (roles.includes("lawyer")) {
+    redirect("/lawyer/dashboard");
+  }
   const displayName = user.user_metadata?.full_name || user.email?.split("@")[0] || "Client";
 
   return (

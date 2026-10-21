@@ -73,18 +73,18 @@ function LawyersDirectorySkeleton() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 animate-pulse">
       <div className="space-y-4 max-w-2xl">
-        <div className="h-6 w-48 bg-white/[0.05] rounded-full" />
-        <div className="h-10 w-96 bg-white/[0.07] rounded-lg" />
-        <div className="h-4 w-full bg-white/[0.03] rounded" />
+        <div className="h-6 w-48 bg-surface-raised rounded-full" />
+        <div className="h-10 w-96 bg-surface-raised rounded-lg" />
+        <div className="h-4 w-full bg-surface-raised rounded" />
       </div>
 
-      <div className="h-32 bg-white/[0.03] rounded-2xl border border-white/[0.05]" />
+      <div className="h-32 bg-surface-raised rounded-xl border border-border-default" />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <div
             key={i}
-            className="h-72 rounded-2xl bg-white/[0.02] border border-white/[0.05]"
+            className="h-72 rounded-xl bg-surface-raised border border-border-default"
           />
         ))}
       </div>
@@ -92,10 +92,21 @@ function LawyersDirectorySkeleton() {
   );
 }
 
-async function LawyersDirectoryContent() {
-  let lawyers: PublicLawyer[] = FALLBACK_DEMO_LAWYERS;
+async function LawyersDirectoryContent({
+  searchParams,
+}: {
+  searchParams?: Promise<{ demo?: string }>;
+}) {
+  const params = await searchParams;
+  const devDemoRequested =
+    process.env.NODE_ENV === "development" &&
+    (process.env.NEXT_PUBLIC_ENABLE_DEMO_LAWYERS === "true" || params?.demo === "true");
+
+  let directoryState: "live" | "empty" | "error" | "dev_demo" = "empty";
+  let lawyers: PublicLawyer[] = [];
   let isAuthenticated = false;
   let loadWarning: string | undefined = undefined;
+  let errorMessage: string | undefined = undefined;
 
   try {
     const supabase = await createClient();
@@ -111,13 +122,29 @@ async function LawyersDirectoryContent() {
     if (error) {
       console.error("[NyayaLink Server Error] Failed to fetch public_lawyer_directory from Supabase:", {
         message: error.message,
-        details: error.details,
-        hint: error.hint,
         code: error.code,
       });
-      loadWarning = "We're having trouble loading live advocate records right now. Displaying verified preview profiles.";
+
+      if (devDemoRequested) {
+        directoryState = "dev_demo";
+        lawyers = FALLBACK_DEMO_LAWYERS;
+        loadWarning = "Showing local mock seed profiles because live query failed in development mode.";
+      } else {
+        directoryState = "error";
+        errorMessage = "Unable to connect to the verified advocate directory. The database service is temporarily unreachable.";
+      }
     } else if (dbLawyers && dbLawyers.length > 0) {
+      directoryState = "live";
       lawyers = dbLawyers as PublicLawyer[];
+    } else {
+      // Query succeeded, but 0 published advocates exist in the database
+      if (devDemoRequested) {
+        directoryState = "dev_demo";
+        lawyers = FALLBACK_DEMO_LAWYERS;
+        loadWarning = "Displaying local demonstration profiles because the database currently contains zero published records.";
+      } else {
+        directoryState = "empty";
+      }
     }
 
     // 2. Safe session check — should never crash public page
@@ -140,7 +167,14 @@ async function LawyersDirectoryContent() {
       throw fatalError;
     }
     console.error("[NyayaLink Fatal Server Error] Exception initializing Supabase or executing lawyer directory query:", fatalError);
-    loadWarning = "We're having trouble loading advocates right now. Displaying verified preview profiles.";
+    if (devDemoRequested) {
+      directoryState = "dev_demo";
+      lawyers = FALLBACK_DEMO_LAWYERS;
+      loadWarning = "Showing local mock seed profiles due to an initialization exception in development mode.";
+    } else {
+      directoryState = "error";
+      errorMessage = "An exception occurred while initializing the directory service. Please retry shortly.";
+    }
   }
 
   return (
@@ -148,14 +182,20 @@ async function LawyersDirectoryContent() {
       initialLawyers={lawyers}
       isAuthenticated={isAuthenticated}
       loadWarning={loadWarning}
+      directoryState={directoryState}
+      errorMessage={errorMessage}
     />
   );
 }
 
-export default function LawyersPage() {
+export default function LawyersPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ demo?: string }>;
+}) {
   return (
     <Suspense fallback={<LawyersDirectorySkeleton />}>
-      <LawyersDirectoryContent />
+      <LawyersDirectoryContent searchParams={searchParams} />
     </Suspense>
   );
 }

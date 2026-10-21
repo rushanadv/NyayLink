@@ -4,22 +4,14 @@ import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion, type Variants } from "framer-motion";
 import {
   Search,
-  Sparkles,
   ShieldCheck,
   CreditCard,
   Briefcase,
   Languages,
-  Activity,
   CheckCircle2,
-  Clock,
   FileText,
-  Mic,
   Lock,
-  ArrowRight,
-  ExternalLink,
   ChevronRight,
-  Info,
-  Scale,
   Calendar,
 } from "lucide-react";
 import { FEATURES } from "@/lib/marketing/features-data";
@@ -118,7 +110,7 @@ export function FeaturePreview({ activeIndex }: FeaturePreviewProps) {
       <div className="px-5 sm:px-7 pt-5 pb-3 flex items-center justify-between border-b border-border-subtle bg-surface-raised">
         <div className="flex items-center gap-2">
           <span className="font-mono text-xs font-bold text-white/60">
-            {feature.number} //
+            {feature.number} {"//"}
           </span>
           <h2 className="text-sm font-medium text-white tracking-wide">
             {feature.title}

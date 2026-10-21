@@ -11,15 +11,9 @@ import {
   ShieldCheck,
   Scale,
   Sparkles,
-  Briefcase,
-  Languages,
   CheckCircle2,
-  Calendar,
   Lock,
   Search,
-  ChevronRight,
-  FileText,
-  Clock,
   Mic,
 } from "lucide-react";
 
@@ -108,7 +102,7 @@ export function SectionStubs() {
               <div className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em]">
                 <span className="w-4 h-px bg-[#C5A059]" />
                 <span className="text-white/60 font-semibold">02</span>
-                <span className="text-white/30">//</span>
+                <span className="text-white/30">{"//"}</span>
                 <span className="text-white/80 font-medium">THE CHALLENGE</span>
               </div>
 
@@ -194,7 +188,7 @@ export function SectionStubs() {
             <div className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em]">
               <span className="w-4 h-px bg-[#C5A059]" />
               <span className="text-white/60 font-semibold">03</span>
-              <span className="text-white/30">//</span>
+              <span className="text-white/30">{"//"}</span>
               <span className="text-white/80 font-medium">LAWYER NETWORK</span>
             </div>
 
@@ -368,7 +362,7 @@ export function SectionStubs() {
             <div className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em]">
               <span className="w-4 h-px bg-[#C5A059]" />
               <span className="text-white/60 font-semibold">04</span>
-              <span className="text-white/30">//</span>
+              <span className="text-white/30">{"//"}</span>
               <span className="text-white/80 font-medium">AI INTAKE ENGINE</span>
             </div>
             <h2 className="font-serif text-2xl sm:text-3xl lg:text-[34px] text-white font-normal leading-[1.18] tracking-tight text-balance">
@@ -424,7 +418,7 @@ export function SectionStubs() {
             <div className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em]">
               <span className="w-4 h-px bg-[#C5A059]" />
               <span className="text-white/60 font-semibold">05</span>
-              <span className="text-white/30">//</span>
+              <span className="text-white/30">{"//"}</span>
               <span className="text-white/80 font-medium">ADVOCATE CHAMBERS PORTAL</span>
             </div>
 
@@ -552,7 +546,7 @@ export function SectionStubs() {
           <div className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em]">
             <span className="w-4 h-px bg-[#C5A059]" />
             <span className="text-white/60 font-semibold">06</span>
-            <span className="text-white/30">//</span>
+            <span className="text-white/30">{"//"}</span>
             <span className="text-white/80 font-medium">LEGAL COMPLIANCE & ETHICS</span>
           </div>
 
@@ -615,7 +609,7 @@ export function SectionStubs() {
           <div className="flex items-center justify-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em]">
             <span className="w-4 h-px bg-[#C5A059]" />
             <span className="text-white/60 font-semibold">07</span>
-            <span className="text-white/30">//</span>
+            <span className="text-white/30">{"//"}</span>
             <span className="text-white/80 font-medium">NEXT STEPS</span>
             <span className="w-4 h-px bg-[#C5A059]" />
           </div>

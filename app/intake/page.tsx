@@ -1,6 +1,6 @@
 import React from "react";
 import { ChatInterface } from "@/components/intake/chat-interface";
-import { Scale, ShieldCheck, Lock, Sparkles } from "lucide-react";
+import { Scale, ShieldCheck, Lock } from "lucide-react";
 
 export default function IntakePage() {
   return (
