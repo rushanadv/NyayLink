@@ -17,20 +17,12 @@ export default {
         mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
       colors: {
-        obsidian: {
-          bg: "#09090F",
-          secondary: "#111119",
-          surface: "#191923",
-          hover: "#22212D",
-          text: "#F5F4FA",
-          textSecondary: "#A5A3B2",
-          muted: "#6F6E7D",
-          primary: "#A99AFF",
-          deep: "#7864DF",
-          glow: "rgba(111, 118, 219, 0.12)",
-          border: "rgba(169, 154, 255, 0.08)",
-          borderStrong: "rgba(169, 154, 255, 0.18)",
-        },
+        "nyaya-accent": "var(--nyaya-accent)",
+        "border-subtle": "var(--border-subtle)",
+        "border-default": "var(--border-default)",
+        "border-strong": "var(--border-strong)",
+        "surface-raised": "var(--surface-raised)",
+        "surface-hover": "var(--surface-hover)",
         nyaya: {
           bg: "#090B10",
           surface: "#0C0F17",
@@ -84,6 +76,15 @@ export default {
           "4": "hsl(var(--chart-4))",
           "5": "hsl(var(--chart-5))",
         },
+      },
+      borderColor: {
+        subtle: "var(--border-subtle)",
+        default: "var(--border-default)",
+        strong: "var(--border-strong)",
+      },
+      backgroundColor: {
+        "surface-raised": "var(--surface-raised)",
+        "surface-hover": "var(--surface-hover)",
       },
       borderRadius: {
         lg: "var(--radius)",

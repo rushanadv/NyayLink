@@ -73,7 +73,7 @@ export function HeroSplit() {
           {/* Eyebrow Label — Architectural Mono, Not a Pill */}
           <div className="flex items-center gap-2.5">
             <span className="w-5 h-px bg-[#C5A059]" />
-            <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#C5A059] font-medium">
+            <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/70 font-medium">
               NyayaLink // National Legal Technology Infrastructure
             </span>
           </div>
@@ -93,10 +93,10 @@ export function HeroSplit() {
             </h1>
           </div>
 
-          {/* 4 Stamped & Sealed Verification Chips — Differentiated from Ambient Ticker */}
+          {/* 4 Stamped & Sealed Verification Chips — Differentiated from Ambient Ticker (Tier 2: rounded-lg) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-            <div className="flex items-center gap-2.5 p-2.5 rounded-md bg-[#C5A059]/[0.06] border border-[#C5A059]/30 shadow-[inset_0_1px_0_rgba(197,160,89,0.15)]">
-              <div className="w-5 h-5 rounded bg-[#C5A059]/15 border border-[#C5A059]/30 flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-[#C5A059]/[0.06] border border-[#C5A059]/30 shadow-[inset_0_1px_0_rgba(197,160,89,0.15)]">
+              <div className="w-5 h-5 rounded-lg bg-[#C5A059]/15 border border-[#C5A059]/30 flex items-center justify-center shrink-0">
                 <ShieldCheck className="w-3.5 h-3.5 text-[#C5A059]" />
               </div>
               <div className="min-w-0">
@@ -109,8 +109,8 @@ export function HeroSplit() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2.5 p-2.5 rounded-md bg-[#C5A059]/[0.06] border border-[#C5A059]/30 shadow-[inset_0_1px_0_rgba(197,160,89,0.15)]">
-              <div className="w-5 h-5 rounded bg-[#C5A059]/15 border border-[#C5A059]/30 flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-[#C5A059]/[0.06] border border-[#C5A059]/30 shadow-[inset_0_1px_0_rgba(197,160,89,0.15)]">
+              <div className="w-5 h-5 rounded-lg bg-[#C5A059]/15 border border-[#C5A059]/30 flex items-center justify-center shrink-0">
                 <Scale className="w-3.5 h-3.5 text-[#C5A059]" />
               </div>
               <div className="min-w-0">
@@ -123,8 +123,8 @@ export function HeroSplit() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2.5 p-2.5 rounded-md bg-[#C5A059]/[0.06] border border-[#C5A059]/30 shadow-[inset_0_1px_0_rgba(197,160,89,0.15)]">
-              <div className="w-5 h-5 rounded bg-[#C5A059]/15 border border-[#C5A059]/30 flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-[#C5A059]/[0.06] border border-[#C5A059]/30 shadow-[inset_0_1px_0_rgba(197,160,89,0.15)]">
+              <div className="w-5 h-5 rounded-lg bg-[#C5A059]/15 border border-[#C5A059]/30 flex items-center justify-center shrink-0">
                 <Lock className="w-3.5 h-3.5 text-[#C5A059]" />
               </div>
               <div className="min-w-0">
@@ -137,8 +137,8 @@ export function HeroSplit() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2.5 p-2.5 rounded-md bg-[#C5A059]/[0.06] border border-[#C5A059]/30 shadow-[inset_0_1px_0_rgba(197,160,89,0.15)]">
-              <div className="w-5 h-5 rounded bg-[#C5A059]/15 border border-[#C5A059]/30 flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-[#C5A059]/[0.06] border border-[#C5A059]/30 shadow-[inset_0_1px_0_rgba(197,160,89,0.15)]">
+              <div className="w-5 h-5 rounded-lg bg-[#C5A059]/15 border border-[#C5A059]/30 flex items-center justify-center shrink-0">
                 <Languages className="w-3.5 h-3.5 text-[#C5A059]" />
               </div>
               <div className="min-w-0">
@@ -166,7 +166,7 @@ export function HeroSplit() {
             <MagneticWrapper maxDisplacement={8}>
               <Link
                 href="/auth/login?intent=lawyer"
-                className="px-5 py-3 rounded-lg border border-white/15 hover:border-[#C5A059]/50 text-white/90 hover:text-white font-medium text-sm transition-colors bg-white/[0.02] hover:bg-white/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C5A059] block"
+                className="px-5 py-3 rounded-lg border border-border-default hover:border-border-strong text-white/90 hover:text-white font-medium text-sm transition-colors bg-surface-raised hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-strong block"
               >
                 Join as a Lawyer
               </Link>
@@ -199,17 +199,17 @@ export function HeroSplit() {
                   id={`feature-tab-${index}`}
                   aria-selected={isActive}
                   aria-controls={`feature-panel-${index}`}
-                  className={`w-full text-left relative px-3.5 py-2.5 rounded-lg transition-all duration-300 flex items-center gap-3.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#C5A059] ${
+                  className={`w-full text-left relative px-3.5 py-2.5 rounded-lg transition-all duration-300 flex items-center gap-3.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-border-strong ${
                     isActive
-                      ? "bg-white/[0.05] text-white shadow-sm"
-                      : "text-slate-400/80 hover:text-white/90 hover:bg-white/[0.02]"
+                      ? "bg-surface-hover text-white shadow-sm"
+                      : "text-slate-400/80 hover:text-white/90 hover:bg-surface-raised"
                   }`}
                 >
                   {/* Left Accent Bar */}
                   <div
-                    className={`absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r transition-all duration-300 ${
+                    className={`absolute left-0 top-1.5 bottom-1.5 w-1 rounded-full transition-all duration-300 ${
                       isActive
-                        ? "bg-[#C5A059] shadow-[0_0_8px_rgba(197,160,89,0.6)]"
+                        ? "bg-white shadow-[0_0_8px_rgba(255,255,255,0.4)]"
                         : "bg-transparent"
                     }`}
                   />
@@ -217,7 +217,7 @@ export function HeroSplit() {
                   {/* Feature Index Number */}
                   <span
                     className={`font-mono text-xs font-semibold transition-colors ${
-                      isActive ? "text-[#C5A059]" : "text-white/30"
+                      isActive ? "text-white" : "text-white/30"
                     }`}
                   >
                     {item.number}
@@ -234,12 +234,12 @@ export function HeroSplit() {
                         {item.title}
                       </span>
                       {isActive && (
-                        <ChevronRight className="w-3.5 h-3.5 text-[#C5A059] shrink-0" />
+                        <ChevronRight className="w-3.5 h-3.5 text-white/60 shrink-0" />
                       )}
                     </div>
                     <p
                       className={`text-[11px] truncate transition-colors ${
-                        isActive ? "text-[#DFBE7E]/80" : "text-white/35"
+                        isActive ? "text-white/70" : "text-white/35"
                       }`}
                     >
                       {item.subtitle}

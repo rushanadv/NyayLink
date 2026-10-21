@@ -139,16 +139,16 @@ export function LiveAIIntakeDemo() {
   return (
     <div ref={containerRef} className="space-y-3.5 select-none">
       {/* Bot Header Bar */}
-      <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+      <div className="flex items-center justify-between pb-2 border-b border-border-subtle">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-[#C5A059]/20 flex items-center justify-center text-[#C5A059]">
+          <div className="w-6 h-6 rounded-lg bg-surface-raised border border-border-default flex items-center justify-center text-white">
             <Sparkles className="w-3.5 h-3.5" />
           </div>
           <span className="text-xs font-medium text-white">
             NyayaAI Intake Assistant
           </span>
         </div>
-        <span className="font-mono text-[10px] text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/20">
+        <span className="font-mono text-[10px] text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded-lg border border-emerald-500/20">
           {currentScenario.groundingTag}
         </span>
       </div>
@@ -156,11 +156,11 @@ export function LiveAIIntakeDemo() {
       {/* Scripted Live Chat Thread */}
       <div className="space-y-3 text-xs min-h-[350px]">
         {/* User Query Bubble */}
-        <div className="ml-auto max-w-[90%] p-3.5 rounded-2xl rounded-tr-sm bg-[#1C2234] border border-white/10 text-white/95 shadow-md">
+        <div className="ml-auto max-w-[90%] p-3.5 rounded-xl rounded-tr-sm bg-[#1C2234] border border-border-default text-white/95 shadow-md">
           <p className="leading-relaxed font-normal">
             &ldquo;{displayedText}&rdquo;
             {phase === "typing" && !shouldReduceMotion && (
-              <span className="inline-block w-1.5 h-3.5 bg-[#C5A059] ml-1 animate-pulse" />
+              <span className="inline-block w-1.5 h-3.5 bg-white ml-1 animate-pulse" />
             )}
           </p>
         </div>
@@ -171,14 +171,14 @@ export function LiveAIIntakeDemo() {
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="mr-auto flex items-center gap-2 px-3 py-2 rounded-xl bg-[#121622] border border-white/[0.08] text-[#DFBE7E]"
+            className="mr-auto flex items-center gap-2 px-3 py-2 rounded-xl bg-[#121622] border border-border-default text-white/80"
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#C5A059] animate-spin" />
+            <Sparkles className="w-3.5 h-3.5 text-white/60 animate-spin" />
             <span className="text-[11px] font-mono">Analyzing statutory provisions...</span>
             <div className="flex items-center gap-1 pl-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059] animate-bounce [animation-delay:-0.3s]" />
-              <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059] animate-bounce [animation-delay:-0.15s]" />
-              <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059] animate-bounce" />
+              <span className="w-1.5 h-1.5 rounded-full bg-white/70 animate-bounce [animation-delay:-0.3s]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-white/70 animate-bounce [animation-delay:-0.15s]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-white/70 animate-bounce" />
             </div>
           </motion.div>
         )}
@@ -190,15 +190,15 @@ export function LiveAIIntakeDemo() {
             initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, ease: "easeOut" }}
-            className="mr-auto max-w-[96%] p-4 rounded-2xl rounded-tl-sm bg-[#121622] border border-[#C5A059]/30 space-y-3 shadow-xl"
+            className="mr-auto max-w-[96%] p-4 rounded-xl rounded-tl-sm bg-[#121622] border border-border-strong space-y-3 shadow-xl"
           >
             {/* Legal Clarity Header */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-[#DFBE7E] text-[11px] font-semibold">
-                <Scale className="w-3.5 h-3.5" />
+              <div className="flex items-center gap-2 text-white text-[11px] font-semibold">
+                <Scale className="w-3.5 h-3.5 text-white/70" />
                 <span>{currentScenario.legalRightsTitle}</span>
               </div>
-              <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/50 px-1.5 py-0.5 rounded border border-emerald-500/20">
+              <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/50 px-1.5 py-0.5 rounded-lg border border-emerald-500/20">
                 Verified Code
               </span>
             </div>
@@ -213,7 +213,7 @@ export function LiveAIIntakeDemo() {
               initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: shouldReduceMotion ? 0 : 0.15 }}
-              className="p-2.5 rounded-lg bg-black/40 border border-white/5 space-y-1.5 text-[11px]"
+              className="p-2.5 rounded-lg bg-black/40 border border-border-subtle space-y-1.5 text-[11px]"
             >
               <div className="flex items-center justify-between text-white/90">
                 <span className="text-white/60">Recommended Remedy:</span>
@@ -224,7 +224,7 @@ export function LiveAIIntakeDemo() {
               </div>
               <div className="flex items-center justify-between text-white/70 text-[10px]">
                 <span className="text-white/50">Statutory Limitation:</span>
-                <span className="font-mono text-[#DFBE7E]">
+                <span className="font-mono text-white/80">
                   {currentScenario.limitationPeriod}
                 </span>
               </div>
@@ -237,10 +237,10 @@ export function LiveAIIntakeDemo() {
               transition={{ duration: 0.25, delay: shouldReduceMotion ? 0 : 0.25 }}
               className="flex flex-wrap items-center gap-2 pt-1"
             >
-              <span className="px-3 py-1 rounded bg-[#C5A059] text-[#090B10] font-semibold text-[10px] shadow-sm">
+              <span className="px-3 py-1 rounded-lg bg-white text-[#090B10] font-semibold text-[10px] shadow-sm">
                 {currentScenario.primaryAction}
               </span>
-              <span className="px-2.5 py-1 rounded bg-white/10 text-white/90 text-[10px] border border-white/10">
+              <span className="px-2.5 py-1 rounded-lg bg-surface-hover text-white/90 text-[10px] border border-border-default">
                 {currentScenario.secondaryAction}
               </span>
             </motion.div>
@@ -249,7 +249,7 @@ export function LiveAIIntakeDemo() {
       </div>
 
       {/* Progress Indicator for Scenarios */}
-      <div className="pt-2 flex items-center justify-between text-[10px] font-mono text-white/40 border-t border-white/[0.04]">
+      <div className="pt-2 flex items-center justify-between text-[10px] font-mono text-white/40 border-t border-border-subtle">
         <span>
           Scenario {scenarioIndex + 1} of {AI_INTAKE_SCENARIOS.length}
         </span>
@@ -259,8 +259,8 @@ export function LiveAIIntakeDemo() {
               key={s.id}
               className={`h-1 rounded-full transition-all duration-300 ${
                 idx === scenarioIndex
-                  ? "w-4 bg-[#C5A059]"
-                  : "w-1.5 bg-white/20"
+                  ? "w-4 bg-white"
+                  : "w-1.5 bg-border-strong"
               }`}
             />
           ))}

@@ -33,7 +33,7 @@ export function MarketingNavbar() {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-[#090B10]/85 backdrop-blur-md border-b border-white/[0.06] shadow-xl shadow-black/40 py-3.5"
+          ? "bg-[#090B10]/85 backdrop-blur-md border-b border-border-subtle shadow-xl shadow-black/40 py-3.5"
           : "bg-transparent py-5"
       }`}
     >
@@ -41,14 +41,14 @@ export function MarketingNavbar() {
         {/* Brand Logo */}
         <Link
           href="/"
-          className="flex items-center gap-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C5A059] rounded-lg"
+          className="flex items-center gap-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-strong rounded-lg"
         >
-          <div className="w-8 h-8 rounded-lg bg-[#C5A059]/15 border border-[#C5A059]/30 flex items-center justify-center text-[#DFBE7E] group-hover:scale-105 transition-transform">
+          <div className="w-8 h-8 rounded-lg bg-surface-raised border border-border-default flex items-center justify-center text-white group-hover:scale-105 transition-transform">
             <Scale className="w-4 h-4" />
           </div>
           <span className="font-serif text-lg font-medium tracking-tight text-white flex items-center gap-1.5">
             NyayaLink
-            <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059]" />
+            <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
           </span>
         </Link>
 
@@ -73,7 +73,7 @@ export function MarketingNavbar() {
             href="/intake"
             className="hover:text-white transition-colors focus-visible:outline-none focus-visible:text-white flex items-center gap-1.5"
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#C5A059]" />
+            <Sparkles className="w-3.5 h-3.5 text-white/50" />
             <span>AI Legal Intake</span>
           </Link>
           <button
@@ -113,7 +113,7 @@ export function MarketingNavbar() {
         <div className="flex md:hidden items-center gap-2">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-white/70 hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#C5A059] rounded-lg"
+            className="p-2 text-white/70 hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-border-strong rounded-lg"
             aria-label="Toggle Navigation Menu"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -123,7 +123,7 @@ export function MarketingNavbar() {
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden px-4 pt-4 pb-6 bg-[#090B10]/95 backdrop-blur-xl border-b border-white/10 space-y-4">
+        <div className="md:hidden px-4 pt-4 pb-6 bg-[#090B10]/95 backdrop-blur-xl border-b border-border-default space-y-4">
           <nav className="flex flex-col space-y-3 text-sm text-[#A5A3B2]">
             <button
               onClick={() => handleNavClick("problem")}
@@ -141,9 +141,9 @@ export function MarketingNavbar() {
             <Link
               href="/intake"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-left py-1 hover:text-white flex items-center gap-2 text-[#DFBE7E]"
+              className="text-left py-1 hover:text-white flex items-center gap-2 text-white"
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#C5A059]" />
+              <Sparkles className="w-3.5 h-3.5 text-white/50" />
               <span>AI Legal Intake</span>
             </Link>
             <button
@@ -159,7 +159,7 @@ export function MarketingNavbar() {
               Compliance
             </button>
           </nav>
-          <div className="pt-3 border-t border-white/10 flex flex-col gap-2">
+          <div className="pt-3 border-t border-border-default flex flex-col gap-2">
             <Link
               href="/auth/login"
               className="text-center py-2 text-white/80 hover:text-white text-xs"

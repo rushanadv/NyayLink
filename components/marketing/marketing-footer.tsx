@@ -4,13 +4,13 @@ import { Scale, ShieldCheck } from "lucide-react";
 
 export function MarketingFooter() {
   return (
-    <footer className="w-full border-t border-white/[0.08] bg-black/40 backdrop-blur-md text-[#A5A3B2] text-xs pt-16 pb-12 relative z-10">
+    <footer className="w-full border-t border-border-default bg-black/40 backdrop-blur-md text-[#A5A3B2] text-xs pt-16 pb-12 relative z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
           {/* Brand Info */}
           <div className="md:col-span-5 space-y-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#C5A059]/15 border border-[#C5A059]/30 flex items-center justify-center text-[#DFBE7E]">
+              <div className="w-8 h-8 rounded-lg bg-surface-raised border border-border-default flex items-center justify-center text-white">
                 <Scale className="w-4 h-4" />
               </div>
               <span className="font-serif text-lg font-medium text-white tracking-tight">
@@ -22,8 +22,8 @@ export function MarketingFooter() {
               Vernacular intake, transparent milestone escrow, and certified Bar
               Council advocacy.
             </p>
-            <div className="flex items-center gap-2 text-[11px] text-[#DFBE7E]">
-              <ShieldCheck className="w-4 h-4 text-[#C5A059]" />
+            <div className="flex items-center gap-2 text-[11px] text-white/70">
+              <ShieldCheck className="w-4 h-4 text-white/50" />
               <span>Section 36 Advocates Act, 1961 Compliant</span>
             </div>
           </div>
@@ -117,7 +117,7 @@ export function MarketingFooter() {
         </div>
 
         {/* Regulatory Disclaimer */}
-        <div className="pt-8 border-t border-white/[0.06] text-[11px] text-white/40 leading-relaxed">
+        <div className="pt-8 border-t border-border-subtle text-[11px] text-white/40 leading-relaxed">
           <p>
             <strong>Regulatory Disclosure:</strong> NyayaLink is an
             informational marketplace and technology service provider, not a law

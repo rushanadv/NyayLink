@@ -29,7 +29,7 @@ export function CaseStatusWidget() {
       initial={{ opacity: 0, y: -6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.15 }}
-      className="inline-flex items-center gap-2.5 px-3 py-1 rounded-full bg-white/[0.02] border border-white/[0.06] hover:border-white/15 transition-colors text-xs select-none"
+      className="inline-flex items-center gap-2.5 px-3 py-1 rounded-full bg-surface-raised border border-border-subtle hover:border-border-strong transition-colors text-xs select-none"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       aria-label="Platform Highlights"
@@ -46,7 +46,7 @@ export function CaseStatusWidget() {
         Feed
       </span>
 
-      <div className="h-2.5 w-px bg-white/[0.08] hidden sm:block" />
+      <div className="h-2.5 w-px bg-border-default hidden sm:block" />
 
       {/* Rotating Stat Content */}
       <div className="overflow-hidden min-w-[170px] sm:min-w-[200px] h-4 relative flex items-center">
@@ -75,7 +75,7 @@ export function CaseStatusWidget() {
       {/* Dismiss button */}
       <button
         onClick={() => setIsDismissed(true)}
-        className="text-white/40 hover:text-white transition-colors p-0.5 rounded-full hover:bg-white/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#C5A059]"
+        className="text-white/40 hover:text-white transition-colors p-0.5 rounded-full hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-border-strong"
         aria-label="Dismiss status notification"
       >
         <X className="w-3 h-3" />

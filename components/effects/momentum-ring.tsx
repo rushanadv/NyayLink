@@ -18,7 +18,6 @@ interface CredentialPanel {
   subtitle: string;
   stat: string;
   icon: React.ComponentType<{ className?: string }>;
-  accentColor: string;
 }
 
 const CREDENTIAL_PANELS: CredentialPanel[] = [
@@ -28,7 +27,6 @@ const CREDENTIAL_PANELS: CredentialPanel[] = [
     subtitle: "State Bar Council Roll Authentication",
     stat: "480+ Enrolled",
     icon: ShieldCheck,
-    accentColor: "#C5A059",
   },
   {
     id: "sec36",
@@ -36,7 +34,6 @@ const CREDENTIAL_PANELS: CredentialPanel[] = [
     subtitle: "Zero Touting & Solicitation Rules",
     stat: "100% Neutral",
     icon: Scale,
-    accentColor: "#DFBE7E",
   },
   {
     id: "escrow",
@@ -44,7 +41,6 @@ const CREDENTIAL_PANELS: CredentialPanel[] = [
     subtitle: "Triple-Layer Retainer Fund Security",
     stat: "₹0 Commission",
     icon: Lock,
-    accentColor: "#C5A059",
   },
   {
     id: "ecourts",
@@ -52,7 +48,6 @@ const CREDENTIAL_PANELS: CredentialPanel[] = [
     subtitle: "Automated Daily Cause List Sync",
     stat: "28 States & UTs",
     icon: RefreshCw,
-    accentColor: "#34D399",
   },
   {
     id: "vakalatnama",
@@ -60,7 +55,6 @@ const CREDENTIAL_PANELS: CredentialPanel[] = [
     subtitle: "Aadhaar e-Sign & Digital Vault",
     stat: "256-bit Encrypted",
     icon: FileCheck2,
-    accentColor: "#C5A059",
   },
 ];
 
@@ -226,13 +220,13 @@ export function MomentumRing({ className = "" }: { className?: string }) {
             return (
               <div
                 key={panel.id}
-                className="p-4 rounded-2xl bg-[#0D1019] border border-white/10 shadow-lg space-y-2 flex flex-col justify-between"
+                className="p-4 rounded-xl bg-[#0D1019] border border-border-default shadow-lg space-y-2 flex flex-col justify-between"
               >
                 <div className="flex items-center justify-between">
-                  <div className="w-8 h-8 rounded-lg bg-[#C5A059]/10 border border-[#C5A059]/20 flex items-center justify-center text-[#C5A059]">
+                  <div className="w-8 h-8 rounded-lg bg-surface-raised border border-border-default flex items-center justify-center text-white">
                     <Icon className="w-4 h-4" />
                   </div>
-                  <span className="text-[9px] font-mono text-[#DFBE7E] px-1.5 py-0.5 rounded bg-[#C5A059]/10 border border-[#C5A059]/30 uppercase tracking-wider font-semibold">
+                  <span className="text-[9px] font-mono text-[#DFBE7E] px-1.5 py-0.5 rounded-lg bg-[#C5A059]/10 border border-[#C5A059]/30 uppercase tracking-wider font-semibold">
                     {panel.stat}
                   </span>
                 </div>
@@ -294,10 +288,10 @@ export function MomentumRing({ className = "" }: { className?: string }) {
               <div
                 key={panel.id}
                 onClick={() => rotateToPanel(i)}
-                className={`absolute inset-0 p-5 rounded-2xl border backdrop-blur-md transition-colors duration-300 flex flex-col justify-between shadow-2xl ${
+                className={`absolute inset-0 p-5 rounded-xl border backdrop-blur-md transition-colors duration-300 flex flex-col justify-between shadow-2xl ${
                   isFacing
-                    ? "bg-[#141824]/95 border-[#C5A059]/60 shadow-[0_15px_35px_rgba(197,160,89,0.25)]"
-                    : "bg-[#0C0F17]/90 border-white/[0.08] opacity-75 shadow-black/80"
+                    ? "bg-[#141824]/95 border-border-strong shadow-[0_15px_35px_rgba(0,0,0,0.6)]"
+                    : "bg-[#0C0F17]/90 border-border-default opacity-75 shadow-black/80"
                 }`}
                 style={{
                   transform: `rotateY(${panelAngle}deg) translateZ(${radius}px)`,
@@ -307,17 +301,10 @@ export function MomentumRing({ className = "" }: { className?: string }) {
               >
                 {/* Top Badge Row */}
                 <div className="flex items-center justify-between">
-                  <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center"
-                    style={{
-                      backgroundColor: "rgba(197, 160, 89, 0.12)",
-                      border: "1px solid rgba(197, 160, 89, 0.25)",
-                      color: panel.accentColor,
-                    }}
-                  >
+                  <div className="w-9 h-9 rounded-lg bg-surface-raised border border-border-default flex items-center justify-center text-white">
                     <Icon className="w-4 h-4" />
                   </div>
-                  <span className="text-[9px] font-mono text-[#DFBE7E] px-1.5 py-0.5 rounded bg-[#C5A059]/10 border border-[#C5A059]/30 uppercase tracking-wider font-semibold">
+                  <span className="text-[9px] font-mono text-[#DFBE7E] px-1.5 py-0.5 rounded-lg bg-[#C5A059]/10 border border-[#C5A059]/30 uppercase tracking-wider font-semibold">
                     {panel.stat}
                   </span>
                 </div>
@@ -333,7 +320,7 @@ export function MomentumRing({ className = "" }: { className?: string }) {
                 </div>
 
                 {/* Bottom Verification Indicator */}
-                <div className="pt-2 border-t border-white/[0.06] flex items-center gap-1.5 text-[10px] font-mono text-emerald-400">
+                <div className="pt-2 border-t border-border-subtle flex items-center gap-1.5 text-[10px] font-mono text-emerald-400">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                   <span>Enforced by Protocol</span>
                 </div>
@@ -351,7 +338,7 @@ export function MomentumRing({ className = "" }: { className?: string }) {
               targetRotationRef.current += angleStep;
               snapToNearest();
             }}
-            className="p-1.5 rounded-full bg-white/[0.04] hover:bg-white/10 text-white/70 hover:text-white border border-white/10 transition-colors"
+            className="p-1.5 rounded-full bg-surface-raised hover:bg-surface-hover text-white/70 hover:text-white border border-border-default transition-colors"
             aria-label="Previous credential layer"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -365,8 +352,8 @@ export function MomentumRing({ className = "" }: { className?: string }) {
                 onClick={() => rotateToPanel(i)}
                 className={`transition-all duration-300 rounded-full ${
                   activeIndex === i
-                    ? "w-5 h-1.5 bg-[#C5A059]"
-                    : "w-1.5 h-1.5 bg-white/20 hover:bg-white/40"
+                    ? "w-5 h-1.5 bg-white"
+                    : "w-1.5 h-1.5 bg-border-strong hover:bg-white/40"
                 }`}
                 aria-label={`Jump to credential layer ${i + 1}`}
               />
@@ -378,7 +365,7 @@ export function MomentumRing({ className = "" }: { className?: string }) {
               targetRotationRef.current -= angleStep;
               snapToNearest();
             }}
-            className="p-1.5 rounded-full bg-white/[0.04] hover:bg-white/10 text-white/70 hover:text-white border border-white/10 transition-colors"
+            className="p-1.5 rounded-full bg-surface-raised hover:bg-surface-hover text-white/70 hover:text-white border border-border-default transition-colors"
             aria-label="Next credential layer"
           >
             <ChevronRight className="w-4 h-4" />
