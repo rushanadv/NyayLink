@@ -70,45 +70,85 @@ export function HeroSplit() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
         {/* LEFT PANEL (~38% column width: 5 cols out of 12) */}
         <div className="lg:col-span-5 lg:sticky lg:top-24 flex flex-col space-y-8 select-none">
-          {/* Eyebrow Label */}
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-xs uppercase tracking-widest text-[#C5A059] font-medium px-2.5 py-1 rounded bg-[#C5A059]/10 border border-[#C5A059]/25">
-              NyayaLink — Access to Justice, Simplified
+          {/* Eyebrow Label — Architectural Mono, Not a Pill */}
+          <div className="flex items-center gap-2.5">
+            <span className="w-5 h-px bg-[#C5A059]" />
+            <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#C5A059] font-medium">
+              NyayaLink // National Legal Technology Infrastructure
             </span>
           </div>
 
-          {/* Large Serif 2-Line Headline */}
-          <div className="space-y-1">
-            <h1 className="tracking-tight text-white leading-[1.12]">
+          {/* Large Serif 2-Line Headline — Expanded Typographic Scale */}
+          <div className="space-y-2">
+            <h1 className="tracking-tight text-white leading-[1.04]">
               <ParticleText
-                text="Justice, within reach."
-                className="font-serif text-3xl sm:text-4xl lg:text-[44px] font-normal tracking-tight text-white block text-balance"
+                text="Justice without intermediaries."
+                className="font-serif text-4xl sm:text-5xl lg:text-6xl xl:text-[64px] font-normal tracking-tight text-white block text-balance"
                 highlightColor="#C5A059"
                 textColor="#F5F4FA"
               />
-              <span className="block text-white/80 font-sans text-2xl sm:text-3xl lg:text-[32px] mt-1.5 font-light tracking-tight text-balance">
-                Verified lawyers, clear fees, your language.
+              <span className="block text-white/75 font-sans text-xl sm:text-2xl lg:text-[26px] mt-3 font-light tracking-tight text-balance leading-snug">
+                State Bar Council–verified advocates. Milestone escrow protection. Vernacular intake.
               </span>
             </h1>
           </div>
 
-          {/* 4 Value Bullets with Icons */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-[#A5A3B2]">
-            <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-white/[0.02] border border-white/[0.06]">
-              <ShieldCheck className="w-4 h-4 text-[#C5A059] shrink-0" />
-              <span className="text-white/90">Verified Bar Council lawyers</span>
+          {/* 4 Stamped & Sealed Verification Chips — Differentiated from Ambient Ticker */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+            <div className="flex items-center gap-2.5 p-2.5 rounded-md bg-[#C5A059]/[0.06] border border-[#C5A059]/30 shadow-[inset_0_1px_0_rgba(197,160,89,0.15)]">
+              <div className="w-5 h-5 rounded bg-[#C5A059]/15 border border-[#C5A059]/30 flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#C5A059]" />
+              </div>
+              <div className="min-w-0">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-[#DFBE7E] block font-semibold leading-tight">
+                  BCI Verified
+                </span>
+                <span className="text-[11px] text-white/80 block truncate">
+                  State Bar Council Enrolled
+                </span>
+              </div>
             </div>
-            <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-white/[0.02] border border-white/[0.06]">
-              <Scale className="w-4 h-4 text-[#C5A059] shrink-0" />
-              <span className="text-white/90">Transparent, flat fees</span>
+
+            <div className="flex items-center gap-2.5 p-2.5 rounded-md bg-[#C5A059]/[0.06] border border-[#C5A059]/30 shadow-[inset_0_1px_0_rgba(197,160,89,0.15)]">
+              <div className="w-5 h-5 rounded bg-[#C5A059]/15 border border-[#C5A059]/30 flex items-center justify-center shrink-0">
+                <Scale className="w-3.5 h-3.5 text-[#C5A059]" />
+              </div>
+              <div className="min-w-0">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-[#DFBE7E] block font-semibold leading-tight">
+                  Rule 36 Compliant
+                </span>
+                <span className="text-[11px] text-white/80 block truncate">
+                  Zero Touting or Solicitation
+                </span>
+              </div>
             </div>
-            <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-white/[0.02] border border-white/[0.06]">
-              <Languages className="w-4 h-4 text-[#C5A059] shrink-0" />
-              <span className="text-white/90">AI intake in your language</span>
+
+            <div className="flex items-center gap-2.5 p-2.5 rounded-md bg-[#C5A059]/[0.06] border border-[#C5A059]/30 shadow-[inset_0_1px_0_rgba(197,160,89,0.15)]">
+              <div className="w-5 h-5 rounded bg-[#C5A059]/15 border border-[#C5A059]/30 flex items-center justify-center shrink-0">
+                <Lock className="w-3.5 h-3.5 text-[#C5A059]" />
+              </div>
+              <div className="min-w-0">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-[#DFBE7E] block font-semibold leading-tight">
+                  Milestone Escrow
+                </span>
+                <span className="text-[11px] text-white/80 block truncate">
+                  Stage-Released Retainers
+                </span>
+              </div>
             </div>
-            <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-white/[0.02] border border-white/[0.06]">
-              <Lock className="w-4 h-4 text-[#C5A059] shrink-0" />
-              <span className="text-white/90">Encrypted case workspace</span>
+
+            <div className="flex items-center gap-2.5 p-2.5 rounded-md bg-[#C5A059]/[0.06] border border-[#C5A059]/30 shadow-[inset_0_1px_0_rgba(197,160,89,0.15)]">
+              <div className="w-5 h-5 rounded bg-[#C5A059]/15 border border-[#C5A059]/30 flex items-center justify-center shrink-0">
+                <Languages className="w-3.5 h-3.5 text-[#C5A059]" />
+              </div>
+              <div className="min-w-0">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-[#DFBE7E] block font-semibold leading-tight">
+                  Vernacular Engine
+                </span>
+                <span className="text-[11px] text-white/80 block truncate">
+                  14 Indian Languages
+                </span>
+              </div>
             </div>
           </div>
 

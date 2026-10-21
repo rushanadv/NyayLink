@@ -26,46 +26,46 @@ export function CaseStatusWidget() {
 
   return (
     <motion.aside
-      initial={{ opacity: 0, y: -8 }}
+      initial={{ opacity: 0, y: -6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-      className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#0C0F17]/90 backdrop-blur-md border border-white/[0.08] hover:border-[#C5A059]/40 transition-colors shadow-xl shadow-black/40 text-xs select-none"
+      transition={{ duration: 0.4, delay: 0.15 }}
+      className="inline-flex items-center gap-2.5 px-3 py-1 rounded-full bg-white/[0.02] border border-white/[0.06] hover:border-white/15 transition-colors text-xs select-none"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       aria-label="Platform Highlights"
       aria-live="polite"
     >
-      {/* Live Pulsing Dot */}
-      <span className="relative flex h-2 w-2">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C5A059] opacity-75" />
-        <span className="relative inline-flex rounded-full h-2 w-2 bg-[#C5A059]" />
+      {/* Ambient Pulsing Feed Indicator */}
+      <span className="relative flex h-1.5 w-1.5">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400/60 opacity-75" />
+        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400/80" />
       </span>
 
-      <span className="font-mono text-[10px] uppercase tracking-wider text-[#C5A059] font-medium hidden sm:inline-flex items-center gap-1">
-        <Activity className="w-3 h-3 text-[#C5A059]" />
-        Live
+      <span className="font-mono text-[10px] uppercase tracking-wider text-white/40 font-medium hidden sm:inline-flex items-center gap-1">
+        <Activity className="w-2.5 h-2.5 text-white/30" />
+        Feed
       </span>
 
-      <div className="h-3 w-px bg-white/10 hidden sm:block" />
+      <div className="h-2.5 w-px bg-white/[0.08] hidden sm:block" />
 
       {/* Rotating Stat Content */}
-      <div className="overflow-hidden min-w-[180px] sm:min-w-[210px] h-4 relative flex items-center">
+      <div className="overflow-hidden min-w-[170px] sm:min-w-[200px] h-4 relative flex items-center">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStat.id}
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.3 }}
-            className="flex items-center gap-1.5 whitespace-nowrap text-[12px]"
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.25 }}
+            className="flex items-center gap-1.5 whitespace-nowrap text-[11px]"
           >
-            <span className="font-semibold text-white tracking-tight">
+            <span className="font-medium text-white/90 tracking-tight">
               {currentStat.metric}
             </span>
-            <span className="text-[#A5A3B2] font-normal">
+            <span className="text-white/50 font-normal">
               {currentStat.label}
             </span>
-            <span className="text-white/40 text-[10px] hidden md:inline">
+            <span className="text-white/30 text-[10px] hidden md:inline">
               · {currentStat.sublabel}
             </span>
           </motion.div>

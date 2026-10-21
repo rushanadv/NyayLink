@@ -116,9 +116,9 @@ export function FeaturePreview({ activeIndex }: FeaturePreviewProps) {
 
       {/* Feature Header Bar */}
       <div className="px-5 sm:px-7 pt-5 pb-3 flex items-center justify-between border-b border-white/[0.04] bg-white/[0.01]">
-        <div className="flex items-center gap-2.5">
-          <span className="font-mono text-xs font-bold text-[#C5A059] px-2 py-0.5 rounded bg-[#C5A059]/10 border border-[#C5A059]/20">
-            {feature.number}
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-xs font-bold text-[#C5A059]">
+            {feature.number} //
           </span>
           <h2 className="text-sm font-medium text-white tracking-wide">
             {feature.title}
@@ -177,27 +177,27 @@ function PreviewSearchMatch() {
         </span>
         <span className="ml-auto font-mono text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30 flex items-center gap-1">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <CountUp to={480} suffix="+" /> Verified Advocates
+          <CountUp to={480} suffix="+" /> Enrolled Advocates
         </span>
       </div>
 
-      {/* Filter Chips */}
+      {/* Stamped Filter Chips */}
       <div className="flex flex-wrap gap-2 text-[11px]">
-        <span className="px-2.5 py-1 rounded-full bg-[#C5A059]/15 text-[#DFBE7E] border border-[#C5A059]/30 font-medium">
-          ✓ Bar Council Verified
+        <span className="px-2 py-0.5 rounded bg-[#C5A059]/10 text-[#DFBE7E] border border-[#C5A059]/30 text-[10px] font-mono uppercase tracking-wider font-semibold flex items-center gap-1">
+          <ShieldCheck className="w-3 h-3 text-[#C5A059]" /> BCI Verified
         </span>
-        <span className="px-2.5 py-1 rounded-full bg-white/[0.04] text-[#A5A3B2] border border-white/[0.08]">
+        <span className="px-2.5 py-0.5 rounded bg-white/[0.04] text-[#A5A3B2] border border-white/[0.08] text-[11px]">
           Civil & RERA
         </span>
-        <span className="px-2.5 py-1 rounded-full bg-white/[0.04] text-[#A5A3B2] border border-white/[0.08]">
+        <span className="px-2.5 py-0.5 rounded bg-white/[0.04] text-[#A5A3B2] border border-white/[0.08] text-[11px]">
           Hindi & Marathi
         </span>
-        <span className="px-2.5 py-1 rounded-full bg-white/[0.04] text-[#A5A3B2] border border-white/[0.08]">
+        <span className="px-2.5 py-0.5 rounded bg-white/[0.04] text-[#A5A3B2] border border-white/[0.08] text-[11px]">
           Fixed Fee Only
         </span>
       </div>
 
-      {/* Mock Lawyer Cards */}
+      {/* Mock Lawyer Cards with Stamped Badges */}
       <div className="grid grid-cols-1 gap-3 pt-1">
         {/* Lawyer 1 */}
         <div className="p-3.5 rounded-xl bg-[#141824]/90 border border-white/[0.08] hover:border-[#C5A059]/40 transition-colors">
@@ -211,12 +211,11 @@ function PreviewSearchMatch() {
                   <h3 className="text-xs font-semibold text-white">
                     Adv. Rajesh Sharma
                   </h3>
-                  <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-0.5">
-                    <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                    BCI Verified
+                  <span className="px-1.5 py-0.5 rounded bg-[#C5A059]/10 border border-[#C5A059]/30 text-[9px] font-mono text-[#DFBE7E] uppercase tracking-wider flex items-center gap-1 font-semibold">
+                    <ShieldCheck className="w-2.5 h-2.5 text-[#C5A059]" /> BCI VERIFIED · D/1429
                   </span>
                 </div>
-                <p className="text-[11px] text-[#A5A3B2]">
+                <p className="text-[11px] text-[#A5A3B2] mt-0.5">
                   Supreme Court of India & High Court of Delhi · 18 yrs exp
                 </p>
               </div>
@@ -246,12 +245,11 @@ function PreviewSearchMatch() {
                   <h3 className="text-xs font-semibold text-white">
                     Adv. Meera Sen
                   </h3>
-                  <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-0.5">
-                    <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                    BCI Verified
+                  <span className="px-1.5 py-0.5 rounded bg-[#C5A059]/10 border border-[#C5A059]/30 text-[9px] font-mono text-[#DFBE7E] uppercase tracking-wider flex items-center gap-1 font-semibold">
+                    <ShieldCheck className="w-2.5 h-2.5 text-[#C5A059]" /> BCI VERIFIED · MAH/3120
                   </span>
                 </div>
-                <p className="text-[11px] text-[#A5A3B2]">
+                <p className="text-[11px] text-[#A5A3B2] mt-0.5">
                   Bombay High Court & NCLT · 12 yrs exp · Marathi, Hindi
                 </p>
               </div>

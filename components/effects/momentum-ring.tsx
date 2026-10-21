@@ -232,7 +232,7 @@ export function MomentumRing({ className = "" }: { className?: string }) {
                   <div className="w-8 h-8 rounded-lg bg-[#C5A059]/10 border border-[#C5A059]/20 flex items-center justify-center text-[#C5A059]">
                     <Icon className="w-4 h-4" />
                   </div>
-                  <span className="text-[10px] font-mono text-white/50">
+                  <span className="text-[9px] font-mono text-[#DFBE7E] px-1.5 py-0.5 rounded bg-[#C5A059]/10 border border-[#C5A059]/30 uppercase tracking-wider font-semibold">
                     {panel.stat}
                   </span>
                 </div>
@@ -317,7 +317,7 @@ export function MomentumRing({ className = "" }: { className?: string }) {
                   >
                     <Icon className="w-4 h-4" />
                   </div>
-                  <span className="text-[10px] font-mono text-[#DFBE7E] px-2 py-0.5 rounded bg-white/[0.03] border border-white/[0.06]">
+                  <span className="text-[9px] font-mono text-[#DFBE7E] px-1.5 py-0.5 rounded bg-[#C5A059]/10 border border-[#C5A059]/30 uppercase tracking-wider font-semibold">
                     {panel.stat}
                   </span>
                 </div>

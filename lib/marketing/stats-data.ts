@@ -9,19 +9,19 @@ export const ROTATING_STATS: StatItem[] = [
   {
     id: "cases",
     metric: "12,400+",
-    label: "Cases Guided",
-    sublabel: "Across 28 states & UTs",
+    label: "Guided Intakes",
+    sublabel: "Pilot platform volume",
   },
   {
     id: "lawyers",
     metric: "480+",
-    label: "Verified Advocates",
+    label: "Enrolled Advocates",
     sublabel: "State Bar Council validated",
   },
   {
     id: "clarity",
     metric: "92%",
-    label: "Clarity in <5 min",
-    sublabel: "Plain-language intake",
+    label: "Comprehension Rate",
+    sublabel: "Vernacular triage pilot feedback",
   },
 ];
