@@ -18,7 +18,6 @@ export function SignUpForm() {
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const supabase = createClient();
     setIsLoading(true);
     setError(null);
 
@@ -35,8 +34,9 @@ export function SignUpForm() {
     }
 
     try {
+      const supabase = createClient();
       const { error: signUpError } = await supabase.auth.signUp({
-        email,
+        email: email.trim(),
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/dashboard`,

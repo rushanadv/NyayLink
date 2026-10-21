@@ -60,24 +60,26 @@ export function ScrollProgress() {
 
   return (
     <nav
-      className="fixed bottom-8 left-6 z-40 hidden lg:flex flex-col items-start gap-3 p-2.5 rounded-full bg-[#0C0F17]/85 backdrop-blur-md border border-white/[0.06] shadow-2xl shadow-black/60 transition-all select-none"
+      className="fixed bottom-8 left-6 z-40 hidden lg:flex flex-col items-start p-2 rounded-full bg-[#0C0F17]/85 backdrop-blur-md border border-white/[0.08] shadow-2xl shadow-black/60 transition-all select-none"
       aria-label="Section Navigation Rail"
     >
-      <div className="relative flex flex-col gap-2.5 items-center py-1">
-        {/* Continuous Scrubber Track */}
+      <div className="relative flex flex-col gap-3 items-center py-1">
+        {/* Continuous Scrubber Track Container (Center of first dot to center of last dot) */}
         <div
           aria-hidden="true"
-          className="absolute top-2 bottom-2 left-1/2 -translate-x-1/2 w-[2px] bg-white/[0.08] rounded-full pointer-events-none"
-        />
+          className="absolute top-2.5 bottom-2.5 left-1/2 -translate-x-1/2 w-[2px] pointer-events-none"
+        >
+          {/* Base Track */}
+          <div className="absolute inset-0 w-full bg-white/[0.12] rounded-full" />
 
-        {/* Continuous Active Fill Line */}
-        {!shouldReduceMotion && (
-          <motion.div
-            aria-hidden="true"
-            className="absolute top-2 left-1/2 -translate-x-1/2 w-[2px] bg-gradient-to-b from-[#C5A059] to-[#DFBE7E] rounded-full pointer-events-none origin-top shadow-[0_0_8px_rgba(197,160,89,0.5)]"
-            style={{ height: fillHeight }}
-          />
-        )}
+          {/* Continuous Active Fill Line (0 to 100% of scroll progress) */}
+          {!shouldReduceMotion && (
+            <motion.div
+              className="absolute top-0 left-0 w-full bg-gradient-to-b from-[#C5A059] to-[#DFBE7E] rounded-full origin-top shadow-[0_0_8px_rgba(197,160,89,0.6)]"
+              style={{ height: fillHeight }}
+            />
+          )}
+        </div>
 
         {SECTIONS.map((sec) => {
           const isActive = activeSection === sec.id;
@@ -89,23 +91,25 @@ export function ScrollProgress() {
               onClick={() => handleSectionClick(sec.id)}
               onMouseEnter={() => setHoveredSection(sec.id)}
               onMouseLeave={() => setHoveredSection(null)}
-              className="group relative z-10 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C5A059] rounded-full p-1"
+              className="group relative z-10 flex items-center justify-center w-5 h-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C5A059] rounded-full"
               aria-label={`Jump to section: ${sec.name}`}
               aria-current={isActive ? "true" : undefined}
             >
-              {/* Dot Indicator */}
+              {/* Discrete Circular Dot Indicator */}
               <div
-                className={`transition-all duration-300 rounded-full ${
+                className={`rounded-full transition-all duration-300 ${
                   isActive
-                    ? "w-2.5 h-6 bg-[#C5A059] shadow-[0_0_12px_rgba(197,160,89,0.5)]"
-                    : "w-2 h-2 bg-[#0C0F17] ring-1.5 ring-white/20 group-hover:ring-white/60 group-hover:scale-125"
+                    ? "w-2.5 h-2.5 bg-[#C5A059] ring-4 ring-[#C5A059]/25 shadow-[0_0_10px_rgba(197,160,89,0.8)] scale-110"
+                    : isHovered
+                    ? "w-2.5 h-2.5 bg-white/80 ring-2 ring-white/30 scale-125"
+                    : "w-2 h-2 bg-[#0C0F17] ring-1.5 ring-white/30 group-hover:ring-white/70"
                 }`}
               />
 
               {/* Tooltip Label on Hover / Active */}
               {(isHovered || isActive) && (
                 <div
-                  className={`absolute left-7 px-2.5 py-1 rounded-md text-[11px] font-mono whitespace-nowrap transition-all duration-200 pointer-events-none ${
+                  className={`absolute left-8 px-2.5 py-1 rounded-md text-[11px] font-mono whitespace-nowrap transition-all duration-200 pointer-events-none shadow-lg ${
                     isActive
                       ? "bg-[#141824] text-white border border-[#C5A059]/40 opacity-100 translate-x-0"
                       : "bg-[#11141D] text-[#A5A3B2] border border-white/10 opacity-90 translate-x-0"

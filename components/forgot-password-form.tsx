@@ -12,13 +12,13 @@ export function ForgotPasswordForm() {
 
   const handleForgotPassword = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const supabase = createClient();
     setIsLoading(true);
     setError(null);
 
     try {
+      const supabase = createClient();
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-        email,
+        email.trim(),
         {
           redirectTo: `${window.location.origin}/auth/update-password`,
         }

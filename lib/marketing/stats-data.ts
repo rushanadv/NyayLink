@@ -14,7 +14,7 @@ export const ROTATING_STATS: StatItem[] = [
   },
   {
     id: "lawyers",
-    metric: "480",
+    metric: "480+",
     label: "Verified Advocates",
     sublabel: "State Bar Council validated",
   },

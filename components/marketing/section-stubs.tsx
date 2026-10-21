@@ -102,10 +102,10 @@ export function SectionStubs() {
         <div className="p-8 sm:p-12 lg:p-16 rounded-3xl bg-[#0C0F17]/85 border border-white/[0.08] backdrop-blur-md shadow-2xl shadow-black/50">
           <div className="flex items-center gap-2 mb-5">
             <span className="font-mono text-xs uppercase tracking-widest text-[#C5A059] font-medium px-2.5 py-1 rounded bg-[#C5A059]/10 border border-[#C5A059]/25">
-              02 / The Challenge
+              02 / THE CHALLENGE
             </span>
           </div>
-          <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-white font-normal max-w-2xl leading-snug tracking-tight">
+          <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-white font-normal max-w-2xl leading-snug tracking-tight text-balance">
             Indian citizens face 5 crore pending cases and opaque legal costs.
           </h2>
           <p className="mt-4 text-sm sm:text-base text-[#A5A3B2] max-w-3xl leading-relaxed">
@@ -158,10 +158,10 @@ export function SectionStubs() {
           <div className="lg:col-span-5 space-y-6">
             <div className="flex items-center gap-2">
               <span className="font-mono text-xs uppercase tracking-widest text-[#C5A059] font-medium px-2.5 py-1 rounded bg-[#C5A059]/10 border border-[#C5A059]/25">
-                03 / Lawyer Network
+                03 / LAWYER NETWORK
               </span>
             </div>
-            <h2 className="font-serif text-2xl sm:text-3xl lg:text-[38px] text-white font-normal leading-[1.18] tracking-tight">
+            <h2 className="font-serif text-2xl sm:text-3xl lg:text-[38px] text-white font-normal leading-[1.18] tracking-tight text-balance">
               A nationwide registry of Bar Council validated advocates.
             </h2>
             <p className="text-sm sm:text-base text-[#A5A3B2] leading-relaxed">
@@ -209,7 +209,7 @@ export function SectionStubs() {
                   <span className="text-white font-semibold">VERIFIED ADVOCATE ROLL</span>
                 </div>
                 <span className="text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/20 text-[10px]">
-                  <CountUp to={480} suffix="+" /> Advocates Active
+                  <CountUp to={480} suffix="+" /> Verified Advocates
                 </span>
               </div>
 
@@ -330,10 +330,10 @@ export function SectionStubs() {
           <div className="lg:col-span-5 order-1 lg:order-2 space-y-6">
             <div className="flex items-center gap-2">
               <span className="font-mono text-xs uppercase tracking-widest text-[#C5A059] font-medium px-2.5 py-1 rounded bg-[#C5A059]/10 border border-[#C5A059]/25">
-                04 / AI Intake Engine
+                04 / AI INTAKE ENGINE
               </span>
             </div>
-            <h2 className="font-serif text-2xl sm:text-3xl lg:text-[38px] text-white font-normal leading-[1.18] tracking-tight">
+            <h2 className="font-serif text-2xl sm:text-3xl lg:text-[38px] text-white font-normal leading-[1.18] tracking-tight text-balance">
               Intelligent legal triage in your mother tongue.
             </h2>
             <p className="text-sm sm:text-base text-[#A5A3B2] leading-relaxed">
@@ -360,7 +360,7 @@ export function SectionStubs() {
 
             <div className="pt-2">
               <Link
-                href="/auth/login?intent=client"
+                href="/intake"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[#C5A059] hover:bg-[#DFBE7E] text-[#090B10] font-semibold text-sm transition-all shadow-lg shadow-[#C5A059]/20"
               >
                 <span>Start Free AI Intake</span>
@@ -385,10 +385,10 @@ export function SectionStubs() {
           <div className="lg:col-span-5 space-y-6">
             <div className="flex items-center gap-2">
               <span className="font-mono text-xs uppercase tracking-widest text-[#C5A059] font-medium px-2.5 py-1 rounded bg-[#C5A059]/10 border border-[#C5A059]/25">
-                05 / Advocate SaaS
+                05 / ADVOCATE SAAS
               </span>
             </div>
-            <h2 className="font-serif text-2xl sm:text-3xl lg:text-[38px] text-white font-normal leading-[1.18] tracking-tight">
+            <h2 className="font-serif text-2xl sm:text-3xl lg:text-[38px] text-white font-normal leading-[1.18] tracking-tight text-balance">
               The modern digital practice for independent advocates.
             </h2>
             <p className="text-sm sm:text-base text-[#A5A3B2] leading-relaxed">
@@ -493,10 +493,10 @@ export function SectionStubs() {
         <div className="p-8 sm:p-12 lg:p-14 rounded-3xl bg-[#14110A]/85 border border-[#C5A059]/25 backdrop-blur-md shadow-2xl shadow-black/50 space-y-6">
           <div className="flex items-center gap-2">
             <span className="font-mono text-xs uppercase tracking-widest text-[#DFBE7E] font-medium px-2.5 py-1 rounded bg-[#C5A059]/10 border border-[#C5A059]/25">
-              06 / Legal Compliance & Ethics
+              06 / LEGAL COMPLIANCE & ETHICS
             </span>
           </div>
-          <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-white font-normal max-w-2xl leading-snug tracking-tight">
+          <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-white font-normal max-w-2xl leading-snug tracking-tight text-balance">
             Engineered strictly in compliance with the Advocates Act, 1961.
           </h2>
           <p className="text-sm sm:text-base text-[#A5A3B2] max-w-3xl leading-relaxed">
@@ -530,9 +530,9 @@ export function SectionStubs() {
       >
         <div className="p-10 sm:p-16 rounded-3xl bg-gradient-to-br from-[#121624] via-[#0C0F17] to-[#090B10] border border-[#C5A059]/30 text-center space-y-6 shadow-2xl">
           <span className="font-mono text-xs uppercase tracking-widest text-[#C5A059] font-medium px-3 py-1 rounded bg-[#C5A059]/10 border border-[#C5A059]/25">
-            07 / Take Action
+            07 / TAKE ACTION
           </span>
-          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-white font-normal max-w-2xl mx-auto leading-tight tracking-tight">
+          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-white font-normal max-w-2xl mx-auto leading-tight tracking-tight text-balance">
             Begin with clarity. Consult a verified advocate today.
           </h2>
           <p className="text-sm sm:text-base text-[#A5A3B2] max-w-xl mx-auto leading-relaxed">

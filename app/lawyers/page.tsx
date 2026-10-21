@@ -93,35 +93,61 @@ function LawyersDirectorySkeleton() {
 }
 
 async function LawyersDirectoryContent() {
-  const supabase = await createClient();
+  let lawyers: PublicLawyer[] = FALLBACK_DEMO_LAWYERS;
+  let isAuthenticated = false;
+  let loadWarning: string | undefined = undefined;
 
-  // 1. Fetch from public.public_lawyer_directory view (anon-accessible, no auth required)
-  const { data: dbLawyers, error } = await supabase
-    .from("public_lawyer_directory")
-    .select(
-      "id, professional_name, bio, practice_areas, experience_years, city, state, languages, created_at"
-    )
-    .order("experience_years", { ascending: false });
+  try {
+    const supabase = await createClient();
 
-  if (error) {
-    console.warn("[NyayaLink Directory] Error fetching public_lawyer_directory:", error.message);
+    // 1. Fetch from public.public_lawyer_directory view (anon-accessible, no auth required)
+    const { data: dbLawyers, error } = await supabase
+      .from("public_lawyer_directory")
+      .select(
+        "id, professional_name, bio, practice_areas, experience_years, city, state, languages, created_at"
+      )
+      .order("experience_years", { ascending: false });
+
+    if (error) {
+      console.error("[NyayaLink Server Error] Failed to fetch public_lawyer_directory from Supabase:", {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+      });
+      loadWarning = "We're having trouble loading live advocate records right now. Displaying verified preview profiles.";
+    } else if (dbLawyers && dbLawyers.length > 0) {
+      lawyers = dbLawyers as PublicLawyer[];
+    }
+
+    // 2. Safe session check — should never crash public page
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      isAuthenticated = !!user;
+    } catch (authError) {
+      console.warn("[NyayaLink Directory] Auth session check non-fatal warning:", authError);
+    }
+  } catch (fatalError: unknown) {
+    if (
+      typeof fatalError === "object" &&
+      fatalError !== null &&
+      ((fatalError as { digest?: string }).digest === "HANGING_PROMISE_REJECTION" ||
+        (fatalError as { digest?: string }).digest?.startsWith("NEXT_") ||
+        (fatalError as { message?: string }).message?.includes("During prerendering"))
+    ) {
+      throw fatalError;
+    }
+    console.error("[NyayaLink Fatal Server Error] Exception initializing Supabase or executing lawyer directory query:", fatalError);
+    loadWarning = "We're having trouble loading advocates right now. Displaying verified preview profiles.";
   }
-
-  // Use database records if available, falling back to realistic demo data for pre-launch evaluation
-  const lawyers: PublicLawyer[] =
-    dbLawyers && dbLawyers.length > 0 ? (dbLawyers as PublicLawyer[]) : FALLBACK_DEMO_LAWYERS;
-
-  // 2. Check if the current visitor has an authenticated session
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const isAuthenticated = !!user;
 
   return (
     <LawyerDirectoryClient
       initialLawyers={lawyers}
       isAuthenticated={isAuthenticated}
+      loadWarning={loadWarning}
     />
   );
 }

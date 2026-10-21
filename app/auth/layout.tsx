@@ -56,7 +56,7 @@ export default function AuthLayout({
             <span>LEGAL-TECH INFRASTRUCTURE</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-[#F5F4FA] leading-[1.08]">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-[#F5F4FA] leading-[1.08] text-balance">
             A clearer path to justice.
           </h1>
 

@@ -14,7 +14,6 @@ export function UpdatePasswordForm() {
 
   const handleUpdatePassword = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const supabase = createClient();
     setIsLoading(true);
     setError(null);
 
@@ -31,6 +30,7 @@ export function UpdatePasswordForm() {
     }
 
     try {
+      const supabase = createClient();
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) throw updateError;
       router.push("/admin/dashboard");

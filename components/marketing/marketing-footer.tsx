@@ -41,7 +41,7 @@ export function MarketingFooter() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="#ai-advisory" className="hover:text-white transition-colors">
+                  <Link href="/intake" className="hover:text-white transition-colors">
                     AI Legal Intake
                   </Link>
                 </li>

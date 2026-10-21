@@ -20,13 +20,14 @@ export function LoginForm() {
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const supabase = createClient();
     setIsLoading(true);
     setError(null);
 
     try {
+      const supabase = createClient();
+
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password,
       });
 
@@ -47,7 +48,14 @@ export function LoginForm() {
         router.refresh();
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Authentication failed. Please verify your credentials.");
+      console.error("[NyayaLink Sign-In Error]:", err);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else if (typeof err === "object" && err !== null && "message" in err) {
+        setError(String((err as { message: unknown }).message));
+      } else {
+        setError("Authentication failed. Please verify your email and password.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -64,7 +72,7 @@ export function LoginForm() {
           <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059]" />
           <span>{isLawyerIntent ? "ADVOCATE WORKSPACE" : "LEGAL CLIENT PORTAL"}</span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-serif tracking-tight text-[#F5F4FA]">
+        <h2 className="text-2xl sm:text-3xl font-serif tracking-tight text-[#F5F4FA] text-balance">
           {isLawyerIntent ? "Sign in to manage your practice" : "Sign in to find your advocate"}
         </h2>
         <p className="text-sm text-[#A5A3B2] mt-2 leading-relaxed">

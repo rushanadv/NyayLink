@@ -6,12 +6,27 @@ import { cookies } from "next/headers";
  * global variable. Always create a new client within each function when using
  * it.
  */
+export function getSupabaseServerCredentials() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key =
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  return { url, key };
+}
+
 export async function createClient() {
   const cookieStore = await cookies();
+  const { url, key } = getSupabaseServerCredentials();
+
+  if (!url || !key) {
+    throw new Error(
+      "Supabase environment variables missing: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) must be defined."
+    );
+  }
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    url,
+    key,
     {
       cookies: {
         getAll() {

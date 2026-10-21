@@ -177,7 +177,7 @@ function PreviewSearchMatch() {
         </span>
         <span className="ml-auto font-mono text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30 flex items-center gap-1">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <CountUp to={480} suffix="+" /> Advocates Active
+          <CountUp to={480} suffix="+" /> Verified Advocates
         </span>
       </div>
 

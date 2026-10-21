@@ -8,9 +8,14 @@ export function LogoutButton() {
   const router = useRouter();
 
   const logout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/auth/login");
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.warn("[NyayaLink Logout]:", err);
+    } finally {
+      router.push("/auth/login");
+    }
   };
 
   return <Button onClick={logout}>Logout</Button>;

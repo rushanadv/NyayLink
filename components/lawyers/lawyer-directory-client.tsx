@@ -16,6 +16,8 @@ import {
   Briefcase,
   ShieldCheck,
   ChevronDown,
+  AlertCircle,
+  Users,
 } from "lucide-react";
 import { MagneticWrapper } from "@/components/ui/magnetic-wrapper";
 
@@ -34,6 +36,7 @@ export interface PublicLawyer {
 interface LawyerDirectoryClientProps {
   initialLawyers: PublicLawyer[];
   isAuthenticated: boolean;
+  loadWarning?: string;
 }
 
 // Helper to get initials from professional name (e.g. "Adv. Rajesh Sharma" -> "RS")
@@ -49,6 +52,7 @@ function getInitials(name: string): string {
 export function LawyerDirectoryClient({
   initialLawyers,
   isAuthenticated,
+  loadWarning,
 }: LawyerDirectoryClientProps) {
   const shouldReduceMotion = useReducedMotion();
   const [searchQuery, setSearchQuery] = useState("");
@@ -173,7 +177,7 @@ export function LawyerDirectoryClient({
           <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059]" />
           <span>03 / VERIFIED ADVOCATE DIRECTORY</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-white tracking-tight leading-[1.15]">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-white tracking-tight leading-[1.15] text-balance">
           Find Verified Bar Council Advocates
         </h1>
         <p className="text-sm sm:text-base text-[#A5A3B2] leading-relaxed">
@@ -185,6 +189,10 @@ export function LawyerDirectoryClient({
 
         {/* Badges / Guarantees Row */}
         <div className="flex flex-wrap items-center gap-3 pt-2 text-xs text-[#A5A3B2]">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+            <Users className="w-3.5 h-3.5 text-[#C5A059]" />
+            <span className="text-white/90">480+ Verified Advocates</span>
+          </div>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.02] border border-white/[0.06]">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
             <span className="text-white/90">BCI Credentials Validated</span>
@@ -198,6 +206,17 @@ export function LawyerDirectoryClient({
             <span className="text-white/90">Milestone Escrow Protection</span>
           </div>
         </div>
+
+        {/* Graceful Degradation Notice (visible if live DB query fails or recovers) */}
+        {loadWarning && (
+          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-200 text-xs flex items-start gap-3 mt-4">
+            <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <p className="font-semibold text-amber-300">Live Sync Notice</p>
+              <p className="text-amber-200/80 leading-relaxed">{loadWarning}</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Search & Filter Toolbar */}

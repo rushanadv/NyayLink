@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Scale, ArrowRight, Menu, X } from "lucide-react";
+import { Scale, ArrowRight, Menu, X, Sparkles } from "lucide-react";
 import { useSmoothScroll } from "./smooth-scroll-provider";
 import { MagneticWrapper } from "@/components/ui/magnetic-wrapper";
 
@@ -69,12 +69,13 @@ export function MarketingNavbar() {
           >
             Lawyer Network
           </Link>
-          <button
-            onClick={() => handleNavClick("ai-advisory")}
-            className="hover:text-white transition-colors focus-visible:outline-none focus-visible:text-white"
+          <Link
+            href="/intake"
+            className="hover:text-white transition-colors focus-visible:outline-none focus-visible:text-white flex items-center gap-1.5"
           >
-            AI Intake
-          </button>
+            <Sparkles className="w-3.5 h-3.5 text-[#C5A059]" />
+            <span>AI Legal Intake</span>
+          </Link>
           <button
             onClick={() => handleNavClick("lawyer-saas")}
             className="hover:text-white transition-colors focus-visible:outline-none focus-visible:text-white"
@@ -137,12 +138,14 @@ export function MarketingNavbar() {
             >
               Lawyer Network
             </Link>
-            <button
-              onClick={() => handleNavClick("ai-advisory")}
-              className="text-left py-1 hover:text-white"
+            <Link
+              href="/intake"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-left py-1 hover:text-white flex items-center gap-2 text-[#DFBE7E]"
             >
-              AI Intake
-            </button>
+              <Sparkles className="w-3.5 h-3.5 text-[#C5A059]" />
+              <span>AI Legal Intake</span>
+            </Link>
             <button
               onClick={() => handleNavClick("lawyer-saas")}
               className="text-left py-1 hover:text-white"

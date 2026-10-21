@@ -78,9 +78,9 @@ export function HeroSplit() {
 
           {/* Large Serif 2-Line Headline */}
           <div className="space-y-1">
-            <h1 className="font-serif text-3xl sm:text-4xl lg:text-[44px] font-normal tracking-tight text-white leading-[1.12]">
+            <h1 className="font-serif text-3xl sm:text-4xl lg:text-[44px] font-normal tracking-tight text-white leading-[1.12] text-balance">
               Justice, within reach.
-              <span className="block text-white/80 font-sans text-2xl sm:text-3xl lg:text-[32px] mt-1.5 font-light tracking-tight">
+              <span className="block text-white/80 font-sans text-2xl sm:text-3xl lg:text-[32px] mt-1.5 font-light tracking-tight text-balance">
                 Verified lawyers, clear fees, your language.
               </span>
             </h1>
@@ -88,19 +88,19 @@ export function HeroSplit() {
 
           {/* 4 Value Bullets with Icons */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-[#A5A3B2]">
-            <div className="flex items-center gap-2.5 p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+            <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-white/[0.02] border border-white/[0.06]">
               <ShieldCheck className="w-4 h-4 text-[#C5A059] shrink-0" />
               <span className="text-white/90">Verified Bar Council lawyers</span>
             </div>
-            <div className="flex items-center gap-2.5 p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+            <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-white/[0.02] border border-white/[0.06]">
               <Scale className="w-4 h-4 text-[#C5A059] shrink-0" />
               <span className="text-white/90">Transparent, flat fees</span>
             </div>
-            <div className="flex items-center gap-2.5 p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+            <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-white/[0.02] border border-white/[0.06]">
               <Languages className="w-4 h-4 text-[#C5A059] shrink-0" />
               <span className="text-white/90">AI intake in your language</span>
             </div>
-            <div className="flex items-center gap-2.5 p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+            <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-white/[0.02] border border-white/[0.06]">
               <Lock className="w-4 h-4 text-[#C5A059] shrink-0" />
               <span className="text-white/90">Encrypted case workspace</span>
             </div>

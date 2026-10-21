@@ -13,11 +13,20 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey =
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    return supabaseResponse;
+  }
+
   // With Fluid compute, don't put this client in a global environment
   // variable. Always create a new one on each request.
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         getAll() {
@@ -53,6 +62,8 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith("/login") &&
     !request.nextUrl.pathname.startsWith("/auth") &&
     !request.nextUrl.pathname.startsWith("/lawyers") &&
+    !request.nextUrl.pathname.startsWith("/intake") &&
+    !request.nextUrl.pathname.startsWith("/api/intake") &&
     !request.nextUrl.pathname.startsWith("/admin-preview")
   ) {
     // no user, potentially respond by redirecting the user to the login page
