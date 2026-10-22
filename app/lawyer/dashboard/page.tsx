@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 import { requireLawyerOrRedirect } from "@/lib/lawyer/auth";
 import { LawyerShell } from "@/components/lawyer/lawyer-shell";
 import {
@@ -9,6 +10,7 @@ import {
 } from "@/lib/portal/types";
 import Link from "next/link";
 import { ShieldAlert } from "lucide-react";
+
 
 function LawyerDashboardSkeleton() {
   return (
@@ -89,8 +91,15 @@ async function LawyerDashboardContent({
 
   const lawyerProfile = (profileRes.data as LawyerProfileData | null) || null;
   const verification = (verifRes.data as LawyerVerificationData | null) || null;
+
+  // If the advocate has not completed their onboarding profile, redirect to onboarding wizard
+  if (!lawyerProfile || !lawyerProfile.is_profile_completed) {
+    redirect("/lawyer/onboarding");
+  }
+
   const rawMatters = (mattersRes.data as LegalMatter[]) || [];
   const rawRequests = (requestsRes.data as ConsultationRequest[]) || [];
+
 
   // Enrich client details if available
   const clientIds = Array.from(

@@ -6,8 +6,8 @@ import type { UserRole } from "@/lib/admin/types";
  * 
  * Strict Role Priority Hierarchy:
  * 1. 'admin'  → /admin/dashboard
- * 2. 'lawyer' → /lawyer/dashboard
- * 3. 'client' → /dashboard (default for clients and new signups)
+ * 2. 'lawyer' → /lawyer/dashboard (or /lawyer/onboarding if profile is incomplete)
+ * 3. 'client' → /dashboard (default for clients and general signups)
  */
 export async function getPostLoginRedirectPath(
   supabase: SupabaseClient,
@@ -25,18 +25,31 @@ export async function getPostLoginRedirectPath(
 
     const roles = roleRecords.map((r) => r.role as UserRole);
 
-    // Prioritize admin > lawyer > client
+    // 1. Admin priority
     if (roles.includes("admin")) {
       return "/admin/dashboard";
     }
 
+    // 2. Lawyer priority
     if (roles.includes("lawyer")) {
+      const { data: lawyerProfile } = await supabase
+        .from("lawyer_profiles")
+        .select("is_profile_completed")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (!lawyerProfile || !lawyerProfile.is_profile_completed) {
+        return "/lawyer/onboarding";
+      }
+
       return "/lawyer/dashboard";
     }
 
+    // 3. Client default
     return "/dashboard";
   } catch (err) {
     console.error("[PostLoginRedirect] Error fetching user roles:", err);
     return "/dashboard";
   }
 }
+

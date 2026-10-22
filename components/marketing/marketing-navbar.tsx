@@ -192,7 +192,7 @@ export function MarketingNavbar() {
                 </Link>
 
                 <Link
-                  href="/auth/login?intent=lawyer"
+                  href="/auth/sign-up?intent=lawyer"
                   onClick={() => setEntryDropdownOpen(false)}
                   className={`flex items-start gap-3 p-2.5 rounded-lg transition-colors group ${
                     isDarkSubpage
@@ -205,15 +205,16 @@ export function MarketingNavbar() {
                   </div>
                   <div>
                     <span className="text-xs font-semibold block group-hover:text-[#174530] transition-colors">
-                      I&apos;m an Advocate
+                      Join as an Advocate
                     </span>
                     <span className="text-[11px] text-[#69736D] block mt-0.5 leading-snug">
-                      Chambers portal, cause lists & Vakalatnama
+                      Register practice & complete professional profile
                     </span>
                   </div>
                 </Link>
               </div>
             )}
+
           </div>
         </div>
 
@@ -301,7 +302,7 @@ export function MarketingNavbar() {
                 Need Legal Help
               </Link>
               <Link
-                href="/auth/login?intent=lawyer"
+                href="/auth/sign-up?intent=lawyer"
                 onClick={() => setMobileMenuOpen(false)}
                 className={`text-center py-2.5 rounded-lg font-semibold text-xs border ${
                   isDarkSubpage
@@ -309,9 +310,10 @@ export function MarketingNavbar() {
                     : "border-[#D5E5D9] bg-white text-[#202824] hover:bg-[#EAF3ED]"
                 }`}
               >
-                Advocate Entry
+                Join as Advocate
               </Link>
             </div>
+
           </div>
         </div>
       )}

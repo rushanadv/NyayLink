@@ -14,7 +14,7 @@ export function ClosingCta() {
       <motion.div
         initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-40px" }}
+        viewport={{ once: true, margin: "0px 0px -40px 0px" }}
         transition={{ duration: 0.5 }}
         className="rounded-3xl bg-white border border-[#D5E5D9] p-10 sm:p-16 lg:p-20 text-center space-y-10 shadow-lg shadow-[#202824]/4 relative overflow-hidden"
       >

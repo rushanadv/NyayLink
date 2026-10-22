@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { getPostLoginRedirectPath } from "@/lib/auth/post-login-redirect";
+import { Eye, EyeOff, KeyRound, AlertCircle } from "lucide-react";
+
 
 export function UpdatePasswordForm() {
   const [password, setPassword] = useState("");
@@ -18,24 +21,32 @@ export function UpdatePasswordForm() {
     setError(null);
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError("Passwords do not match.");
       setIsLoading(false);
       return;
     }
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters");
+      setError("Password must be at least 8 characters.");
       setIsLoading(false);
       return;
     }
 
     try {
       const supabase = createClient();
-      const { error: updateError } = await supabase.auth.updateUser({ password });
+      const { data, error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) throw updateError;
-      router.push("/admin/dashboard");
+
+      const userId = data.user?.id;
+      if (userId) {
+        const targetPath = await getPostLoginRedirectPath(supabase, userId);
+        router.push(targetPath);
+      } else {
+        router.push("/dashboard");
+      }
       router.refresh();
     } catch (err: unknown) {
+      console.error("[Update Password Error]:", err);
       setError(err instanceof Error ? err.message : "Password update failed");
     } finally {
       setIsLoading(false);
@@ -44,34 +55,33 @@ export function UpdatePasswordForm() {
 
   return (
     <div className="w-full">
-      <div className="mb-8">
-        <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#191923] border border-white/[0.06] text-[11px] font-mono text-[#A99AFF] mb-4">
-          <span>CREDENTIAL UPDATE</span>
+      <div className="mb-6">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EAF3ED] border border-[#D5E5D9] text-[11px] font-mono text-[#174530] mb-3 shadow-2xs">
+          <KeyRound className="w-3.5 h-3.5 text-[#205C43]" />
+          <span>CREDENTIAL SECURITY</span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#F5F4FA]">
-          Choose New Password
+        <h2 className="text-2xl sm:text-3xl font-serif tracking-tight text-[#202824]">
+          Set New Password
         </h2>
-        <p className="text-sm text-[#A5A3B2] mt-2">
-          Set a secure passphrase for your NyayLink account access.
+        <p className="text-xs sm:text-sm text-[#69736D] mt-2 leading-relaxed">
+          Choose a secure passphrase for your NyayLink account access.
         </p>
       </div>
 
       <form onSubmit={handleUpdatePassword} className="space-y-4">
         {error && (
-          <div className="p-3.5 rounded-lg bg-red-950/40 border border-red-500/25 text-red-200 text-xs flex items-start gap-2.5">
-            <svg className="w-4 h-4 text-red-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <span className="leading-relaxed">{error}</span>
+          <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-start gap-2.5">
+            <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+            <span className="leading-relaxed font-medium">{error}</span>
           </div>
         )}
 
         <div className="space-y-1.5">
           <label
             htmlFor="new-password"
-            className="block text-xs font-mono font-medium text-[#A5A3B2] tracking-wide uppercase"
+            className="block text-xs font-mono font-semibold text-[#202824] tracking-wide uppercase"
           >
-            New Password
+            New Password (min 8 chars)
           </label>
           <div className="relative">
             <input
@@ -84,25 +94,16 @@ export function UpdatePasswordForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
-              className="w-full h-11 pl-3.5 pr-11 rounded-lg bg-[#111119] border border-white/[0.08] text-[#F5F4FA] placeholder-[#6F6E7D] text-sm focus:outline-none focus:border-[#A99AFF] focus:ring-1 focus:ring-[#A99AFF]/30 transition-colors disabled:opacity-50"
+              className="w-full h-11 pl-3.5 pr-11 rounded-xl bg-white border border-[#D5E5D9] text-[#202824] placeholder-[#8F9A93] text-sm focus:outline-none focus:border-[#205C43] focus:ring-2 focus:ring-[#205C43]/15 shadow-2xs transition-colors disabled:opacity-50"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               tabIndex={-1}
               aria-label={showPassword ? "Hide password" : "Show password"}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#6F6E7D] hover:text-[#F5F4FA] transition-colors"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#69736D] hover:text-[#202824] transition-colors p-1"
             >
-              {showPassword ? (
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                </svg>
-              ) : (
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              )}
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
         </div>
@@ -110,7 +111,7 @@ export function UpdatePasswordForm() {
         <div className="space-y-1.5">
           <label
             htmlFor="confirm-password"
-            className="block text-xs font-mono font-medium text-[#A5A3B2] tracking-wide uppercase"
+            className="block text-xs font-mono font-semibold text-[#202824] tracking-wide uppercase"
           >
             Confirm New Password
           </label>
@@ -124,28 +125,29 @@ export function UpdatePasswordForm() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             disabled={isLoading}
-            className="w-full h-11 px-3.5 rounded-lg bg-[#111119] border border-white/[0.08] text-[#F5F4FA] placeholder-[#6F6E7D] text-sm focus:outline-none focus:border-[#A99AFF] focus:ring-1 focus:ring-[#A99AFF]/30 transition-colors disabled:opacity-50"
+            className="w-full h-11 px-3.5 rounded-xl bg-white border border-[#D5E5D9] text-[#202824] placeholder-[#8F9A93] text-sm focus:outline-none focus:border-[#205C43] focus:ring-2 focus:ring-[#205C43]/15 shadow-2xs transition-colors disabled:opacity-50"
           />
         </div>
 
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full h-11 rounded-lg bg-gradient-to-r from-[#A99AFF] to-[#8C7BFF] hover:from-[#B9ACFF] hover:to-[#9B8BFF] text-[#09090F] font-semibold text-sm transition-all duration-200 shadow-[0_0_20px_rgba(169,154,255,0.22)] hover:shadow-[0_0_25px_rgba(169,154,255,0.35)] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
+          className="w-full min-h-[44px] h-11 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white font-semibold text-sm transition-all duration-200 shadow-sm active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
         >
           {isLoading ? (
             <>
-              <svg className="animate-spin h-4 w-4 text-[#09090F]" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
               </svg>
               <span>Updating password...</span>
             </>
           ) : (
-            <span>Update Password & Enter</span>
+            <span>Update Password & Continue</span>
           )}
         </button>
       </form>
     </div>
   );
 }
+

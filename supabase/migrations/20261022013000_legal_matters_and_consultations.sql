@@ -29,6 +29,7 @@ CREATE INDEX IF NOT EXISTS idx_legal_matters_assigned_lawyer_id ON public.legal_
 CREATE INDEX IF NOT EXISTS idx_legal_matters_status ON public.legal_matters(status);
 CREATE INDEX IF NOT EXISTS idx_legal_matters_created_at ON public.legal_matters(created_at DESC);
 
+DROP TRIGGER IF EXISTS trg_legal_matters_updated_at ON public.legal_matters;
 CREATE TRIGGER trg_legal_matters_updated_at
   BEFORE UPDATE ON public.legal_matters
   FOR EACH ROW
@@ -61,6 +62,7 @@ CREATE INDEX IF NOT EXISTS idx_consultation_requests_matter_id ON public.consult
 CREATE INDEX IF NOT EXISTS idx_consultation_requests_status ON public.consultation_requests(status);
 CREATE INDEX IF NOT EXISTS idx_consultation_requests_created_at ON public.consultation_requests(created_at DESC);
 
+DROP TRIGGER IF EXISTS trg_consultation_requests_updated_at ON public.consultation_requests;
 CREATE TRIGGER trg_consultation_requests_updated_at
   BEFORE UPDATE ON public.consultation_requests
   FOR EACH ROW
@@ -185,6 +187,8 @@ CREATE POLICY "Authorized users can view matter updates"
 DROP POLICY IF EXISTS "Authorized users can insert matter updates" ON public.matter_updates;
 CREATE POLICY "Authorized users can insert matter updates"
   ON public.matter_updates FOR INSERT
+  TO authenticated
+  WITH CHECK (
     auth.uid() = author_id
     AND EXISTS (
       SELECT 1 FROM public.legal_matters m

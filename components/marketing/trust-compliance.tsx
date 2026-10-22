@@ -14,7 +14,7 @@ export function TrustCompliance() {
       <motion.div
         initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-40px" }}
+        viewport={{ once: true, margin: "0px 0px -40px 0px" }}
         transition={{ duration: 0.5 }}
         className="rounded-2xl bg-white border border-[#D5E5D9] p-8 sm:p-12 lg:p-14 shadow-sm space-y-10 relative overflow-hidden"
       >

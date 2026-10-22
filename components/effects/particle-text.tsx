@@ -35,12 +35,14 @@ export function ParticleText({
   const textRef = useRef<HTMLHeadingElement>(null);
   const shouldReduceMotion = useReducedMotion();
   const [animationCompleted, setAnimationCompleted] = useState(false);
+  const hasRunRef = useRef(false);
 
   useEffect(() => {
-    if (shouldReduceMotion) {
+    if (shouldReduceMotion || hasRunRef.current) {
       setAnimationCompleted(true);
       return;
     }
+    hasRunRef.current = true;
 
     const container = containerRef.current;
     const canvas = canvasRef.current;
@@ -88,41 +90,44 @@ export function ParticleText({
       if (!offCtx) return;
 
       const computedStyle = window.getComputedStyle(textEl);
-      const fontSize = computedStyle.fontSize || "38px";
-      const fontFamily = computedStyle.fontFamily || "serif";
+      const fontSize = computedStyle.fontSize || "48px";
+      const fontFamily = computedStyle.fontFamily || "Fraunces, Georgia, serif";
       const fontWeight = computedStyle.fontWeight || "400";
       const letterSpacing = computedStyle.letterSpacing || "-0.02em";
 
       offCtx.fillStyle = "#ffffff";
       offCtx.font = `${fontWeight} ${fontSize} ${fontFamily}`;
-      offCtx.textBaseline = "middle";
+      offCtx.textBaseline = "top";
       if ("letterSpacing" in offCtx) {
         (offCtx as unknown as { letterSpacing: string }).letterSpacing = letterSpacing;
       }
 
-      // Handle word wrapping if container is narrower than text
-      const words = text.split(" ");
-      let currentLine = "";
-      const lines: string[] = [];
-      for (let n = 0; n < words.length; n++) {
-        const testLine = currentLine ? `${currentLine} ${words[n]}` : words[n];
-        const metrics = offCtx.measureText(testLine);
-        if (metrics.width > width - 10 && currentLine) {
-          lines.push(currentLine);
-          currentLine = words[n];
-        } else {
-          currentLine = testLine;
+      const parsedFontSize = parseFloat(fontSize) || 48;
+      const lineHeightPx = parseFloat(computedStyle.lineHeight) || (parsedFontSize * 1.15);
+
+      // Handle explicit lines (e.g. intentional \n line-breaks) or responsive auto-wrap
+      let lines: string[] = [];
+      if (text.includes("\n")) {
+        lines = text.split("\n").map((l) => l.trim());
+      } else {
+        const words = text.split(" ");
+        let currentLine = "";
+        for (let n = 0; n < words.length; n++) {
+          const testLine = currentLine ? `${currentLine} ${words[n]}` : words[n];
+          const metrics = offCtx.measureText(testLine);
+          if (metrics.width > width - 10 && currentLine) {
+            lines.push(currentLine);
+            currentLine = words[n];
+          } else {
+            currentLine = testLine;
+          }
         }
+        if (currentLine) lines.push(currentLine);
       }
-      if (currentLine) lines.push(currentLine);
 
-      const parsedFontSize = parseFloat(fontSize) || 38;
-      const lineHeightPx = parseFloat(computedStyle.lineHeight) || (parsedFontSize * 1.2);
-      const totalTextHeight = lines.length * lineHeightPx;
-      const startY = (height - totalTextHeight) / 2 + lineHeightPx / 2;
-
+      // Render lines flush with the DOM layout starting at y: 0
       lines.forEach((l, idx) => {
-        offCtx.fillText(l, 0, startY + idx * lineHeightPx);
+        offCtx.fillText(l, 0, idx * lineHeightPx);
       });
 
       const imgData = offCtx.getImageData(0, 0, width, height);
@@ -142,7 +147,7 @@ export function ParticleText({
       }
 
       // If too dense, sample with larger step
-      const targetCount = 2000;
+      const targetCount = 1800;
       const points =
         rawPoints.length > targetCount
           ? rawPoints.filter((_, i) => i % Math.ceil(rawPoints.length / targetCount) === 0)
@@ -150,94 +155,98 @@ export function ParticleText({
 
       // Build particle array with randomized scatter & slight stagger
       particles = points.map((p) => {
-      // Scattered starting position across canvas boundary with radial swirl
-      const angle = Math.random() * Math.PI * 2;
-      const distance = 80 + Math.random() * 200;
-      const startX = p.x + Math.cos(angle) * distance;
-      const startY = p.y + Math.sin(angle) * distance;
+        // Scattered starting position across canvas boundary with radial swirl
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 80 + Math.random() * 180;
+        const startX = p.x + Math.cos(angle) * distance;
+        const startY = p.y + Math.sin(angle) * distance;
 
-      // Color palette mix: majority gold, some soft bright accents
-      const isAccent = Math.random() < 0.35;
-      const color = isAccent ? highlightColor : textColor;
+        // Color palette mix: majority forest green & deep text, accents
+        const isAccent = Math.random() < 0.35;
+        const color = isAccent ? highlightColor : textColor;
 
-      return {
-        startX,
-        startY,
-        targetX: p.x,
-        targetY: p.y,
-        delay: Math.random() * 320, // Stagger up to 320ms
-        color,
-        size: particleSize * (0.8 + Math.random() * 0.4),
-      };
-    });
+        return {
+          startX,
+          startY,
+          targetX: p.x,
+          targetY: p.y,
+          delay: Math.random() * 260, // Stagger up to 260ms
+          color,
+          size: particleSize * (0.8 + Math.random() * 0.4),
+        };
+      });
 
-    // Ease-out cubic spring curve
-    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3.2);
+      // Ease-out cubic spring curve
+      const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3.2);
 
-    const render = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const elapsed = timestamp - startTime;
+      const render = (timestamp: number) => {
+        if (!startTime) startTime = timestamp;
+        const elapsed = timestamp - startTime;
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.save();
-      ctx.scale(dpr, dpr);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.scale(dpr, dpr);
 
-      let allSettled = true;
+        let allSettled = true;
 
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
-        const particleElapsed = Math.max(0, elapsed - p.delay);
-        const progress = Math.min(1, particleElapsed / duration);
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          const particleElapsed = Math.max(0, elapsed - p.delay);
+          const progress = Math.min(1, particleElapsed / duration);
 
-        if (progress < 1) {
-          allSettled = false;
+          if (progress < 1) {
+            allSettled = false;
+          }
+
+          const eased = easeOutCubic(progress);
+          const currentX = p.startX + (p.targetX - p.startX) * eased;
+          const currentY = p.startY + (p.targetY - p.startY) * eased;
+          
+          // Particles arrive vibrant, then dissolve seamlessly into the underlying text as they settle
+          const fadeOut = progress > 0.75 ? (1 - progress) / 0.25 : 1;
+          const alpha = Math.min(1, progress * 1.5) * fadeOut;
+
+          if (alpha > 0.01) {
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(currentX, currentY, p.size, 0, Math.PI * 2);
+            ctx.fill();
+          }
         }
 
-        const eased = easeOutCubic(progress);
-        const currentX = p.startX + (p.targetX - p.startX) * eased;
-        const currentY = p.startY + (p.targetY - p.startY) * eased;
-        const alpha = Math.min(1, progress * 1.5);
+        ctx.restore();
 
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(currentX, currentY, p.size, 0, Math.PI * 2);
-        ctx.fill();
-      }
+        if (allSettled && elapsed > duration + 200) {
+          // Transition to static text and stop rAF loop completely
+          setAnimationCompleted(true);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          return;
+        }
 
-      ctx.restore();
+        if (isVisible) {
+          animationFrameId = requestAnimationFrame(render);
+        }
+      };
 
-      if (allSettled && elapsed > duration + 350) {
-        // Transition to static text and stop rAF loop completely
-        setAnimationCompleted(true);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        return;
-      }
-
-      if (isVisible) {
-        animationFrameId = requestAnimationFrame(render);
-      }
+      renderFn = render;
+      animationFrameId = requestAnimationFrame(render);
     };
 
-    renderFn = render;
-    animationFrameId = requestAnimationFrame(render);
-  };
+    startEffect();
 
-  startEffect();
-
-  // Page Visibility API to pause when tab is backgrounded
-  const handleVisibilityChange = () => {
-    if (document.hidden) {
-      isVisible = false;
-      cancelAnimationFrame(animationFrameId);
-    } else {
-      isVisible = true;
-      // Resume with adjusted start time
-      if (!animationCompleted && renderFn) {
-        animationFrameId = requestAnimationFrame(renderFn);
+    // Page Visibility API to pause when tab is backgrounded
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        isVisible = false;
+        cancelAnimationFrame(animationFrameId);
+      } else {
+        isVisible = true;
+        if (!hasRunRef.current && renderFn) {
+          animationFrameId = requestAnimationFrame(renderFn);
+        }
       }
-    }
-  };
+    };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
@@ -246,7 +255,7 @@ export function ParticleText({
       cancelAnimationFrame(animationFrameId);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [text, highlightColor, textColor, particleSize, duration, shouldReduceMotion, animationCompleted]);
+  }, [text, highlightColor, textColor, particleSize, duration, shouldReduceMotion]);
 
   return (
     <div ref={containerRef} className="relative inline-block w-full">
@@ -255,7 +264,13 @@ export function ParticleText({
         ref={textRef}
         className={className}
       >
-        {text}
+        {text.includes("\n")
+          ? text.split("\n").map((line, i) => (
+              <span key={i} className="block">
+                {line}
+              </span>
+            ))
+          : text}
       </span>
 
       {/* Decorative Canvas Layer (active only during the one-time gathering arrival) */}

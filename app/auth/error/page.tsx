@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { ArrowLeft, ArrowRight, ShieldAlert } from "lucide-react";
+
 
 async function ErrorContent({
   searchParams,
@@ -7,11 +9,11 @@ async function ErrorContent({
   searchParams: Promise<{ error?: string }>;
 }) {
   const params = await searchParams;
-  const errorMsg = params?.error || "Authentication flow encountered an unrecoverable exception.";
+  const rawMsg = params?.error || "The confirmation link is invalid, expired, or has already been used.";
 
   return (
-    <div className="p-4 rounded-lg bg-red-950/30 border border-red-500/20 text-xs font-mono text-red-200 break-all leading-relaxed">
-      {errorMsg}
+    <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-xs text-red-900 leading-relaxed font-mono break-words">
+      {rawMsg}
     </div>
   );
 }
@@ -23,36 +25,54 @@ export default function AuthErrorPage({
 }) {
   return (
     <div className="w-full space-y-6">
-      <div className="w-12 h-12 rounded-xl bg-red-950/40 border border-red-500/30 flex items-center justify-center text-red-400">
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
+      <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 shadow-2xs">
+        <ShieldAlert className="w-6 h-6 text-amber-700" />
       </div>
 
       <div>
-        <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#191923] border border-white/[0.06] text-[11px] font-mono text-red-400 mb-3">
-          <span>AUTHENTICATION FAULT</span>
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EAF3ED] border border-[#D5E5D9] text-[11px] font-mono text-[#174530] mb-3 shadow-2xs">
+          <span>AUTHENTICATION NOTICE</span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#F5F4FA]">
+        <h2 className="text-2xl sm:text-3xl font-serif tracking-tight text-[#202824]">
           Verification Interrupted
         </h2>
-        <p className="text-sm text-[#A5A3B2] mt-2 leading-relaxed">
-          The requested authentication token is invalid or expired.
+        <p className="text-sm text-[#69736D] mt-2 leading-relaxed">
+          The link you used may have expired, already been verified, or experienced a network timeout.
         </p>
       </div>
 
-      <Suspense fallback={<div className="h-16 bg-white/[0.04] rounded-lg animate-pulse" />}>
+      <Suspense fallback={<div className="h-16 bg-[#EAF3ED]/40 rounded-xl animate-pulse" />}>
         <ErrorContent searchParams={searchParams} />
       </Suspense>
 
-      <div className="pt-2">
+      <div className="p-4 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] space-y-2 text-xs text-[#404D44]">
+        <div className="font-semibold font-mono text-[#202824] uppercase tracking-wide">
+          Quick Recovery Steps
+        </div>
+        <ul className="list-disc list-inside space-y-1.5 text-[#69736D]">
+          <li>If you already confirmed previously, your credentials may already be active. Try signing in directly.</li>
+          <li>If the link expired, submit a fresh registration or request a password reset.</li>
+        </ul>
+      </div>
+
+      <div className="pt-2 flex flex-col gap-2.5">
         <Link
           href="/auth/login"
-          className="inline-flex items-center justify-center w-full h-11 rounded-lg bg-gradient-to-r from-[#A99AFF] to-[#8C7BFF] hover:from-[#B9ACFF] hover:to-[#9B8BFF] text-[#09090F] font-semibold text-sm transition-all"
+          className="w-full min-h-[44px] h-11 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white text-xs font-semibold flex items-center justify-center gap-2 transition-colors shadow-xs"
         >
-          Return to Login
+          <span>Sign In With Your Password</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+
+        <Link
+          href="/auth/sign-up?intent=lawyer"
+          className="w-full min-h-[44px] h-11 rounded-xl bg-white hover:bg-[#EAF3ED] border border-[#D5E5D9] text-[#202824] text-xs font-semibold flex items-center justify-center gap-2 transition-colors shadow-2xs"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Return to Advocate Registration</span>
         </Link>
       </div>
     </div>
   );
 }
+

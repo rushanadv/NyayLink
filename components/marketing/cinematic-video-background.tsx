@@ -28,28 +28,28 @@ export function CinematicVideoBackground() {
 
   return (
     <>
-      {/* Mobile Subtle Ambient Gold-Green Glow (Lightweight, Non-Intrusive, Battery-Friendly) */}
+      {/* Mobile & Tablet Subtle Ambient Gold-Green Glow (Preserves pristine text contrast) */}
       <div
-        className="block md:hidden fixed top-0 right-0 w-[65vw] h-[35vh] pointer-events-none z-0 opacity-20 select-none"
+        className="block lg:hidden fixed top-0 right-0 w-[65vw] h-[35vh] pointer-events-none z-0 opacity-25 select-none"
         aria-hidden="true"
         style={{
           background:
-            "radial-gradient(ellipse at top right, rgba(32, 92, 67, 0.45) 0%, rgba(220, 180, 95, 0.3) 40%, transparent 75%)",
+            "radial-gradient(ellipse at top right, rgba(32, 92, 67, 0.4) 0%, rgba(220, 180, 95, 0.25) 40%, transparent 75%)",
         }}
       />
 
-      {/* Desktop & Tablet Persistent Fixed Cinematic Video Layer */}
+      {/* Desktop Persistent Fixed Cinematic Video Layer (aligned with visual preview column) */}
       <div
-        className="hidden md:block fixed top-0 right-0 w-[55vw] lg:w-[58vw] xl:w-[52vw] h-screen pointer-events-none z-0 overflow-hidden select-none"
+        className="hidden lg:block fixed top-0 right-0 w-[50vw] xl:w-[48vw] h-screen pointer-events-none z-0 overflow-hidden select-none"
         aria-hidden="true"
         style={{
-        // Linear fade mask across the horizontal axis: blends seamlessly into the dominant white canvas on the left
-        maskImage:
-          "linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.08) 12%, rgba(0, 0, 0, 0.6) 35%, rgba(0, 0, 0, 0.95) 60%, #000 85%)",
-        WebkitMaskImage:
-          "linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.08) 12%, rgba(0, 0, 0, 0.6) 35%, rgba(0, 0, 0, 0.95) 60%, #000 85%)",
-      }}
-    >
+          // Linear fade mask: leaves the text area 100% pure white, fading in smoothly across the visual column
+          maskImage:
+            "linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.04) 15%, rgba(0, 0, 0, 0.45) 45%, rgba(0, 0, 0, 0.95) 75%, #000 90%)",
+          WebkitMaskImage:
+            "linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.04) 15%, rgba(0, 0, 0, 0.45) 45%, rgba(0, 0, 0, 0.95) 75%, #000 90%)",
+        }}
+      >
       {/* Secondary elliptical vignette mask to soften top, bottom, and right boundaries */}
       <div
         className="relative w-full h-full"

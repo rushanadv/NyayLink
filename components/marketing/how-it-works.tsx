@@ -76,7 +76,7 @@ export function HowItWorks() {
               key={step.number}
               initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
+              viewport={{ once: true, margin: "0px 0px -40px 0px" }}
               transition={{ duration: 0.5, delay: idx * 0.12 }}
               className="rounded-2xl bg-white border border-[#D5E5D9] hover:border-[#205C43]/50 p-7 flex flex-col justify-between shadow-xs transition-all relative group"
             >

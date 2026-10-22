@@ -10,8 +10,9 @@ export default function AuthLayout({
   return (
     <div className="min-h-screen w-full bg-white text-[#202824] font-sans flex flex-col md:flex-row antialiased selection:bg-[#205C43]/20 selection:text-[#202824] relative overflow-hidden">
       {/* LEFT SIDE — EDITORIAL BRAND WORLD (58% Desktop) */}
-      <div className="relative w-full md:w-[54%] lg:w-[58%] flex flex-col justify-between p-8 sm:p-12 lg:p-16 border-b md:border-b-0 md:border-r border-[#D5E5D9] overflow-hidden bg-gradient-to-b from-white via-[#FAFCFB] to-[#EAF3ED]/40">
+      <div className="relative w-full md:w-[54%] lg:w-[58%] flex flex-col justify-between p-4 sm:p-6 md:p-12 lg:p-16 border-b md:border-b-0 md:border-r border-[#D5E5D9] overflow-hidden bg-gradient-to-b from-white via-[#FAFCFB] to-[#EAF3ED]/40">
         {/* Subtle Architectural Atmosphere */}
+
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           {/* Faint green luminous ambient light */}
           <div className="absolute -top-[20%] -left-[10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-[#205C43]/8 to-transparent blur-[100px]" />
@@ -96,8 +97,9 @@ export default function AuthLayout({
       </div>
 
       {/* RIGHT SIDE — AUTHENTICATION SURFACE (42% Desktop) */}
-      <div className="w-full md:w-[46%] lg:w-[42%] flex items-center justify-center p-6 sm:p-10 lg:p-14 bg-white relative">
+      <div className="w-full md:w-[46%] lg:w-[42%] flex items-center justify-center p-4 sm:p-8 lg:p-14 bg-white relative">
         <div className="w-full max-w-md relative z-10">
+
           {children}
         </div>
       </div>

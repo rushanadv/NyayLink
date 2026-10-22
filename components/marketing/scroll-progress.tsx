@@ -60,7 +60,7 @@ export function ScrollProgress() {
 
   return (
     <nav
-      className="fixed bottom-8 left-6 z-40 hidden lg:flex flex-col items-start p-2 rounded-full bg-white/95 backdrop-blur-md border border-[#D5E5D9] shadow-lg shadow-[#202824]/5 transition-all select-none"
+      className="fixed bottom-8 left-6 z-40 hidden xl:flex flex-col items-start p-2 rounded-full bg-white/95 backdrop-blur-md border border-[#D5E5D9] shadow-lg shadow-[#202824]/5 transition-all select-none"
       aria-label="Section Navigation Rail"
     >
       <div className="relative flex flex-col gap-3 items-center py-1">
@@ -106,16 +106,12 @@ export function ScrollProgress() {
                 }`}
               />
 
-              {/* Tooltip Label on Hover / Active */}
-              {(isHovered || isActive) && (
+              {/* Tooltip Label on Hover */}
+              {isHovered && (
                 <div
-                  className={`absolute left-8 px-2.5 py-1 rounded-lg text-[11px] font-mono whitespace-nowrap transition-all duration-200 pointer-events-none shadow-md ${
-                    isActive
-                      ? "bg-[#205C43] text-white border border-[#174530] opacity-100 translate-x-0"
-                      : "bg-white text-[#69736D] border border-[#D5E5D9] opacity-95 translate-x-0"
-                  }`}
+                  className="absolute left-8 px-2.5 py-1 rounded-lg text-[11px] font-mono whitespace-nowrap transition-all duration-200 pointer-events-none shadow-md bg-white text-[#202824] border border-[#D5E5D9] opacity-100"
                 >
-                  <span className={isActive ? "text-[#EAF3ED] mr-1.5 font-bold" : "text-[#205C43] mr-1.5 font-bold"}>
+                  <span className="text-[#205C43] mr-1.5 font-bold">
                     {sec.number}
                   </span>
                   <span>{sec.name}</span>

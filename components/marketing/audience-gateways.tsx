@@ -39,7 +39,7 @@ export function AudienceGateways() {
         <motion.div
           initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
+          viewport={{ once: true, margin: "0px 0px -40px 0px" }}
           transition={{ duration: 0.5 }}
           className="lg:col-span-6 rounded-2xl bg-white border border-[#D5E5D9] hover:border-[#205C43]/50 p-7 sm:p-9 flex flex-col justify-between shadow-lg shadow-[#202824]/4 transition-all relative overflow-hidden group"
         >
@@ -116,7 +116,7 @@ export function AudienceGateways() {
         <motion.div
           initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
+          viewport={{ once: true, margin: "0px 0px -40px 0px" }}
           transition={{ duration: 0.5, delay: 0.1 }}
           className="lg:col-span-6 rounded-2xl bg-white/95 md:bg-[#EAF3ED]/90 backdrop-blur-md border border-[#D5E5D9] hover:border-[#174530] p-7 sm:p-9 flex flex-col justify-between shadow-lg shadow-[#202824]/4 transition-all relative overflow-hidden group"
         >

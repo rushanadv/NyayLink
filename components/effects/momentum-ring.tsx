@@ -81,7 +81,22 @@ export function MomentumRing({ className = "" }: { className?: string }) {
 
   const numPanels = CREDENTIAL_PANELS.length;
   const angleStep = 360 / numPanels;
-  const radius = 230; // Radius in 3D space
+  const [radius, setRadius] = useState<number>(220);
+
+  useEffect(() => {
+    const updateRadius = () => {
+      if (window.innerWidth < 480) {
+        setRadius(160);
+      } else if (window.innerWidth < 768) {
+        setRadius(190);
+      } else {
+        setRadius(220);
+      }
+    };
+    updateRadius();
+    window.addEventListener("resize", updateRadius);
+    return () => window.removeEventListener("resize", updateRadius);
+  }, []);
 
   // Snap to nearest 360/N index
   const snapToNearest = useCallback(() => {
@@ -273,7 +288,7 @@ export function MomentumRing({ className = "" }: { className?: string }) {
         {/* Revolving Inner Ring */}
         <div
           ref={ringRef}
-          className="relative w-[230px] h-[190px] flex items-center justify-center"
+          className="relative w-[190px] sm:w-[230px] h-[175px] sm:h-[190px] flex items-center justify-center"
           style={{
             transformStyle: "preserve-3d",
             willChange: "transform",
@@ -288,7 +303,7 @@ export function MomentumRing({ className = "" }: { className?: string }) {
               <div
                 key={panel.id}
                 onClick={() => rotateToPanel(i)}
-                className={`absolute inset-0 p-5 rounded-xl border backdrop-blur-md transition-colors duration-300 flex flex-col justify-between shadow-md ${
+                className={`absolute inset-0 p-4 sm:p-5 rounded-xl border backdrop-blur-md transition-colors duration-300 flex flex-col justify-between shadow-md ${
                   isFacing
                     ? "bg-white border-[#205C43]/50 shadow-[0_15px_35px_rgba(32,92,67,0.1)]"
                     : "bg-[#FAFCFB] border-[#D5E5D9] opacity-80 shadow-xs"

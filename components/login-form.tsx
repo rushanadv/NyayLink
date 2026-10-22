@@ -8,22 +8,25 @@ import { getPostLoginRedirectPath } from "@/lib/auth/post-login-redirect";
 import { User, Briefcase, Eye, EyeOff } from "lucide-react";
 
 export function LoginForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDemoLoading, setIsDemoLoading] = useState(false);
-
   const router = useRouter();
   const searchParams = useSearchParams();
   // Support both 'intent' and 'role' query parameters as presentation hints
   const roleHint = searchParams.get("role") || searchParams.get("intent");
   const isLawyerIntent = roleHint === "lawyer";
+  const initialEmail = searchParams.get("email") || "";
+
+  const [email, setEmail] = useState(initialEmail);
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isEmailUnconfirmed, setIsEmailUnconfirmed] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDemoLoading, setIsDemoLoading] = useState(false);
 
   const handleDemoLogin = async (role: "client" | "lawyer") => {
     setIsDemoLoading(true);
     setError(null);
+    setIsEmailUnconfirmed(false);
     try {
       const res = await fetch("/api/auth/demo-login", {
         method: "POST",
@@ -48,16 +51,23 @@ export function LoginForm() {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setIsEmailUnconfirmed(false);
 
     try {
       const supabase = createClient();
 
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
+        email: email.trim().toLowerCase(),
         password,
       });
 
       if (signInError) {
+        const errorMsg = signInError.message.toLowerCase();
+        if (errorMsg.includes("email not confirmed") || errorMsg.includes("email_not_confirmed")) {
+          setIsEmailUnconfirmed(true);
+          setError("Your email has not been confirmed yet.");
+          return;
+        }
         throw signInError;
       }
 
@@ -88,6 +98,7 @@ export function LoginForm() {
   };
 
   const nextParam = searchParams.get("next");
+
   const nextQuery = nextParam ? `&next=${encodeURIComponent(nextParam)}` : "";
 
   return (
@@ -180,9 +191,22 @@ export function LoginForm() {
                 d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
               />
             </svg>
-            <span className="leading-relaxed font-medium">{error}</span>
+            <div className="flex-1 space-y-1.5">
+              <span className="leading-relaxed font-medium block">{error}</span>
+              {isEmailUnconfirmed && (
+                <div className="pt-1">
+                  <Link
+                    href={`/auth/sign-up-success?intent=${isLawyerIntent ? "lawyer" : "client"}&email=${encodeURIComponent(email)}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-900 font-semibold transition-colors"
+                  >
+                    <span>Resend verification email</span>
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         )}
+
 
         {/* Email Field */}
         <div className="space-y-1.5">
