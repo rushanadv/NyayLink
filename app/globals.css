@@ -169,3 +169,29 @@ html.lenis, html.lenis body {
   pointer-events: none;
 }
 
+/* NyayLink Animated Rainbow Perimeter & Edge Glow */
+@property --rainbow-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes rainbow-rotate {
+  0% {
+    --rainbow-angle: 0deg;
+  }
+  100% {
+    --rainbow-angle: 360deg;
+  }
+}
+
+.animate-rainbow-border {
+  animation: rainbow-rotate 11s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rainbow-border {
+    animation: none !important;
+  }
+}
+

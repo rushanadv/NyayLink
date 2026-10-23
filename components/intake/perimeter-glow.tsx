@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useRef, useEffect, useState, memo } from "react";
-import { Scale, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import { NyayLinkLogo } from "@/components/ui/nyaylink-logo";
 
 interface PerimeterGlowProps {
   children: React.ReactNode;
@@ -10,11 +11,15 @@ interface PerimeterGlowProps {
 }
 
 /**
- * Cursor-reactive edge-lit perimeter treatment inspired by the Oryzo.ai interaction,
- * adapted specifically for NyayLink's white-and-forest-green legal aesthetic.
+ * Animated Rainbow Perimeter & Pointer-Reactive Edge Glow
  *
- * Employs CSS variables, requestAnimationFrame interpolation, layered gradients,
- * and backdrop masks to create an ambient, edge-shifting glow without 3D WebGL overhead.
+ * Implements the color-shifting illuminated edge treatment from the reference recordings:
+ * - A continuous rotating rainbow conic spectrum (Forest Green -> Emerald -> Cyan -> Sapphire -> Violet -> Magenta -> Amber -> Green)
+ * - Crisp 1.5px masked perimeter stroke without color blocking
+ * - Outer soft blurred halo (24px blur) creating ambient luminosity
+ * - Pointer-reactive spotlight tracking cursor position with smooth lerp damping and natural lag
+ * - Pure CSS animation & variable interpolation for 60fps performance without 3D canvas overhead
+ * - Full support for prefers-reduced-motion and touch devices
  */
 export const PerimeterGlowContainer = memo(function PerimeterGlowContainer({
   children,
@@ -25,10 +30,17 @@ export const PerimeterGlowContainer = memo(function PerimeterGlowContainer({
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
 
-  // Mouse tracking state with smooth linear interpolation (lerp)
-  const mousePos = useRef({ x: 50, y: 50, targetX: 50, targetY: 50 });
+  // Smooth pointer tracking with lerp interpolation
+  const mouseState = useRef({
+    currentX: 50,
+    currentY: 50,
+    targetX: 50,
+    targetY: 50,
+    currentIntensity: 0,
+    targetIntensity: 0,
+  });
+
   const idleTimer = useRef<NodeJS.Timeout | null>(null);
-  const [isIdle, setIsIdle] = useState(true);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -41,33 +53,51 @@ export const PerimeterGlowContainer = memo(function PerimeterGlowContainer({
       const x = ((e.clientX - rect.left) / rect.width) * 100;
       const y = ((e.clientY - rect.top) / rect.height) * 100;
 
-      mousePos.current.targetX = Math.max(0, Math.min(100, x));
-      mousePos.current.targetY = Math.max(0, Math.min(100, y));
+      mouseState.current.targetX = Math.max(0, Math.min(100, x));
+      mouseState.current.targetY = Math.max(0, Math.min(100, y));
+      mouseState.current.targetIntensity = 1.0;
 
-      setIsIdle(false);
       if (idleTimer.current) clearTimeout(idleTimer.current);
-      idleTimer.current = setTimeout(() => setIsIdle(true), 2500);
+      idleTimer.current = setTimeout(() => {
+        // Settle back to subtle ambient intensity after 2s idle
+        mouseState.current.targetIntensity = 0.35;
+      }, 2200);
     };
 
-    const handlePointerEnter = () => setIsHovered(true);
+    const handlePointerEnter = () => {
+      setIsHovered(true);
+      mouseState.current.targetIntensity = 0.9;
+    };
+
     const handlePointerLeave = () => {
       setIsHovered(false);
-      setIsIdle(true);
-      mousePos.current.targetX = 50;
-      mousePos.current.targetY = 50;
+      mouseState.current.targetIntensity = 0;
+      // Gently return pointer center
+      mouseState.current.targetX = 50;
+      mouseState.current.targetY = 50;
+      if (idleTimer.current) clearTimeout(idleTimer.current);
     };
 
-    const handleFocusIn = () => setIsFocused(true);
-    const handleFocusOut = () => setIsFocused(false);
+    const handleFocusIn = () => {
+      setIsFocused(true);
+      mouseState.current.targetIntensity = 0.85;
+    };
 
-    // Lerp loop for fluid, non-abrupt cursor tracking
+    const handleFocusOut = () => {
+      setIsFocused(false);
+      mouseState.current.targetIntensity = isHovered ? 0.9 : 0;
+    };
+
+    // RAF Loop for smooth lerp lag (12% lerp per frame = natural silky damping)
     const updateGlow = () => {
-      const current = mousePos.current;
-      current.x += (current.targetX - current.x) * 0.12;
-      current.y += (current.targetY - current.y) * 0.12;
+      const state = mouseState.current;
+      state.currentX += (state.targetX - state.currentX) * 0.12;
+      state.currentY += (state.targetY - state.currentY) * 0.12;
+      state.currentIntensity += (state.targetIntensity - state.currentIntensity) * 0.08;
 
-      container.style.setProperty("--glow-x", `${current.x.toFixed(2)}%`);
-      container.style.setProperty("--glow-y", `${current.y.toFixed(2)}%`);
+      container.style.setProperty("--pointer-x", `${state.currentX.toFixed(2)}%`);
+      container.style.setProperty("--pointer-y", `${state.currentY.toFixed(2)}%`);
+      container.style.setProperty("--pointer-intensity", state.currentIntensity.toFixed(3));
 
       animFrame = requestAnimationFrame(updateGlow);
     };
@@ -89,55 +119,58 @@ export const PerimeterGlowContainer = memo(function PerimeterGlowContainer({
       cancelAnimationFrame(animFrame);
       if (idleTimer.current) clearTimeout(idleTimer.current);
     };
-  }, []);
+  }, [isHovered]);
 
-  // Intensity state computation
-  const intensity = isFocused ? 0.95 : isHovered ? 0.8 : isActive ? 0.7 : isIdle ? 0.42 : 0.65;
+  // Ambient baseline opacity
+  const ambientHaloOpacity = isFocused ? 0.85 : isHovered ? 0.75 : isActive ? 0.65 : 0.48;
 
   return (
     <div
       ref={containerRef}
-      className={`relative rounded-2xl group transition-shadow duration-700 ${className}`}
+      className={`relative rounded-2xl group transition-all duration-500 ${className}`}
       style={
         {
-          "--glow-x": "50%",
-          "--glow-y": "50%",
-          "--glow-intensity": intensity,
+          "--pointer-x": "50%",
+          "--pointer-y": "50%",
+          "--pointer-intensity": "0",
         } as React.CSSProperties
       }
     >
-      {/* Layer 1: Exterior Perimeter Aura (Soft radial wash outside the border) */}
+      {/* LAYER 1: Outer Rainbow Halo Glow (24px blur creates soft radiant luminescence) */}
       <div
-        className="absolute -inset-1.5 sm:-inset-2 rounded-3xl pointer-events-none transition-opacity duration-700 z-0 blur-xl opacity-60"
+        className="absolute -inset-2 sm:-inset-2.5 rounded-3xl pointer-events-none z-0 blur-[24px] transition-opacity duration-700 animate-rainbow-border motion-reduce:animate-none"
         style={{
-          opacity: `calc(var(--glow-intensity) * 0.75)`,
-          background: `
-            radial-gradient(
-              550px circle at var(--glow-x) var(--glow-y),
-              rgba(16, 185, 129, 0.45) 0%,
-              rgba(32, 92, 67, 0.35) 30%,
-              rgba(234, 243, 237, 0.25) 55%,
-              transparent 75%
-            )
-          `,
+          opacity: ambientHaloOpacity,
+          background: `conic-gradient(from var(--rainbow-angle, 0deg) at 50% 50%,
+            #205C43 0deg,
+            #10B981 40deg,
+            #06B6D4 90deg,
+            #3B82F6 140deg,
+            #8B5CF6 190deg,
+            #EC4899 240deg,
+            #F59E0B 290deg,
+            #10B981 330deg,
+            #205C43 360deg
+          )`,
         }}
         aria-hidden="true"
       />
 
-      {/* Layer 2: Edge-Lit Perimeter Trace (Crisp border highlight following the cursor) */}
+      {/* LAYER 2: Crisp Animated Rainbow Perimeter Stroke (Strict 1.5px border via mask) */}
       <div
-        className="absolute -inset-[1px] rounded-2xl pointer-events-none transition-opacity duration-500 z-0 opacity-80"
+        className="absolute -inset-[1.5px] rounded-2xl pointer-events-none z-0 animate-rainbow-border motion-reduce:animate-none transition-opacity duration-500"
         style={{
-          opacity: `var(--glow-intensity)`,
-          background: `
-            radial-gradient(
-              420px circle at var(--glow-x) var(--glow-y),
-              #10B981 0%,
-              #205C43 35%,
-              #EAF3ED 70%,
-              transparent 100%
-            )
-          `,
+          background: `conic-gradient(from var(--rainbow-angle, 0deg) at 50% 50%,
+            #205C43 0deg,
+            #10B981 40deg,
+            #06B6D4 90deg,
+            #3B82F6 140deg,
+            #8B5CF6 190deg,
+            #EC4899 240deg,
+            #F59E0B 290deg,
+            #10B981 330deg,
+            #205C43 360deg
+          )`,
           mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
           maskComposite: "exclude",
           WebkitMaskComposite: "xor",
@@ -146,43 +179,55 @@ export const PerimeterGlowContainer = memo(function PerimeterGlowContainer({
         aria-hidden="true"
       />
 
-      {/* Layer 3: Ambient Color Drift Ring (Breathing rotational movement along perimeter) */}
+      {/* LAYER 3: Pointer-Reactive Edge Spotlight (Brightens nearest perimeter sector) */}
       <div
-        className="absolute -inset-[2px] rounded-2xl pointer-events-none z-0 opacity-30 mix-blend-multiply motion-reduce:hidden"
+        className="absolute -inset-[1.5px] rounded-2xl pointer-events-none z-0 transition-opacity duration-200"
         style={{
-          background: `conic-gradient(from 0deg at 50% 50%, rgba(32,92,67,0.3) 0deg, rgba(16,185,129,0.4) 90deg, rgba(234,243,237,0.6) 180deg, rgba(32,92,67,0.3) 360deg)`,
-          animation: "edge-drift 14s linear infinite",
+          opacity: "var(--pointer-intensity, 0)",
+          background: `radial-gradient(
+            360px circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+            rgba(255, 255, 255, 0.95) 0%,
+            rgba(255, 255, 255, 0.4) 35%,
+            rgba(255, 255, 255, 0.1) 60%,
+            transparent 85%
+          )`,
           mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
           maskComposite: "exclude",
           WebkitMaskComposite: "xor",
           padding: "1.5px",
+          mixBlendMode: "overlay",
         }}
         aria-hidden="true"
       />
 
-      {/* Inner Container: Solid White surface protecting readable text */}
-      <div className="relative z-10 w-full h-full bg-white rounded-2xl overflow-hidden shadow-sm">
+      {/* LAYER 4: Pointer-Reactive Soft Bloom Flare (Follows cursor smoothly outside edge) */}
+      <div
+        className="absolute -inset-2 rounded-3xl pointer-events-none z-0 blur-[18px] transition-opacity duration-300"
+        style={{
+          opacity: "calc(var(--pointer-intensity, 0) * 0.7)",
+          background: `radial-gradient(
+            320px circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+            rgba(16, 185, 129, 0.5) 0%,
+            rgba(6, 182, 212, 0.35) 30%,
+            rgba(139, 92, 246, 0.25) 55%,
+            transparent 80%
+          )`,
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Solid White Interior Surface (Protects 100% readability of text and inputs) */}
+      <div className="relative z-10 w-full h-full bg-white rounded-2xl overflow-hidden shadow-sm flex flex-col">
         {children}
       </div>
-
-      <style jsx global>{`
-        @keyframes edge-drift {
-          0% {
-            transform: rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg);
-          }
-        }
-      `}</style>
     </div>
   );
 });
 
 /**
  * Interactive NyayLink Legal Compass Motif for the initial empty state.
- * Responds subtly to pointer proximity with gentle 3D tilt and light reflection,
- * communicating clarity, trust, and focus before a conversation begins.
+ * Features the official Lady Justice emblem in an orbital celestial frame,
+ * with subtle pointer-proximity 3D tilt.
  */
 export const LegalCompassMotif = memo(function LegalCompassMotif() {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -199,10 +244,10 @@ export const LegalCompassMotif = memo(function LegalCompassMotif() {
     const dx = (e.clientX - cx) / (rect.width / 2);
     const dy = (e.clientY - cy) / (rect.height / 2);
 
-    // Subtle restrained tilt (-5deg to +5deg)
+    // Subtle restrained tilt (-4deg to +4deg)
     setTilt({
-      x: -dy * 5,
-      y: dx * 5,
+      x: -dy * 4,
+      y: dx * 4,
     });
   };
 
@@ -215,22 +260,22 @@ export const LegalCompassMotif = memo(function LegalCompassMotif() {
       ref={cardRef}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
-      className="flex flex-col items-center justify-center text-center py-6 sm:py-8 px-4 cursor-default select-none transition-transform duration-300 ease-out"
+      className="flex flex-col items-center justify-center text-center py-2 sm:py-2.5 px-4 cursor-default select-none transition-transform duration-300 ease-out"
       style={{
         transform: `perspective(800px) rotateX(${tilt.x.toFixed(2)}deg) rotateY(${tilt.y.toFixed(2)}deg)`,
       }}
     >
-      {/* Concentric Compass Emblem */}
-      <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-5 flex items-center justify-center">
+      {/* Concentric Compass Emblem with Official Lady Justice Logo */}
+      <div className="relative w-12 h-12 sm:w-16 sm:h-16 mb-1.5 sm:mb-2 flex items-center justify-center">
         {/* Outer orbital ring */}
         <div className="absolute inset-0 rounded-full border border-[#D5E5D9] animate-[spin_24s_linear_infinite] opacity-60" />
 
         {/* Middle dashed compass ring */}
-        <div className="absolute inset-2 rounded-full border border-dashed border-[#205C43]/40 animate-[spin_18s_linear_infinite_reverse]" />
+        <div className="absolute inset-1.5 rounded-full border border-dashed border-[#205C43]/40 animate-[spin_18s_linear_infinite_reverse]" />
 
-        {/* Inner radiant node */}
-        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-[#EAF3ED] via-white to-[#D5E5D9]/50 border border-[#D5E5D9] flex items-center justify-center text-[#205C43] shadow-md shadow-[#205C43]/10 relative z-10 transition-transform hover:scale-105">
-          <Scale className="w-6 h-6 text-[#205C43]" />
+        {/* Center node: Official Lady Justice Emblem */}
+        <div className="relative z-10 transition-transform hover:scale-105 duration-200">
+          <NyayLinkLogo variant="symbol" size={26} href={false} />
         </div>
 
         {/* Cardinal tick dots */}
@@ -241,14 +286,13 @@ export const LegalCompassMotif = memo(function LegalCompassMotif() {
       </div>
 
       {/* Editorial Title */}
-      <h3 className="text-xl sm:text-2xl font-serif font-semibold text-[#174530] tracking-tight mb-2 flex items-center gap-2">
-        <span>Nyay AI Legal Intake</span>
+      <h3 className="text-lg sm:text-xl font-serif font-semibold text-[#174530] tracking-tight mb-1 flex items-center gap-1.5">
+        <span>What would you like help understanding?</span>
         <Sparkles className="w-4 h-4 text-[#205C43]" />
       </h3>
 
-      <p className="text-xs sm:text-sm text-[#69736D] max-w-md leading-relaxed">
-        Describe your legal dispute, notice, or question in plain language.
-        Receive statutory provisions, procedural orientation, and guidance for counsel.
+      <p className="text-xs text-[#69736D] max-w-md leading-relaxed">
+        Describe your legal dispute, notice, or question in plain language for statutory guidance.
       </p>
     </div>
   );

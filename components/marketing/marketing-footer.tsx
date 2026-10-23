@@ -2,7 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import { Scale, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
+import { NyayLinkLogo } from "@/components/ui/nyaylink-logo";
 
 export function MarketingFooter() {
   // Site-wide white and green brand identity
@@ -20,24 +21,7 @@ export function MarketingFooter() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
           {/* Brand Info */}
           <div className="md:col-span-5 space-y-4">
-            <div className="flex items-center gap-2.5">
-              <div
-                className={`w-8 h-8 rounded-lg border flex items-center justify-center ${
-                  isDarkSubpage
-                    ? "bg-white/[0.04] border-white/[0.1] text-white"
-                    : "bg-[#EAF3ED] border-[#D5E5D9] text-[#205C43]"
-                }`}
-              >
-                <Scale className="w-4 h-4 text-[#205C43]" />
-              </div>
-              <span
-                className={`font-serif text-lg font-medium tracking-tight ${
-                  isDarkSubpage ? "text-white" : "text-[#202824]"
-                }`}
-              >
-                NyayLink
-              </span>
-            </div>
+            <NyayLinkLogo size="sm" />
             <p className="text-xs leading-relaxed max-w-sm">
               Democratizing access to verified legal counsel across India.
               Plain-language intake, transparent milestone escrow, and certified Bar

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import type { AdminDashboardTab, UserRole } from "@/lib/admin/types";
 import { LogoutButton } from "@/components/logout-button";
+import { NyayLinkLogo } from "@/components/ui/nyaylink-logo";
 
 interface AdminSidebarProps {
   currentTab: AdminDashboardTab;
@@ -51,24 +52,7 @@ export function AdminSidebar({
     <aside className="w-64 bg-[#09090F] border-r border-white/[0.06] flex flex-col shrink-0 min-h-screen text-[#A5A3B2] select-none font-sans">
       {/* Brand Header with Custom Obsidian Monogram */}
       <div className="h-20 px-6 flex items-center border-b border-white/[0.06]">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1E1C30] to-[#121120] border border-[#A99AFF]/30 flex items-center justify-center shadow-[0_0_15px_rgba(169,154,255,0.18)]">
-            <span className="font-mono text-xs font-bold text-[#A99AFF] tracking-wider">NL</span>
-          </div>
-          <div className="flex flex-col">
-            <div className="flex items-center gap-1.5">
-              <span className="text-sm font-semibold tracking-tight text-[#F5F4FA]">
-                NyayLink
-              </span>
-              <span className="text-[10px] font-mono text-[#A99AFF]/80">
-                PROD
-              </span>
-            </div>
-            <span className="text-[10px] tracking-wide text-[#6F6E7D] font-mono">
-              Workspace IN-HQ
-            </span>
-          </div>
-        </div>
+        <NyayLinkLogo size="sm" theme="dark" subtitle="Admin HQ" href="/admin" />
       </div>
 
       {/* Navigation Links */}

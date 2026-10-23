@@ -25,6 +25,7 @@ import {
 import { MagneticWrapper } from "@/components/ui/magnetic-wrapper";
 import { FormattedMarkdown, markdownToPlainText } from "@/components/intake/formatted-markdown";
 import { PerimeterGlowContainer, LegalCompassMotif } from "@/components/intake/perimeter-glow";
+import { NyayLinkLogo } from "@/components/ui/nyaylink-logo";
 
 export interface ChatMessage {
   id: string;
@@ -459,11 +460,14 @@ export function ChatInterface() {
     messages.filter((m) => m.role === "assistant" && m.content.length > 20).length >= 1;
 
   return (
-    <PerimeterGlowContainer isActive={isLoading} className="w-full max-w-4xl mx-auto shadow-xl">
+    <PerimeterGlowContainer
+      isActive={isLoading}
+      className="w-full max-w-4xl mx-auto h-[calc(100dvh-9.5rem)] sm:h-[calc(100svh-11.5rem)] min-h-[460px] sm:min-h-[500px] max-h-[720px] flex flex-col shadow-xl"
+    >
       {/* Top Bar: Identity, Jurisdiction, and New Chat */}
-      <div className="px-5 py-3.5 border-b border-[#D5E5D9] bg-[#FDFEFC] flex flex-wrap items-center justify-between gap-3 text-xs select-none">
+      <div className="shrink-0 px-4 sm:px-5 py-2.5 sm:py-3 border-b border-[#D5E5D9] bg-[#FDFEFC] flex flex-wrap items-center justify-between gap-2.5 text-xs select-none">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#EAF3ED] border border-[#D5E5D9] flex items-center justify-center text-[#205C43]">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#EAF3ED] border border-[#D5E5D9] flex items-center justify-center text-[#205C43]">
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
@@ -479,7 +483,7 @@ export function ChatInterface() {
 
         <div className="flex items-center gap-2">
           {/* State Jurisdiction Picker */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white border border-[#D5E5D9] text-[11px] text-[#69736D] shadow-2xs">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-[#D5E5D9] text-[11px] text-[#69736D] shadow-2xs">
             <MapPin className="w-3.5 h-3.5 text-[#205C43]" />
             <select
               value={selectedState}
@@ -500,7 +504,7 @@ export function ChatInterface() {
             <button
               type="button"
               onClick={handleResetChat}
-              className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-[#EAF3ED] border border-[#D5E5D9] text-[#205C43] text-xs font-medium transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
+              className="px-2.5 py-1 rounded-lg bg-white hover:bg-[#EAF3ED] border border-[#D5E5D9] text-[#205C43] text-xs font-medium transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
               title="Start a new legal inquiry"
             >
               <PlusCircle className="w-3.5 h-3.5" />
@@ -513,7 +517,7 @@ export function ChatInterface() {
             <MagneticWrapper maxDisplacement={5}>
               <Link
                 href="/lawyers"
-                className="px-3.5 py-1.5 rounded-lg bg-[#205C43] hover:bg-[#174530] text-white font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-xs"
+                className="px-3.5 py-1 rounded-lg bg-[#205C43] hover:bg-[#174530] text-white font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-xs"
               >
                 <span>Find Advocates</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -524,7 +528,7 @@ export function ChatInterface() {
       </div>
 
       {/* Escrow & Confidentiality Micro-Banner */}
-      <div className="px-5 py-2 bg-[#EAF3ED]/40 border-b border-[#D5E5D9] flex items-center justify-between text-[11px] text-[#69736D]">
+      <div className="shrink-0 px-4 sm:px-5 py-1.5 bg-[#EAF3ED]/40 border-b border-[#D5E5D9] flex items-center justify-between text-[11px] text-[#69736D]">
         <div className="flex items-center gap-2">
           <Lock className="w-3 h-3 text-[#205C43]" />
           <span>Session is private & non-identifying. No broker touting.</span>
@@ -535,10 +539,10 @@ export function ChatInterface() {
       </div>
 
       {/* Messages Scroll Area */}
-      <div className="p-5 sm:p-7 space-y-6 overflow-y-auto max-h-[560px] bg-[#FFFFFF] min-h-[380px]">
+      <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-5 bg-[#FFFFFF] scroll-smooth">
         {/* Initial Empty State with Interactive Compass Motif and Gemini-style suggested prompts */}
         {messages.length === 0 && !isLoading && (
-          <div className="space-y-6 py-4">
+          <div className="space-y-4 py-2">
             <LegalCompassMotif />
 
             {/* Suggested Prompt Cards */}
@@ -550,7 +554,7 @@ export function ChatInterface() {
                     key={idx}
                     type="button"
                     onClick={() => handleSendMessage(item.prompt)}
-                    className="p-3.5 rounded-xl border border-[#D5E5D9] hover:border-[#205C43]/50 bg-white hover:bg-[#F8FAF9] text-left transition-all group flex items-start gap-3 shadow-2xs hover:shadow-xs cursor-pointer"
+                    className="p-2.5 sm:p-3 rounded-xl border border-[#D5E5D9] hover:border-[#205C43]/50 bg-white hover:bg-[#F8FAF9] text-left transition-all group flex items-start gap-2.5 shadow-2xs hover:shadow-xs cursor-pointer"
                   >
                     <div className="w-7 h-7 rounded-lg bg-[#EAF3ED] border border-[#D5E5D9] flex items-center justify-center text-[#205C43] shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
                       <IconComponent className="w-3.5 h-3.5" />
@@ -588,8 +592,8 @@ export function ChatInterface() {
                 {!isUser && (
                   <div className="flex items-center justify-between text-xs font-semibold mb-3 select-none border-b border-[#D5E5D9]/50 pb-2">
                     <div className="flex items-center gap-2 text-[#205C43]">
-                      <Scale className="w-4 h-4 text-[#205C43]" />
-                      <span className="font-serif tracking-tight text-sm">
+                      <NyayLinkLogo variant="symbol" size={18} href={false} />
+                      <span className="font-serif tracking-tight text-sm font-semibold text-[#174530]">
                         Preliminary Legal Orientation
                       </span>
                     </div>
@@ -791,7 +795,7 @@ export function ChatInterface() {
       </div>
 
       {/* Multiline Modern Composer */}
-      <div className="p-4 border-t border-[#D5E5D9] bg-white space-y-2.5">
+      <div className="shrink-0 p-3 sm:p-4 border-t border-[#D5E5D9] bg-white space-y-2">
         <div className="relative flex items-end gap-2 p-2 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] focus-within:border-[#205C43] focus-within:ring-2 focus-within:ring-[#205C43]/15 transition-all shadow-xs">
           <textarea
             ref={textareaRef}

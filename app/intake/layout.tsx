@@ -43,7 +43,7 @@ export default function IntakeLayout({
         <CinematicVideoBackground variant="intake" />
 
         <MarketingNavbar />
-        <div className="flex-1 pt-24 pb-16 relative z-10">{children}</div>
+        <div className="flex-1 pt-16 pb-8 sm:pt-20 sm:pb-10 relative z-10">{children}</div>
         <MarketingFooter />
       </SmoothScrollProvider>
     </div>

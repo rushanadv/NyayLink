@@ -16,8 +16,8 @@ import { CalendarTab } from "./calendar-tab";
 import { ProfileTab } from "./profile-tab";
 import { DocumentsTab } from "./documents-tab";
 import { LogoutButton } from "@/components/logout-button";
+import { NyayLinkLogo } from "@/components/ui/nyaylink-logo";
 import {
-  Scale,
   LayoutDashboard,
   Inbox,
   Briefcase,
@@ -119,14 +119,7 @@ export function LawyerShell({
             {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
 
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-xl bg-[#174530] text-white flex items-center justify-center shadow-xs">
-              <Scale className="w-4 h-4" />
-            </div>
-            <span className="font-serif text-lg font-semibold tracking-tight text-[#202824]">
-              NyayLink
-            </span>
-          </Link>
+          <NyayLinkLogo size="sm" />
 
           <div className="hidden sm:block h-4 w-px bg-[#D5E5D9] mx-1" />
 

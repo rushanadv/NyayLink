@@ -11,6 +11,17 @@ export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
   title: "NyayLink — Access to Justice, Simplified",
   description: "India's Verified Legal Services Marketplace, Client Workspaces, and Advocate Practice Infrastructure",
+  icons: {
+    icon: [
+      { url: "/brand/nyaylink-logo.png", sizes: "32x32", type: "image/png" },
+      { url: "/brand/nyaylink-logo.png", sizes: "64x64", type: "image/png" },
+      { url: "/brand/nyaylink-logo.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [
+      { url: "/brand/nyaylink-logo.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: "/brand/nyaylink-logo.png",
+  },
 };
 
 const geistSans = Geist({

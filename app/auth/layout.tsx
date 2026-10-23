@@ -1,6 +1,6 @@
 import React from "react";
-import Link from "next/link";
-import { Scale, ShieldCheck, Lock } from "lucide-react";
+import { ShieldCheck, Lock } from "lucide-react";
+import { NyayLinkLogo } from "@/components/ui/nyaylink-logo";
 
 export default function AuthLayout({
   children,
@@ -25,19 +25,7 @@ export default function AuthLayout({
 
         {/* TOP: Brand Wordmark & Security Status */}
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <Link href="/" className="group flex items-center gap-3 transition-opacity hover:opacity-90">
-            <div className="w-8 h-8 rounded-lg bg-[#EAF3ED] border border-[#D5E5D9] flex items-center justify-center shadow-xs text-[#205C43]">
-              <Scale className="w-4 h-4 text-[#205C43]" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-base font-serif font-medium tracking-tight text-[#202824]">
-                NyayLink
-              </span>
-              <span className="text-[10px] font-mono tracking-wider text-[#69736D] uppercase">
-                Legal Services
-              </span>
-            </div>
-          </Link>
+          <NyayLinkLogo size="sm" subtitle="Legal Services" />
 
           <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#D5E5D9] text-[11px] font-mono text-[#69736D] w-fit shadow-xs">
             <span className="w-1.5 h-1.5 rounded-full bg-[#205C43] animate-pulse" />

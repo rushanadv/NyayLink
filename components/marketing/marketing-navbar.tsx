@@ -3,9 +3,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Scale, Menu, X, ChevronDown, User, Briefcase, Sparkles } from "lucide-react";
+import { Menu, X, ChevronDown, User, Briefcase, Sparkles } from "lucide-react";
 import { useSmoothScroll } from "./smooth-scroll-provider";
 import { MagneticWrapper } from "@/components/ui/magnetic-wrapper";
+import { NyayLinkLogo } from "@/components/ui/nyaylink-logo";
 
 export function MarketingNavbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -53,19 +54,8 @@ export function MarketingNavbar() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-        {/* Brand Logo & Wordmark */}
-        <Link
-          href="/"
-          className="flex items-center gap-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#205C43] rounded-lg"
-        >
-          <div className="w-8 h-8 rounded-lg border flex items-center justify-center transition-transform group-hover:scale-105 bg-[#EAF3ED] border-[#D5E5D9] text-[#205C43] shadow-xs">
-            <Scale className="w-4 h-4 text-[#205C43]" />
-          </div>
-          <span className="font-serif text-lg font-medium tracking-tight flex items-center gap-1.5 text-[#202824]">
-            NyayLink
-            <span className="w-1.5 h-1.5 rounded-full bg-[#205C43]" />
-          </span>
-        </Link>
+        {/* Brand Logo & Wordmark with Official Lady Justice Emblem */}
+        <NyayLinkLogo size="sm" />
 
         {/* Middle: Editorial Section Navigation */}
         <nav
