@@ -3,10 +3,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, ChevronDown, User, Briefcase, Sparkles } from "lucide-react";
+import { Menu, X, ChevronDown, User, Briefcase, Sparkles, Languages } from "lucide-react";
 import { useSmoothScroll } from "./smooth-scroll-provider";
 import { MagneticWrapper } from "@/components/ui/magnetic-wrapper";
 import { NyayLinkLogo } from "@/components/ui/nyaylink-logo";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { useLanguage } from "@/lib/i18n/context";
 
 export function MarketingNavbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -15,6 +17,7 @@ export function MarketingNavbar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { scrollTo } = useSmoothScroll();
   const pathname = usePathname();
+  const { t, isHindi } = useLanguage();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -66,25 +69,25 @@ export function MarketingNavbar() {
             onClick={() => handleNavClick("how-it-works")}
             className="transition-colors focus-visible:outline-none hover:text-[#202824]"
           >
-            How it works
+            {t.nav.howItWorks}
           </button>
           <button
             onClick={() => handleNavClick("for-clients")}
             className="transition-colors focus-visible:outline-none hover:text-[#202824]"
           >
-            For clients
+            {isHindi ? "मुवक्किलों के लिए" : "For clients"}
           </button>
           <button
             onClick={() => handleNavClick("for-advocates")}
             className="transition-colors focus-visible:outline-none hover:text-[#202824]"
           >
-            For advocates
+            {t.nav.forLawyers}
           </button>
           <button
             onClick={() => handleNavClick("trust")}
             className="transition-colors focus-visible:outline-none hover:text-[#202824]"
           >
-            Trust & Ethics
+            {isHindi ? "विश्वास व आचार संहिता" : "Trust & Ethics"}
           </button>
           <Link
             href="/lawyers"
@@ -94,7 +97,7 @@ export function MarketingNavbar() {
                 : "hover:text-[#202824]"
             }`}
           >
-            Lawyer Directory
+            {t.nav.findAdvocates}
           </Link>
           <Link
             href="/intake"
@@ -105,20 +108,23 @@ export function MarketingNavbar() {
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 text-[#205C43]" />
-            <span>AI Legal Intake</span>
+            <span>{t.nav.aiIntake}</span>
           </Link>
         </nav>
 
-        {/* Right Action Controls: Clear Sign In & Account Type Selector */}
+        {/* Right Action Controls: Language Switcher, Sign In & Account Type Selector */}
         <div className="hidden sm:flex items-center gap-3">
+          {/* Global Compact Language Switcher */}
+          <LanguageSwitcher variant="compact" />
+
           <Link
             href="/auth/login"
             className="text-xs px-3 py-2 font-medium transition-colors text-[#69736D] hover:text-[#202824]"
           >
-            Sign In
+            {t.nav.signIn}
           </Link>
 
-          {/* Account Type Selection Gateway Dropdown */}
+          {/* Account Type Selection Gateway Dropdown / Onboarding */}
           <div className="relative" ref={dropdownRef}>
             <MagneticWrapper maxDisplacement={4}>
               <button
@@ -127,7 +133,7 @@ export function MarketingNavbar() {
                 aria-expanded={entryDropdownOpen}
                 aria-haspopup="true"
               >
-                <span>Get Started</span>
+                <span>{t.nav.getStarted}</span>
                 <ChevronDown
                   className={`w-3.5 h-3.5 transition-transform duration-200 ${
                     entryDropdownOpen ? "rotate-180" : ""
@@ -137,9 +143,26 @@ export function MarketingNavbar() {
             </MagneticWrapper>
 
             {entryDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-64 rounded-xl border p-2 shadow-xl transition-all z-50 bg-white border-[#D5E5D9] text-[#202824] shadow-lg shadow-[#202824]/8">
-                <div className="px-2.5 py-1.5 text-[10px] font-mono uppercase tracking-wider text-[#205C43] font-semibold border-b border-[#D5E5D9] mb-1">
-                  Choose Account Type
+              <div className="absolute right-0 mt-2 w-72 rounded-xl border p-2 shadow-xl transition-all z-50 bg-white border-[#D5E5D9] text-[#202824] shadow-lg shadow-[#202824]/8">
+                {/* Step 1 Language First Onboarding Entry */}
+                <Link
+                  href="/onboarding"
+                  onClick={() => setEntryDropdownOpen(false)}
+                  className="flex items-center gap-2.5 p-2.5 rounded-lg bg-[#EAF3ED]/80 hover:bg-[#EAF3ED] border border-[#205C43]/20 text-[#205C43] transition-colors mb-2"
+                >
+                  <Languages className="w-4 h-4 shrink-0 text-[#205C43]" />
+                  <div className="text-left">
+                    <span className="text-xs font-semibold block">
+                      {isHindi ? "शुरुआती ऑनबोर्डिंग" : "First-Time Onboarding"}
+                    </span>
+                    <span className="text-[11px] text-[#69736D] block leading-snug">
+                      {isHindi ? "चरण 1: भाषा चुनें • चरण 2: भूमिका चुनें" : "Step 1: Choose Language • Step 2: Choose Role"}
+                    </span>
+                  </div>
+                </Link>
+
+                <div className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider text-[#205C43] font-semibold border-b border-[#D5E5D9] mb-1">
+                  {isHindi ? "सीधे पोर्टल में जाएं" : "Or Direct Gateway"}
                 </div>
                 <Link
                   href="/auth/login?intent=client"
@@ -151,10 +174,10 @@ export function MarketingNavbar() {
                   </div>
                   <div>
                     <span className="text-xs font-semibold block group-hover:text-[#205C43] transition-colors">
-                      I Need Legal Help
+                      {isHindi ? "मुवक्किल पोर्टल (Client)" : "I Need Legal Help"}
                     </span>
                     <span className="text-[11px] text-[#69736D] block mt-0.5 leading-snug">
-                      Intake brief & verified lawyer consultation
+                      {isHindi ? "परामर्श व केस ब्रीफ" : "Intake brief & verified lawyer consultation"}
                     </span>
                   </div>
                 </Link>
@@ -169,10 +192,10 @@ export function MarketingNavbar() {
                   </div>
                   <div>
                     <span className="text-xs font-semibold block group-hover:text-[#174530] transition-colors">
-                      Join as an Advocate
+                      {isHindi ? "अधिवक्ता पोर्टल (Advocate)" : "Join as an Advocate"}
                     </span>
                     <span className="text-[11px] text-[#69736D] block mt-0.5 leading-snug">
-                      Register practice & complete professional profile
+                      {isHindi ? "प्रैक्टिस इंफ्रास्ट्रक्चर व कॉज लिस्ट" : "Register practice & complete professional profile"}
                     </span>
                   </div>
                 </Link>
@@ -189,10 +212,10 @@ export function MarketingNavbar() {
                   </div>
                   <div>
                     <span className="text-xs font-semibold block group-hover:text-[#205C43] transition-colors">
-                      AI Legal Intake
+                      {t.nav.aiIntake}
                     </span>
                     <span className="text-[11px] text-[#69736D] block mt-0.5 leading-snug">
-                      Plain-language statutory remedies & questions
+                      {isHindi ? "सरल कानूनी सलाह व अधिकार" : "Plain-language statutory remedies & questions"}
                     </span>
                   </div>
                 </Link>
@@ -203,6 +226,7 @@ export function MarketingNavbar() {
 
         {/* Mobile menu hamburger */}
         <div className="flex md:hidden items-center gap-2">
+          <LanguageSwitcher variant="compact" />
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="p-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#205C43] text-[#202824]/80 hover:text-[#202824]"
@@ -221,32 +245,32 @@ export function MarketingNavbar() {
               onClick={() => handleNavClick("how-it-works")}
               className="text-left py-1 hover:text-[#205C43]"
             >
-              How it works
+              {t.nav.howItWorks}
             </button>
             <button
               onClick={() => handleNavClick("for-clients")}
               className="text-left py-1 hover:text-[#205C43]"
             >
-              For clients
+              {isHindi ? "मुवक्किलों के लिए" : "For clients"}
             </button>
             <button
               onClick={() => handleNavClick("for-advocates")}
               className="text-left py-1 hover:text-[#205C43]"
             >
-              For advocates
+              {t.nav.forLawyers}
             </button>
             <button
               onClick={() => handleNavClick("trust")}
               className="text-left py-1 hover:text-[#205C43]"
             >
-              Trust & Ethics
+              {isHindi ? "विश्वास व आचार संहिता" : "Trust & Ethics"}
             </button>
             <Link
               href="/lawyers"
               onClick={() => setMobileMenuOpen(false)}
               className="text-left py-1 hover:text-[#205C43]"
             >
-              Lawyer Directory
+              {t.nav.findAdvocates}
             </Link>
             <Link
               href="/intake"
@@ -254,32 +278,40 @@ export function MarketingNavbar() {
               className="text-left py-1.5 font-semibold text-[#205C43] flex items-center gap-2"
             >
               <Sparkles className="w-4 h-4 text-[#205C43]" />
-              <span>AI Legal Intake</span>
+              <span>{t.nav.aiIntake}</span>
             </Link>
           </nav>
 
           <div className="pt-3 border-t flex flex-col gap-2.5 border-[#D5E5D9]">
             <Link
+              href="/onboarding"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-center py-2.5 text-xs font-semibold rounded-lg bg-[#205C43] text-white hover:bg-[#174530]"
+            >
+              {isHindi ? "ऑनबोर्डिंग शुरू करें (भाषा व भूमिका)" : "Start Onboarding (Language & Role)"}
+            </Link>
+
+            <Link
               href="/auth/login"
               className="text-center py-2 text-xs font-medium rounded-lg border border-[#D5E5D9] bg-white text-[#202824] hover:bg-[#EAF3ED]"
             >
-              Sign In
+              {t.nav.signIn}
             </Link>
 
             <div className="grid grid-cols-2 gap-2 pt-1">
               <Link
                 href="/auth/login?intent=client"
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-center py-2.5 rounded-lg bg-[#205C43] hover:bg-[#174530] text-white font-semibold text-xs"
+                className="text-center py-2.5 rounded-lg border border-[#D5E5D9] bg-white text-[#205C43] font-semibold text-xs hover:bg-[#EAF3ED]"
               >
-                Need Legal Help
+                {isHindi ? "मुवक्किल" : "Need Legal Help"}
               </Link>
               <Link
                 href="/auth/sign-up?intent=lawyer"
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-center py-2.5 rounded-lg font-semibold text-xs border border-[#D5E5D9] bg-white text-[#202824] hover:bg-[#EAF3ED]"
+                className="text-center py-2.5 rounded-lg font-semibold text-xs border border-[#D5E5D9] bg-white text-[#174530] hover:bg-[#EAF3ED]"
               >
-                Join as Advocate
+                {isHindi ? "अधिवक्ता" : "Join as Advocate"}
               </Link>
             </div>
           </div>

@@ -15,12 +15,16 @@ import { ProfileTab } from "./profile-tab";
 import { LogoutButton } from "@/components/logout-button";
 import { CinematicVideoBackground } from "@/components/marketing/cinematic-video-background";
 import { NyayLinkLogo } from "@/components/ui/nyaylink-logo";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { useLanguage } from "@/lib/i18n/context";
+import { LegalCalendar } from "@/components/calendar/legal-calendar";
 import {
   LayoutDashboard,
   Briefcase,
   Users,
   Sparkles,
   CalendarCheck,
+  Calendar as CalendarIcon,
   FolderLock,
   User,
   Plus,
@@ -53,6 +57,7 @@ export function ClientShell({
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentTab = searchParams.get("tab") || initialTab;
+  const { isHindi } = useLanguage();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNewMatterModalOpen, setIsNewMatterModalOpen] = useState(false);
@@ -71,40 +76,45 @@ export function ClientShell({
   const navItems = [
     {
       id: "overview",
-      label: "Overview",
+      label: isHindi ? "डैशबोर्ड अवलोकन" : "Overview",
       icon: <LayoutDashboard className="w-4 h-4" />,
     },
     {
       id: "matters",
-      label: "My Matters",
+      label: isHindi ? "मेरे मामले व वाद" : "My Matters",
       icon: <Briefcase className="w-4 h-4" />,
       badge: matters.length > 0 ? String(matters.length) : undefined,
     },
     {
       id: "advocates",
-      label: "Find Advocates",
+      label: isHindi ? "अधिवक्ता खोजें" : "Find Advocates",
       icon: <Users className="w-4 h-4" />,
     },
     {
       id: "intake",
-      label: "AI Legal Intake",
+      label: isHindi ? "एआई कानूनी सलाह" : "AI Legal Intake",
       icon: <Sparkles className="w-4 h-4" />,
       special: true,
     },
     {
+      id: "calendar",
+      label: isHindi ? "कॉज लिस्ट व कैलेंडर" : "Legal Calendar",
+      icon: <CalendarIcon className="w-4 h-4" />,
+    },
+    {
       id: "consultations",
-      label: "Consultations",
+      label: isHindi ? "परामर्श अनुसूची" : "Consultations",
       icon: <CalendarCheck className="w-4 h-4" />,
       badge: pendingConsultationsCount > 0 ? String(pendingConsultationsCount) : undefined,
     },
     {
       id: "documents",
-      label: "Documents Vault",
+      label: isHindi ? "दस्तावेज़ वॉल्ट" : "Documents Vault",
       icon: <FolderLock className="w-4 h-4" />,
     },
     {
       id: "profile",
-      label: "Profile & Account",
+      label: isHindi ? "प्रोफ़ाइल व खाता" : "Profile & Account",
       icon: <User className="w-4 h-4" />,
     },
   ];
@@ -130,17 +140,20 @@ export function ClientShell({
           <div className="hidden sm:block h-4 w-px bg-[#D5E5D9] mx-1" />
 
           <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-mono uppercase font-semibold bg-[#EAF3ED] text-[#205C43] border border-[#D5E5D9]">
-            Client Portal
+            {isHindi ? "मुवक्किल पोर्टल" : "Client Portal"}
           </span>
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Global Compact Language Switcher */}
+          <LanguageSwitcher variant="compact" />
+
           <button
             onClick={() => setIsNewMatterModalOpen(true)}
             className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white text-xs font-semibold shadow-xs transition-all active:scale-[0.99]"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>New Matter</span>
+            <span>{isHindi ? "नया मामला" : "New Matter"}</span>
           </button>
 
           <div className="h-4 w-px bg-[#D5E5D9] hidden sm:block" />
@@ -313,6 +326,12 @@ export function ClientShell({
           )}
 
           {currentTab === "intake" && <IntakeTab />}
+
+          {currentTab === "calendar" && (
+            <div className="space-y-6">
+              <LegalCalendar role="client" userId={userId} matters={matters} />
+            </div>
+          )}
 
           {currentTab === "consultations" && (
             <ConsultationsTab

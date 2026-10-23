@@ -1,6 +1,7 @@
 import React from "react";
 import { ShieldCheck, Lock } from "lucide-react";
 import { NyayLinkLogo } from "@/components/ui/nyaylink-logo";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
 
 export default function AuthLayout({
   children,
@@ -27,9 +28,12 @@ export default function AuthLayout({
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <NyayLinkLogo size="sm" subtitle="Legal Services" />
 
-          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#D5E5D9] text-[11px] font-mono text-[#69736D] w-fit shadow-xs">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#205C43] animate-pulse" />
-            <span>Bar Council Roll Verification Active</span>
+          <div className="flex items-center gap-2.5">
+            <LanguageSwitcher variant="compact" />
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#D5E5D9] text-[11px] font-mono text-[#69736D] w-fit shadow-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#205C43] animate-pulse" />
+              <span>Bar Council Roll Verification Active</span>
+            </div>
           </div>
         </div>
 

@@ -6,10 +6,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getPostLoginRedirectPath } from "@/lib/auth/post-login-redirect";
 import { User, Briefcase, Eye, EyeOff } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/context";
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t, isHindi } = useLanguage();
   // Support both 'intent' and 'role' query parameters as presentation hints
   const roleHint = searchParams.get("role") || searchParams.get("intent");
   const isLawyerIntent = roleHint === "lawyer";
@@ -109,23 +111,33 @@ export function LoginForm() {
           {isLawyerIntent ? (
             <>
               <Briefcase className="w-3.5 h-3.5 text-[#174530]" />
-              <span className="font-semibold text-[#202824]">ADVOCATE CHAMBERS PORTAL</span>
+              <span className="font-semibold text-[#202824]">
+                {isHindi ? "अधिवक्ता चैंबर पोर्टल" : "ADVOCATE CHAMBERS PORTAL"}
+              </span>
             </>
           ) : (
             <>
               <User className="w-3.5 h-3.5 text-[#205C43]" />
-              <span className="font-semibold text-[#202824]">LEGAL CLIENT PORTAL</span>
+              <span className="font-semibold text-[#202824]">
+                {isHindi ? "मुवक्किल कानूनी पोर्टल" : "LEGAL CLIENT PORTAL"}
+              </span>
             </>
           )}
         </div>
 
         <h2 className="text-2xl sm:text-3xl font-serif tracking-tight text-[#202824] text-balance">
-          {isLawyerIntent ? "Sign in to your practice workspace" : "Sign in to access your legal brief"}
+          {isLawyerIntent
+            ? isHindi ? "अपने अधिवक्ता कार्यक्षेत्र में साइन इन करें" : "Sign in to your practice workspace"
+            : isHindi ? "अपने कानूनी ब्रीफ तक पहुँचने के लिए साइन इन करें" : "Sign in to access your legal brief"}
         </h2>
         <p className="text-sm text-[#69736D] mt-2 leading-relaxed">
           {isLawyerIntent
-            ? "Access daily cause list alerts, active client dockets, Vakalatnama vault, and retainers."
-            : "Review your intake brief, message your verified advocate, and view consultation schedules."}
+            ? isHindi
+              ? "दैनिक कॉज लिस्ट, सक्रिय मुवक्किल मामले, वकालतनामा वॉल्ट और परामर्श तक पहुंचें।"
+              : "Access daily cause list alerts, active client dockets, Vakalatnama vault, and retainers."
+            : isHindi
+              ? "अपना केस ब्रीफ देखें, सत्यापित अधिवक्ता से संवाद करें और परामर्श अनुसूची ट्रैक करें।"
+              : "Review your intake brief, message your verified advocate, and view consultation schedules."}
         </p>
       </div>
 
@@ -133,10 +145,10 @@ export function LoginForm() {
       <div className="mb-6 p-4 rounded-2xl bg-[#F8FAF9] border border-[#D5E5D9] shadow-xs">
         <div className="flex items-center justify-between mb-3">
           <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-[#69736D]">
-            Instant Demo Access
+            {isHindi ? "त्वरित डेमो लॉगिन" : "Instant Demo Access"}
           </span>
           <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#EAF3ED] text-[#205C43] border border-[#D5E5D9] font-medium">
-            Test Portals
+            {isHindi ? "परीक्षण खाते" : "Test Portals"}
           </span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -147,7 +159,7 @@ export function LoginForm() {
             className="w-full h-10 px-3.5 rounded-xl bg-[#EAF3ED] hover:bg-[#D8EADB] border border-[#C5DDD0] text-[#174530] text-xs font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-50"
           >
             <User className="w-3.5 h-3.5 text-[#205C43]" />
-            <span>Continue as Demo Client</span>
+            <span>{isHindi ? "मुवक्किल डेमो जारी रखें" : "Continue as Demo Client"}</span>
           </button>
           <button
             type="button"
@@ -156,11 +168,11 @@ export function LoginForm() {
             className="w-full h-10 px-3.5 rounded-xl bg-white hover:bg-[#F2F7F4] border border-[#D5E5D9] text-[#202824] text-xs font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-50 shadow-xs"
           >
             <Briefcase className="w-3.5 h-3.5 text-[#174530]" />
-            <span>Continue as Demo Lawyer</span>
+            <span>{isHindi ? "अधिवक्ता डेमो जारी रखें" : "Continue as Demo Lawyer"}</span>
           </button>
         </div>
         <p className="text-[11px] text-[#69736D] mt-2.5 text-center">
-          Establishes an authenticated session with genuine database records.
+          {isHindi ? "वास्तविक डेटाबेस रिकॉर्ड के साथ प्रमाणित सत्र स्थापित करता है।" : "Establishes an authenticated session with genuine database records."}
         </p>
       </div>
 
@@ -169,7 +181,7 @@ export function LoginForm() {
           <div className="w-full border-t border-[#D5E5D9]"></div>
         </div>
         <span className="relative px-3 bg-[#FFFFFF] text-[11px] font-mono uppercase tracking-wider text-[#69736D]">
-          or sign in with credentials
+          {isHindi ? "या क्रेडेंशियल्स के साथ साइन इन करें" : "or sign in with credentials"}
         </span>
       </div>
 
@@ -214,7 +226,7 @@ export function LoginForm() {
             htmlFor="email"
             className="block text-xs font-mono font-semibold text-[#202824] tracking-wide uppercase"
           >
-            Email Address
+            {t.auth.email}
           </label>
           <input
             id="email"
@@ -237,13 +249,13 @@ export function LoginForm() {
               htmlFor="password"
               className="block text-xs font-mono font-semibold text-[#202824] tracking-wide uppercase"
             >
-              Password
+              {t.auth.password}
             </label>
             <Link
               href="/auth/forgot-password"
               className="text-xs text-[#205C43] hover:text-[#174530] hover:underline transition-colors font-mono"
             >
-              Forgot password?
+              {t.auth.forgotPassword}
             </Link>
           </div>
           <div className="relative">
@@ -291,10 +303,14 @@ export function LoginForm() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
               </svg>
-              <span>Verifying credentials...</span>
+              <span>{isHindi ? "प्रमाणीकरण हो रहा है..." : "Verifying credentials..."}</span>
             </>
           ) : (
-            <span>{isLawyerIntent ? "Sign In as Advocate" : "Sign In to Client Portal"}</span>
+            <span>
+              {isLawyerIntent
+                ? isHindi ? "अधिवक्ता के रूप में साइन इन करें" : "Sign In as Advocate"
+                : isHindi ? "मुवक्किल पोर्टल में साइन इन करें" : "Sign In to Client Portal"}
+            </span>
           )}
         </button>
 
@@ -302,22 +318,22 @@ export function LoginForm() {
         <div className="pt-2 text-center">
           {isLawyerIntent ? (
             <p className="text-xs text-[#69736D]">
-              Looking for legal assistance instead?{" "}
+              {isHindi ? "क्या आप कानूनी सहायता की तलाश कर रहे हैं? " : "Looking for legal assistance instead? "}
               <Link
                 href={`/auth/login?role=client${nextQuery}`}
                 className="text-[#205C43] hover:text-[#174530] hover:underline font-semibold"
               >
-                Switch to client sign-in
+                {isHindi ? "मुवक्किल साइन इन पर जाएं" : "Switch to client sign-in"}
               </Link>
             </p>
           ) : (
             <p className="text-xs text-[#69736D]">
-              Practicing advocate looking for chambers portal?{" "}
+              {isHindi ? "क्या आप अधिवक्ता हैं और चैंबर पोर्टल चाहते हैं? " : "Practicing advocate looking for chambers portal? "}
               <Link
                 href={`/auth/login?role=lawyer${nextQuery}`}
                 className="text-[#205C43] hover:text-[#174530] hover:underline font-semibold"
               >
-                Switch to lawyer sign-in
+                {isHindi ? "अधिवक्ता साइन इन पर जाएं" : "Switch to lawyer sign-in"}
               </Link>
             </p>
           )}
@@ -326,12 +342,12 @@ export function LoginForm() {
         {/* Footer Navigation */}
         <div className="pt-4 border-t border-[#D5E5D9] text-center">
           <p className="text-xs text-[#69736D]">
-            Don&apos;t have an account yet?{" "}
+            {t.auth.noAccount}{" "}
             <Link
               href={`/auth/sign-up?intent=${isLawyerIntent ? "lawyer" : "client"}${nextQuery}`}
               className="text-[#202824] hover:text-[#205C43] font-semibold transition-colors"
             >
-              Create Account
+              {isHindi ? "नया खाता बनाएं" : "Create Account"}
             </Link>
           </p>
         </div>

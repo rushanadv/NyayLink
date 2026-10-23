@@ -17,6 +17,8 @@ import { ProfileTab } from "./profile-tab";
 import { DocumentsTab } from "./documents-tab";
 import { LogoutButton } from "@/components/logout-button";
 import { NyayLinkLogo } from "@/components/ui/nyaylink-logo";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { useLanguage } from "@/lib/i18n/context";
 import {
   LayoutDashboard,
   Inbox,
@@ -45,6 +47,7 @@ interface LawyerShellProps {
 export function LawyerShell({
   displayName,
   userEmail,
+  userId,
   lawyerProfile,
   verification,
   matters,
@@ -54,6 +57,7 @@ export function LawyerShell({
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentTab = searchParams.get("tab") || initialTab;
+  const { isHindi } = useLanguage();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -71,34 +75,34 @@ export function LawyerShell({
   const navItems = [
     {
       id: "overview",
-      label: "Overview",
+      label: isHindi ? "डैशबोर्ड अवलोकन" : "Overview",
       icon: <LayoutDashboard className="w-4 h-4" />,
     },
     {
       id: "requests",
-      label: "Client Requests",
+      label: isHindi ? "मुवक्किल अनुरोध" : "Client Requests",
       icon: <Inbox className="w-4 h-4" />,
       badge: pendingRequestsCount > 0 ? String(pendingRequestsCount) : undefined,
     },
     {
       id: "matters",
-      label: "Assigned Matters",
+      label: isHindi ? "सक्रिय वाद व केस" : "Assigned Matters",
       icon: <Briefcase className="w-4 h-4" />,
       badge: matters.length > 0 ? String(matters.length) : undefined,
     },
     {
       id: "calendar",
-      label: "Calendar & Consults",
+      label: isHindi ? "कॉज लिस्ट व कैलेंडर" : "Calendar & Consults",
       icon: <Calendar className="w-4 h-4" />,
     },
     {
       id: "profile",
-      label: "Chamber Profile",
+      label: isHindi ? "चैंबर प्रोफाइल" : "Chamber Profile",
       icon: <UserCheck className="w-4 h-4" />,
     },
     {
       id: "documents",
-      label: "Case Vault",
+      label: isHindi ? "केस दस्तावेज़" : "Case Vault",
       icon: <FolderLock className="w-4 h-4" />,
     },
   ];
@@ -124,7 +128,7 @@ export function LawyerShell({
           <div className="hidden sm:block h-4 w-px bg-[#D5E5D9] mx-1" />
 
           <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-mono uppercase font-semibold bg-[#174530] text-white">
-            Advocate Chambers
+            {isHindi ? "अधिवक्ता चैंबर" : "Advocate Chambers"}
           </span>
 
           {lawyerProfile?.bar_council_number && (
@@ -135,6 +139,9 @@ export function LawyerShell({
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Global Language Switcher */}
+          <LanguageSwitcher variant="compact" />
+
           <div className="hidden md:flex flex-col text-right">
             <span className="text-xs font-semibold text-[#202824] leading-tight">
               {lawyerProfile?.professional_name || displayName}
@@ -300,7 +307,11 @@ export function LawyerShell({
           {currentTab === "matters" && <MattersTab matters={matters} />}
 
           {currentTab === "calendar" && (
-            <CalendarTab consultations={consultations} />
+            <CalendarTab
+              consultations={consultations}
+              matters={matters}
+              userId={userId}
+            />
           )}
 
           {currentTab === "profile" && (

@@ -5,10 +5,12 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { User, Briefcase, Eye, EyeOff, ShieldCheck, ArrowRight, AlertCircle } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/context";
 
 export function SignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t, isHindi } = useLanguage();
   const initialIntent = searchParams.get("role") || searchParams.get("intent") || "lawyer";
   const [activeTab, setActiveTab] = useState<"lawyer" | "client">(
     initialIntent === "client" ? "client" : "lawyer"
@@ -139,7 +141,7 @@ export function SignUpForm() {
           }`}
         >
           <Briefcase className="w-3.5 h-3.5" />
-          <span>Join as an Advocate</span>
+          <span>{isHindi ? "अधिवक्ता के रूप में जुड़ें" : "Join as an Advocate"}</span>
         </button>
         <button
           type="button"
@@ -155,7 +157,7 @@ export function SignUpForm() {
           }`}
         >
           <User className="w-3.5 h-3.5" />
-          <span>Client Account</span>
+          <span>{isHindi ? "मुवक्किल खाता" : "Client Account"}</span>
         </button>
       </div>
 
@@ -164,16 +166,24 @@ export function SignUpForm() {
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EAF3ED] border border-[#D5E5D9] text-[11px] font-mono mb-3 shadow-2xs">
           <ShieldCheck className="w-3.5 h-3.5 text-[#205C43]" />
           <span className="font-semibold text-[#202824]">
-            {isLawyer ? "ADVOCATE REGISTRATION" : "CITIZEN & CLIENT ONBOARDING"}
+            {isLawyer
+              ? isHindi ? "अधिवक्ता पंजीकरण" : "ADVOCATE REGISTRATION"
+              : isHindi ? "नागरिक व मुवक्किल पंजीकरण" : "CITIZEN & CLIENT ONBOARDING"}
           </span>
         </div>
         <h2 className="text-2xl sm:text-3xl font-serif tracking-tight text-[#202824]">
-          {isLawyer ? "Join as an Advocate" : "Create Your Client Account"}
+          {isLawyer
+            ? isHindi ? "अधिवक्ता के रूप में जुड़ें" : "Join as an Advocate"
+            : isHindi ? "अपना मुवक्किल खाता बनाएं" : "Create Your Client Account"}
         </h2>
         <p className="text-xs sm:text-sm text-[#69736D] mt-2 leading-relaxed">
           {isLawyer
-            ? "Create your NyayLink account and complete your professional profile."
-            : "Register securely to post legal inquiries, consult verified counsel, and track cases."}
+            ? isHindi
+              ? "अपना NyayLink खाता बनाएं और अपनी व्यावसायिक प्रोफ़ाइल पूर्ण करें।"
+              : "Create your NyayLink account and complete your professional profile."
+            : isHindi
+              ? "कानूनी पूछताछ दर्ज करने, अधिवक्ताओं से परामर्श करने और मामलों को ट्रैक करने के लिए सुरक्षित पंजीकरण करें।"
+              : "Register securely to post legal inquiries, consult verified counsel, and track cases."}
         </p>
       </div>
 
@@ -204,7 +214,9 @@ export function SignUpForm() {
             htmlFor="signup-name"
             className="block text-xs font-mono font-semibold text-[#202824] tracking-wide uppercase"
           >
-            {isLawyer ? "Advocate's Full Legal Name" : "Full Name"}
+            {isLawyer
+              ? isHindi ? "अधिवक्ता का पूर्ण कानूनी नाम" : "Advocate's Full Legal Name"
+              : t.auth.fullName}
           </label>
           <input
             id="signup-name"
@@ -213,7 +225,7 @@ export function SignUpForm() {
             required
             autoComplete="name"
             inputMode="text"
-            placeholder={isLawyer ? "Adv. Rajesh Kumar Sharma" : "Rahul Sharma"}
+            placeholder={isLawyer ? (isHindi ? "अधि. राजेश कुमार शर्मा" : "Adv. Rajesh Kumar Sharma") : (isHindi ? "राहुल शर्मा" : "Rahul Sharma")}
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             disabled={isLoading}
@@ -227,7 +239,7 @@ export function SignUpForm() {
             htmlFor="signup-email"
             className="block text-xs font-mono font-semibold text-[#202824] tracking-wide uppercase"
           >
-            Email Address
+            {t.auth.email}
           </label>
           <input
             id="signup-email"
@@ -250,7 +262,7 @@ export function SignUpForm() {
             htmlFor="signup-password"
             className="block text-xs font-mono font-semibold text-[#202824] tracking-wide uppercase"
           >
-            Password (min 8 chars)
+            {t.auth.password} (min 8 chars)
           </label>
           <div className="relative">
             <input
@@ -283,7 +295,7 @@ export function SignUpForm() {
             htmlFor="signup-repeat-password"
             className="block text-xs font-mono font-semibold text-[#202824] tracking-wide uppercase"
           >
-            Confirm Password
+            {t.auth.repeatPassword}
           </label>
           <input
             id="signup-repeat-password"
@@ -310,15 +322,16 @@ export function SignUpForm() {
               className="mt-0.5 h-4 w-4 rounded border-[#D5E5D9] text-[#205C43] focus:ring-[#205C43] shrink-0"
             />
             <span className="leading-snug">
-              I agree to the{" "}
+              {isHindi ? "मैं " : "I agree to the "}
               <Link href="/terms" target="_blank" className="text-[#205C43] font-medium underline">
-                Terms of Service
+                {isHindi ? "सेवा की शर्तें" : "Terms of Service"}
               </Link>{" "}
-              and{" "}
+              {isHindi ? "और " : "and "}
               <Link href="/privacy" target="_blank" className="text-[#205C43] font-medium underline">
-                Privacy Policy
+                {isHindi ? "गोपनीयता नीति" : "Privacy Policy"}
               </Link>
-              {isLawyer && " and affirm that I hold an authentic Bar Council enrollment"}.
+              {isHindi ? " स्वीकार करता हूँ" : ""}
+              {isLawyer && (isHindi ? " तथा प्रमाणित करता हूँ कि मैं एक प्रामाणिक बार काउंसिल नामांकन रखता हूँ।" : " and affirm that I hold an authentic Bar Council enrollment")}.
             </span>
           </label>
         </div>
@@ -339,22 +352,26 @@ export function SignUpForm() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
               </svg>
-              <span>Creating your account...</span>
+              <span>{isHindi ? "खाता बनाया जा रहा है..." : "Creating your account..."}</span>
             </>
           ) : (
-            <span>{isLawyer ? "Continue to Profile Setup" : "Complete Registration"}</span>
+            <span>
+              {isLawyer
+                ? isHindi ? "प्रोफ़ाइल सेटअप पर जारी रखें" : "Continue to Profile Setup"
+                : isHindi ? "पंजीकरण पूर्ण करें" : "Complete Registration"}
+            </span>
           )}
         </button>
 
         {/* Already Registered Sign In Option */}
         <div className="pt-4 border-t border-[#D5E5D9] text-center">
           <p className="text-xs text-[#69736D]">
-            Already registered?{" "}
+            {t.auth.haveAccount}{" "}
             <Link
               href={`/auth/login?role=${activeTab}`}
               className="text-[#202824] hover:text-[#205C43] font-semibold transition-colors"
             >
-              Sign in
+              {t.nav.signIn}
             </Link>
           </p>
         </div>

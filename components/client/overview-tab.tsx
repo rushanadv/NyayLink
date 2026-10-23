@@ -262,6 +262,69 @@ export function OverviewTab({
         </div>
       </div>
 
+      {/* Upcoming Legal Calendar & Cause List Card */}
+      <div className="p-6 rounded-2xl bg-white border border-[#D5E5D9] shadow-xs space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-[#EAF3ED] text-[#205C43] border border-[#D5E5D9] flex items-center justify-center">
+              <CalendarCheck className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-base font-serif font-semibold text-[#202824]">
+                Upcoming Legal Calendar & Hearings
+              </h2>
+              <p className="text-xs text-[#69736D]">
+                Scheduled advocate conferences, court hearings, and filing dates
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => onNavigateTab("calendar")}
+            className="px-3.5 py-1.5 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white text-xs font-medium flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+          >
+            <span>View Full Calendar</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {upcomingConsultations.length === 0 ? (
+          <div className="p-4 rounded-xl bg-[#F8FAF9] border border-dashed border-[#D5E5D9] text-center text-xs text-[#69736D]">
+            <span>No upcoming hearings scheduled today. </span>
+            <button
+              onClick={() => onNavigateTab("calendar")}
+              className="font-semibold text-[#205C43] hover:underline ml-1"
+            >
+              Open Legal Calendar &rarr;
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {upcomingConsultations.slice(0, 3).map((c) => (
+              <div
+                key={c.id}
+                onClick={() => onNavigateTab("calendar")}
+                className="p-3 rounded-xl border border-[#D5E5D9] hover:border-[#205C43] bg-[#FDFEFC] hover:bg-white cursor-pointer transition-all space-y-1"
+              >
+                <div className="flex items-center justify-between text-[10px] font-mono">
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200">
+                    Confirmed
+                  </span>
+                  <span className="text-[#69736D]">
+                    {c.scheduled_at ? new Date(c.scheduled_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Flexible"}
+                  </span>
+                </div>
+                <h4 className="text-xs font-semibold text-[#202824] line-clamp-1">
+                  {c.subject}
+                </h4>
+                <p className="text-[11px] text-[#69736D] line-clamp-1">
+                  Advocate: {c.lawyer?.professional_name || "Assigned Counsel"}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* AI Legal Intake Card */}
       <div className="p-6 rounded-2xl bg-[#F8FAF9] border border-[#D5E5D9] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-start gap-3.5">

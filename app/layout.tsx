@@ -30,16 +30,25 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
+import { cookies } from "next/headers";
+import { LanguageProvider } from "@/lib/i18n/context";
+import { Locale } from "@/lib/i18n/types";
 import { CursorSpotlight } from "@/components/marketing/cursor-spotlight";
 import { FilmGrain } from "@/components/marketing/film-grain";
 
-export default function RootLayout({
+export const instant = false;
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const rawLocale = cookieStore.get("nyaylink_locale")?.value;
+  const initialLocale: Locale = rawLocale === "hi" ? "hi" : "en";
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={initialLocale} suppressHydrationWarning>
       <body className={`${geistSans.className} antialiased bg-[#090B10] text-[#F5F4FA]`}>
         <ThemeProvider
           attribute="class"
@@ -48,11 +57,13 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          {/* Subtle Global Ambient Layers */}
-          <CursorSpotlight />
-          <FilmGrain />
+          <LanguageProvider initialLocale={initialLocale}>
+            {/* Subtle Global Ambient Layers */}
+            <CursorSpotlight />
+            <FilmGrain />
 
-          {children}
+            {children}
+          </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>
