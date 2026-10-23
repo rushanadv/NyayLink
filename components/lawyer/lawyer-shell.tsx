@@ -26,7 +26,10 @@ import {
   FolderLock,
   Menu,
   X,
+  Sparkles,
+  ExternalLink,
 } from "lucide-react";
+import { CinematicVideoBackground } from "@/components/marketing/cinematic-video-background";
 
 interface LawyerShellProps {
   displayName: string;
@@ -101,7 +104,10 @@ export function LawyerShell({
   ];
 
   return (
-    <div className="min-h-screen bg-[#FDFEFC] text-[#202824] flex flex-col font-sans antialiased">
+    <div className="min-h-screen bg-[#FDFEFC] text-[#202824] flex flex-col font-sans antialiased relative overflow-x-hidden">
+      {/* Low-Intensity Atmospheric Green Smoke Treatment for Advocate Chambers */}
+      <CinematicVideoBackground variant="portal" />
+
       {/* Top Application Bar */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#D5E5D9] px-4 sm:px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -204,6 +210,21 @@ export function LawyerShell({
             <p className="text-[10px] text-[#69736D] leading-tight">
               Demonstration profile. Not listed on public registry.
             </p>
+          </div>
+
+          {/* Contextual Link to Public Client Intake */}
+          <div className="pt-2">
+            <Link
+              href="/intake"
+              target="_blank"
+              className="flex items-center justify-between px-3 py-2 rounded-xl text-[11px] text-[#69736D] hover:text-[#205C43] hover:bg-[#EAF3ED]/60 transition-colors border border-transparent hover:border-[#D5E5D9]"
+            >
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-[#205C43]" />
+                <span>AI Intake Gateway</span>
+              </div>
+              <ExternalLink className="w-3 h-3 text-[#69736D]" />
+            </Link>
           </div>
         </aside>
 

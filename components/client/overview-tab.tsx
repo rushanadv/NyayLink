@@ -62,6 +62,13 @@ export function OverviewTab({
               <span>Find Verified Advocates</span>
               <ArrowRight className="w-3.5 h-3.5 text-[#69736D]" />
             </button>
+            <a
+              href="/intake"
+              className="px-4 py-2.5 rounded-xl bg-[#EAF3ED] hover:bg-[#D5E5D9] border border-[#D5E5D9] text-[#205C43] text-xs font-semibold flex items-center gap-2 transition-all shadow-xs"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#205C43]" />
+              <span>Start AI Legal Intake</span>
+            </a>
           </div>
         </div>
       </div>

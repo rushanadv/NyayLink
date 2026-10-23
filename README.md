@@ -4,7 +4,7 @@
 > India's verified legal services marketplace connecting citizens with Bar Council-enrolled advocates through transparent flat fees, AI-guided legal intake, milestone escrow, and secure case dockets.
 
 - **Production Domain**: [https://nyay.live](https://nyay.live/)
-- **Repository**: [rushanadv/nyayalink](https://github.com/rushanadv/nyayalink)
+- **Repository**: [rushanadv/NyayLink](https://github.com/rushanadv/NyayLink)
 - **Tech Stack**: Next.js 15 (App Router), TypeScript, Tailwind CSS, Supabase (Auth, Postgres, RLS), Framer Motion, Lenis, OpenRouter.
 
 ---
@@ -50,8 +50,8 @@ On the login screen (`/auth/login`), click either **Continue as Demo Client** or
 
 ### 1. Clone & Install
 ```bash
-git clone https://github.com/rushanadv/nyayalink.git
-cd nyayalink/nyayalink-app
+git clone https://github.com/rushanadv/NyayLink.git
+cd NyayLink/nyayalink-app
 npm install
 ```
 

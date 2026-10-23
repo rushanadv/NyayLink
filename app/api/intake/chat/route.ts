@@ -13,13 +13,12 @@ const getFallbackModel = (): string =>
 // In-memory rate limiting: IP -> timestamps array
 const rateLimitMap = new Map<string, number[]>();
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
-const MAX_REQUESTS_PER_MINUTE = 10;
+const MAX_REQUESTS_PER_MINUTE = 15;
 
 function checkRateLimit(clientIp: string): { allowed: boolean; remaining: number } {
   const now = Date.now();
   const timestamps = rateLimitMap.get(clientIp) || [];
 
-  // Filter timestamps within the active window
   const recent = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
 
   if (recent.length >= MAX_REQUESTS_PER_MINUTE) {
@@ -30,7 +29,7 @@ function checkRateLimit(clientIp: string): { allowed: boolean; remaining: number
   recent.push(now);
   rateLimitMap.set(clientIp, recent);
 
-  // Periodic pruning to avoid memory growth
+  // Periodic pruning
   if (rateLimitMap.size > 1000) {
     for (const [ip, list] of rateLimitMap.entries()) {
       const active = list.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
@@ -64,12 +63,14 @@ async function requestOpenRouter(
   clientSignal?: AbortSignal
 ): Promise<Response> {
   const controller = new AbortController();
-  // 35s connection / initial response timeout
   const timeoutId = setTimeout(() => controller.abort(), 35000);
 
-  // Propagate client cancellation if the user aborts / navigates away
   if (clientSignal) {
-    clientSignal.addEventListener("abort", () => controller.abort(), { once: true });
+    if (clientSignal.aborted) {
+      controller.abort();
+    } else {
+      clientSignal.addEventListener("abort", () => controller.abort(), { once: true });
+    }
   }
 
   try {
@@ -84,9 +85,11 @@ async function requestOpenRouter(
       body: JSON.stringify({
         model,
         messages,
-        max_tokens: 1200,
-        temperature: 0.3,
+        max_tokens: 1500,
+        temperature: 0.25,
         stream: true,
+        // Disable reasoning token overhead for dramatic TTFT speedup on supported reasoning models
+        reasoning: { effort: "none" },
       }),
       signal: controller.signal,
     });
@@ -97,8 +100,10 @@ async function requestOpenRouter(
 }
 
 export async function POST(req: NextRequest) {
+  const requestStartTime = Date.now();
+
   try {
-    // 1. Identify Client IP & Apply Rate Limiting
+    // 1. Rate Limiting Check
     const forwarded = req.headers.get("x-forwarded-for");
     const clientIp = forwarded
       ? forwarded.split(",")[0].trim()
@@ -109,7 +114,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "Rate limit reached (10 queries per minute). Please wait a moment before asking further questions.",
+            "Rate limit reached. Please wait a few moments before asking additional legal questions.",
         },
         {
           status: 429,
@@ -122,27 +127,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Server-side Secret Validation (NEVER exposed to client)
+    // 2. Secret Validation
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey || apiKey === "your-openrouter-key-here" || apiKey.trim() === "") {
       return NextResponse.json(
         {
           error:
-            "OPENROUTER_API_KEY is not configured on the server. Please configure OPENROUTER_API_KEY in Vercel Project Settings → Environment Variables (or .env.local for local development) to enable real AI intake.",
+            "OPENROUTER_API_KEY is not configured on the server. Please configure your key in environment settings.",
         },
         { status: 503 }
       );
     }
 
-    // 3. Parse and Validate Request Payload
+    // 3. Payload Parsing
     let body: RequestBody;
     try {
       body = await req.json();
     } catch {
-      return NextResponse.json(
-        { error: "Invalid JSON request body." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid JSON request body." }, { status: 400 });
     }
 
     const { messages = [], state, district, isContinuation } = body;
@@ -154,8 +156,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 4. Sanitize messages and prepend Server-Controlled System Prompt
-    // Only permit user and assistant messages from the client. Never allow client to inject or override system prompts.
+    // 4. Sanitize messages & build bounded context window
     const sanitizedChatMessages: ChatMessage[] = messages
       .filter(
         (m): m is ChatMessage =>
@@ -164,10 +165,10 @@ export async function POST(req: NextRequest) {
           typeof m.content === "string" &&
           m.content.trim().length > 0
       )
-      .slice(-6) // Keep last 6 turns for optimal TTFT and token economy
+      .slice(-6) // Bounded context: last 6 turns preserve state without token bloat
       .map((m) => ({
         role: m.role,
-        content: m.content.slice(0, 1200), // Protect against prompt-stuffing
+        content: m.content.slice(0, 1500),
       }));
 
     if (sanitizedChatMessages.length === 0) {
@@ -191,11 +192,12 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 5. Attempt Primary Model with Fallback Strategy
+    // 5. Connect to OpenRouter (Primary Model -> Fallback on failure)
     const primaryModel = getPrimaryModel();
     const fallbackModel = getFallbackModel();
 
     let activeResponse: Response | null = null;
+    let selectedModel = primaryModel;
     let primaryErrorDetail = "";
     let primaryStatus = 0;
 
@@ -207,19 +209,17 @@ export async function POST(req: NextRequest) {
         primaryStatus = primaryRes.status;
         const errText = await primaryRes.text();
         primaryErrorDetail = errText;
-        console.warn(
-          `[AI Intake] Primary model (${primaryModel}) failed [${primaryStatus}]:`,
-          errText.slice(0, 200)
-        );
+        console.warn(`[AI Intake] Primary model (${primaryModel}) failed [${primaryStatus}]`);
       }
     } catch (err: unknown) {
       primaryErrorDetail = err instanceof Error ? err.message : String(err);
-      console.warn(`[AI Intake] Primary model network error:`, primaryErrorDetail);
+      console.warn(`[AI Intake] Primary model network error: ${primaryErrorDetail}`);
     }
 
-    // If Primary failed before emitting any text, retry once with Fallback Model
+    // Fallback if primary model failed before emitting tokens
     if (!activeResponse) {
-      console.info(`[AI Intake] Retrying with fallback model (${fallbackModel})...`);
+      console.info(`[AI Intake] Initiating fallback model (${fallbackModel})...`);
+      selectedModel = fallbackModel;
       try {
         const fallbackRes = await requestOpenRouter(fallbackModel, fullMessages, apiKey, req.signal);
         if (fallbackRes.ok && fallbackRes.body) {
@@ -228,32 +228,28 @@ export async function POST(req: NextRequest) {
           const fallbackStatus = fallbackRes.status;
           const fallbackErrText = await fallbackRes.text();
           console.error(
-            `[AI Intake] Fallback model (${fallbackModel}) also failed [${fallbackStatus}]:`,
-            fallbackErrText.slice(0, 200)
+            `[AI Intake] Fallback model (${fallbackModel}) failed [${fallbackStatus}]: ${fallbackErrText.slice(0, 160)}`
           );
 
-          // Build a clear, diagnostic error message highlighting model slug issues if any 404 occurred
           const is404 = primaryStatus === 404 || fallbackStatus === 404;
           const errorMsg = is404
-            ? `OpenRouter returned 404 for one or more model IDs. The model slug may no longer be available in OpenRouter's free catalog.\nPrimary (${primaryModel}): [${primaryStatus}] ${primaryErrorDetail.slice(0, 160)}\nFallback (${fallbackModel}): [${fallbackStatus}] ${fallbackErrText.slice(0, 160)}`
-            : `OpenRouter query failed on both models.\nPrimary (${primaryModel}): [${primaryStatus}] ${primaryErrorDetail.slice(0, 160)}\nFallback (${fallbackModel}): [${fallbackStatus}] ${fallbackErrText.slice(0, 160)}`;
+            ? "The AI legal model is temporarily undergoing maintenance upstream. Please retry in a few moments."
+            : "AI intake is temporarily unavailable from the upstream provider. Please retry shortly.";
 
           return NextResponse.json({ error: errorMsg }, { status: 502 });
         }
       } catch (fallbackErr: unknown) {
         const fallbackMsg =
           fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr);
+        console.error(`[AI Intake] Fallback network exception: ${fallbackMsg}`);
         return NextResponse.json(
-          {
-            error: `Both models failed.\nPrimary (${primaryModel}): ${primaryErrorDetail}\nFallback (${fallbackModel}): ${fallbackMsg}`,
-          },
+          { error: "Unable to establish connection with legal AI provider. Please retry." },
           { status: 502 }
         );
       }
     }
 
-    // 6. Stream SSE Tokens to Client via ReadableStream
-    // We decode OpenRouter's SSE chunks server-side and stream text tokens directly.
+    // 6. Robust Server-Side SSE Token Parser and Stream Transmitter
     const openRouterReader = activeResponse.body!.getReader();
     const encoder = new TextEncoder();
     const decoder = new TextDecoder();
@@ -261,8 +257,10 @@ export async function POST(req: NextRequest) {
     const stream = new ReadableStream({
       async start(controller) {
         let buffer = "";
-        let finishReason = "unknown";
+        let finishReason: string | null = null;
         let hasEmittedTokens = false;
+        let streamError: string | null = null;
+        let timeToFirstToken: number | null = null;
 
         try {
           while (true) {
@@ -286,19 +284,36 @@ export async function POST(req: NextRequest) {
               if (trimmed.startsWith("data: ")) {
                 try {
                   const json = JSON.parse(trimmed.slice(6));
+
+                  // OpenRouter mid-stream error format
+                  if (json.error) {
+                    const rawMsg = json.error?.message || "Upstream provider stream error.";
+                    console.error("[AI Intake] SSE chunk error received:", rawMsg);
+                    streamError = rawMsg;
+                    break;
+                  }
+
                   const delta = json.choices?.[0]?.delta?.content;
                   if (delta) {
+                    if (timeToFirstToken === null) {
+                      timeToFirstToken = Date.now() - requestStartTime;
+                    }
                     controller.enqueue(encoder.encode(delta));
                     hasEmittedTokens = true;
                   }
+
                   const reason = json.choices?.[0]?.finish_reason;
                   if (reason) {
                     finishReason = reason;
                   }
                 } catch {
-                  // Ignore JSON parse errors for fragmented or malformed lines
+                  // Ignore JSON parse errors on fragmented lines
                 }
               }
+            }
+
+            if (streamError) {
+              break;
             }
           }
 
@@ -308,14 +323,23 @@ export async function POST(req: NextRequest) {
             controller.enqueue(encoder.encode(remainder));
           }
 
-          // Append deterministic completion marker based on finish_reason
-          if (hasEmittedTokens) {
+          // Emit deterministic protocol completion token based on generation state
+          if (streamError) {
+            controller.enqueue(encoder.encode(`\n\n__NYAYLINK_ERROR__: ${streamError}`));
+          } else if (hasEmittedTokens) {
             if (finishReason === "length") {
               controller.enqueue(encoder.encode("\n\n__NYAYLINK_TRUNCATED__"));
+            } else if (finishReason === "content_filter") {
+              controller.enqueue(encoder.encode("\n\n__NYAYLINK_FILTERED__"));
             } else {
               controller.enqueue(encoder.encode("\n\n__NYAYLINK_DONE__"));
             }
           }
+
+          const totalDuration = Date.now() - requestStartTime;
+          console.info(
+            `[AI Intake] Request completed: model=${selectedModel}, TTFT=${timeToFirstToken ?? "none"}ms, total=${totalDuration}ms, finish=${finishReason || "natural"}`
+          );
 
           controller.close();
         } catch (streamErr) {

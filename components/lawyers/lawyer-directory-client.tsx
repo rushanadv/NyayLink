@@ -92,60 +92,62 @@ export function LawyerDirectoryClient({
 
   // Client-side instant filtering
   const filteredLawyers = useMemo(() => {
-    return initialLawyers.filter((lawyer) => {
-      // 1. Text Search query
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase().trim();
-        const nameMatch = lawyer.professional_name.toLowerCase().includes(q);
-        const bioMatch = lawyer.bio?.toLowerCase().includes(q) ?? false;
-        const cityMatch = lawyer.city.toLowerCase().includes(q);
-        const stateMatch = lawyer.state.toLowerCase().includes(q);
-        const paMatch = lawyer.practice_areas.some((pa) =>
-          pa.toLowerCase().includes(q)
-        );
-        const langMatch = lawyer.languages.some((lang) =>
-          lang.toLowerCase().includes(q)
-        );
+    return initialLawyers
+      .filter((lawyer) => {
+        // 1. Text Search query
+        if (searchQuery.trim()) {
+          const q = searchQuery.toLowerCase().trim();
+          const nameMatch = lawyer.professional_name.toLowerCase().includes(q);
+          const bioMatch = lawyer.bio?.toLowerCase().includes(q) ?? false;
+          const cityMatch = lawyer.city.toLowerCase().includes(q);
+          const stateMatch = lawyer.state.toLowerCase().includes(q);
+          const paMatch = lawyer.practice_areas.some((pa) =>
+            pa.toLowerCase().includes(q)
+          );
+          const langMatch = lawyer.languages.some((lang) =>
+            lang.toLowerCase().includes(q)
+          );
 
-        if (!nameMatch && !bioMatch && !cityMatch && !stateMatch && !paMatch && !langMatch) {
-          return false;
+          if (!nameMatch && !bioMatch && !cityMatch && !stateMatch && !paMatch && !langMatch) {
+            return false;
+          }
         }
-      }
 
-      // 2. Practice Area filter
-      if (selectedPracticeArea !== "all") {
-        if (!lawyer.practice_areas.includes(selectedPracticeArea)) {
-          return false;
+        // 2. Practice Area filter
+        if (selectedPracticeArea !== "all") {
+          if (!lawyer.practice_areas.includes(selectedPracticeArea)) {
+            return false;
+          }
         }
-      }
 
-      // 3. City filter
-      if (selectedCity !== "all") {
-        if (lawyer.city !== selectedCity) {
-          return false;
+        // 3. City filter
+        if (selectedCity !== "all") {
+          if (lawyer.city !== selectedCity) {
+            return false;
+          }
         }
-      }
 
-      // 4. Language filter
-      if (selectedLanguage !== "all") {
-        if (!lawyer.languages.includes(selectedLanguage)) {
-          return false;
+        // 4. Language filter
+        if (selectedLanguage !== "all") {
+          if (!lawyer.languages.includes(selectedLanguage)) {
+            return false;
+          }
         }
-      }
 
-      return true;
-    }).sort((a, b) => {
-      if (sortBy === "exp-desc") {
-        return b.experience_years - a.experience_years;
-      }
-      if (sortBy === "exp-asc") {
-        return a.experience_years - b.experience_years;
-      }
-      if (sortBy === "name-asc") {
-        return a.professional_name.localeCompare(b.professional_name);
-      }
-      return 0;
-    });
+        return true;
+      })
+      .sort((a, b) => {
+        if (sortBy === "exp-desc") {
+          return b.experience_years - a.experience_years;
+        }
+        if (sortBy === "exp-asc") {
+          return a.experience_years - b.experience_years;
+        }
+        if (sortBy === "name-asc") {
+          return a.professional_name.localeCompare(b.professional_name);
+        }
+        return 0;
+      });
   }, [
     initialLawyers,
     searchQuery,
@@ -174,17 +176,17 @@ export function LawyerDirectoryClient({
     : "/auth/login?intent=client&next=/lawyers";
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10">
       {/* Page Header */}
       <div className="space-y-4 max-w-3xl">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#191923] border border-border-default text-xs font-mono text-white/80">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059]" />
-          <span>03 // VERIFIED ADVOCATE DIRECTORY</span>
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#EAF3ED] border border-[#D5E5D9] text-xs font-mono font-semibold text-[#205C43]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#205C43] animate-pulse" />
+          <span>VERIFIED ADVOCATE DIRECTORY</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-white tracking-tight leading-[1.15] text-balance">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-[#202824] tracking-tight leading-[1.15] text-balance">
           Find Verified Bar Council Advocates
         </h1>
-        <p className="text-sm sm:text-base text-[#A5A3B2] leading-relaxed">
+        <p className="text-sm sm:text-base text-[#69736D] leading-relaxed">
           Search independent practitioners across Supreme Court, High Courts, and
           District Tribunals. All profiles feature authenticated Bar Council of
           India enrollment records, upfront flat consultation fees, and zero
@@ -192,36 +194,36 @@ export function LawyerDirectoryClient({
         </p>
 
         {/* Badges / Guarantees Row */}
-        <div className="flex flex-wrap items-center gap-3 pt-2 text-xs text-[#A5A3B2]">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-raised border border-border-subtle">
-            <Users className="w-3.5 h-3.5 text-white/70" />
-            <span className="text-white/90">
+        <div className="flex flex-wrap items-center gap-2.5 pt-2 text-xs text-[#69736D]">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#D5E5D9] shadow-xs">
+            <Users className="w-3.5 h-3.5 text-[#205C43]" />
+            <span className="text-[#202824] font-medium">
               {initialLawyers.length > 0
                 ? `${initialLawyers.length} Enrolled Advocates`
                 : "National Bar Roll"}
             </span>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-raised border border-border-subtle">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="text-white/90">BCI Credentials Validated</span>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#D5E5D9] shadow-xs">
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#205C43]" />
+            <span className="text-[#202824] font-medium">BCI Credentials Validated</span>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-raised border border-border-subtle">
-            <Scale className="w-3.5 h-3.5 text-white/70" />
-            <span className="text-white/90">Section 36 Compliant</span>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#D5E5D9] shadow-xs">
+            <Scale className="w-3.5 h-3.5 text-[#205C43]" />
+            <span className="text-[#202824] font-medium">Section 36 Compliant</span>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-raised border border-border-subtle">
-            <ShieldCheck className="w-3.5 h-3.5 text-white/70" />
-            <span className="text-white/90">Milestone Escrow Protection</span>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#D5E5D9] shadow-xs">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#205C43]" />
+            <span className="text-[#202824] font-medium">Milestone Escrow Protection</span>
           </div>
         </div>
 
         {/* Development Demo Notice */}
         {directoryState === "dev_demo" && (
-          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-200 text-xs flex items-start gap-3 mt-4">
-            <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+          <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-3 mt-4 shadow-xs">
+            <AlertCircle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
             <div className="space-y-0.5">
-              <p className="font-semibold text-amber-300">Development Demo Mode Active</p>
-              <p className="text-amber-200/80 leading-relaxed">
+              <p className="font-semibold text-amber-950 font-mono">Development Demo Mode Active</p>
+              <p className="text-amber-800 leading-relaxed">
                 Displaying 6 local demonstration advocate profiles for development and UI testing.
                 These are simulated profiles, NOT live verified advocates.
               </p>
@@ -231,32 +233,32 @@ export function LawyerDirectoryClient({
 
         {/* Diagnostic Notice */}
         {loadWarning && directoryState !== "dev_demo" && (
-          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-200 text-xs flex items-start gap-3 mt-4">
-            <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+          <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-3 mt-4 shadow-xs">
+            <AlertCircle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
             <div className="space-y-0.5">
-              <p className="font-semibold text-amber-300">Directory Notice</p>
-              <p className="text-amber-200/80 leading-relaxed">{loadWarning}</p>
+              <p className="font-semibold text-amber-950 font-mono">Directory Notice</p>
+              <p className="text-amber-800 leading-relaxed">{loadWarning}</p>
             </div>
           </div>
         )}
       </div>
 
       {/* Search & Filter Toolbar */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-[#0C0F17]/95 border border-white/[0.08] backdrop-blur-md shadow-2xl space-y-4">
+      <div className="p-5 sm:p-6 rounded-2xl bg-white/95 border border-[#D5E5D9] backdrop-blur-md shadow-xs space-y-4">
         {/* Main Search Input */}
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#C5A059]" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#205C43]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by advocate name, legal issue (e.g. RERA, Bail, NCLT), city, or language..."
-            className="w-full h-12 pl-11 pr-10 rounded-xl bg-[#141824] border border-white/10 focus:border-[#C5A059]/60 focus:ring-1 focus:ring-[#C5A059] text-sm text-white placeholder-white/30 transition-all outline-none"
+            className="w-full h-12 pl-11 pr-10 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] focus:border-[#205C43] focus:ring-2 focus:ring-[#205C43]/15 text-sm text-[#202824] placeholder-[#69736D]/60 transition-all outline-none"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 text-white/40 hover:text-white"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 text-[#69736D] hover:text-[#202824]"
               aria-label="Clear search input"
             >
               <X className="w-4 h-4" />
@@ -268,67 +270,67 @@ export function LawyerDirectoryClient({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Practice Area Filter */}
           <div className="relative">
-            <label className="block text-[11px] font-mono text-[#A5A3B2] uppercase tracking-wider mb-1">
+            <label className="block text-[11px] font-mono text-[#69736D] uppercase tracking-wider mb-1 font-semibold">
               Practice Area
             </label>
             <select
               value={selectedPracticeArea}
               onChange={(e) => setSelectedPracticeArea(e.target.value)}
-              className="w-full h-10 px-3 pr-8 rounded-lg bg-[#141824] border border-white/10 text-xs text-white focus:border-[#C5A059] outline-none appearance-none cursor-pointer"
+              className="w-full h-10 px-3 pr-8 rounded-lg bg-[#F8FAF9] border border-[#D5E5D9] text-xs text-[#202824] focus:border-[#205C43] outline-none appearance-none cursor-pointer"
             >
               <option value="all">All Practice Areas ({practiceAreasList.length})</option>
               {practiceAreasList.map((pa) => (
-                <option key={pa} value={pa} className="bg-[#0C0F17] text-white">
+                <option key={pa} value={pa}>
                   {pa}
                 </option>
               ))}
             </select>
-            <ChevronDown className="absolute right-3 top-[34px] w-3.5 h-3.5 text-white/40 pointer-events-none" />
+            <ChevronDown className="absolute right-3 top-[34px] w-3.5 h-3.5 text-[#69736D] pointer-events-none" />
           </div>
 
           {/* City / State Filter */}
           <div className="relative">
-            <label className="block text-[11px] font-mono text-[#A5A3B2] uppercase tracking-wider mb-1">
+            <label className="block text-[11px] font-mono text-[#69736D] uppercase tracking-wider mb-1 font-semibold">
               Court Jurisdiction / City
             </label>
             <select
               value={selectedCity}
               onChange={(e) => setSelectedCity(e.target.value)}
-              className="w-full h-10 px-3 pr-8 rounded-lg bg-[#141824] border border-white/10 text-xs text-white focus:border-[#C5A059] outline-none appearance-none cursor-pointer"
+              className="w-full h-10 px-3 pr-8 rounded-lg bg-[#F8FAF9] border border-[#D5E5D9] text-xs text-[#202824] focus:border-[#205C43] outline-none appearance-none cursor-pointer"
             >
               <option value="all">All Locations ({citiesList.length})</option>
               {citiesList.map((city) => (
-                <option key={city} value={city} className="bg-[#0C0F17] text-white">
+                <option key={city} value={city}>
                   {city}
                 </option>
               ))}
             </select>
-            <ChevronDown className="absolute right-3 top-[34px] w-3.5 h-3.5 text-white/40 pointer-events-none" />
+            <ChevronDown className="absolute right-3 top-[34px] w-3.5 h-3.5 text-[#69736D] pointer-events-none" />
           </div>
 
           {/* Language Filter */}
           <div className="relative">
-            <label className="block text-[11px] font-mono text-[#A5A3B2] uppercase tracking-wider mb-1">
+            <label className="block text-[11px] font-mono text-[#69736D] uppercase tracking-wider mb-1 font-semibold">
               Consultation Language
             </label>
             <select
               value={selectedLanguage}
               onChange={(e) => setSelectedLanguage(e.target.value)}
-              className="w-full h-10 px-3 pr-8 rounded-lg bg-[#141824] border border-white/10 text-xs text-white focus:border-[#C5A059] outline-none appearance-none cursor-pointer"
+              className="w-full h-10 px-3 pr-8 rounded-lg bg-[#F8FAF9] border border-[#D5E5D9] text-xs text-[#202824] focus:border-[#205C43] outline-none appearance-none cursor-pointer"
             >
               <option value="all">All Languages ({languagesList.length})</option>
               {languagesList.map((lang) => (
-                <option key={lang} value={lang} className="bg-[#0C0F17] text-white">
+                <option key={lang} value={lang}>
                   {lang}
                 </option>
               ))}
             </select>
-            <ChevronDown className="absolute right-3 top-[34px] w-3.5 h-3.5 text-white/40 pointer-events-none" />
+            <ChevronDown className="absolute right-3 top-[34px] w-3.5 h-3.5 text-[#69736D] pointer-events-none" />
           </div>
 
           {/* Sort By Filter */}
           <div className="relative">
-            <label className="block text-[11px] font-mono text-[#A5A3B2] uppercase tracking-wider mb-1">
+            <label className="block text-[11px] font-mono text-[#69736D] uppercase tracking-wider mb-1 font-semibold">
               Sort Results
             </label>
             <select
@@ -336,31 +338,25 @@ export function LawyerDirectoryClient({
               onChange={(e) =>
                 setSortBy(e.target.value as "exp-desc" | "exp-asc" | "name-asc")
               }
-              className="w-full h-10 px-3 pr-8 rounded-lg bg-[#141824] border border-white/10 text-xs text-white focus:border-[#C5A059] outline-none appearance-none cursor-pointer"
+              className="w-full h-10 px-3 pr-8 rounded-lg bg-[#F8FAF9] border border-[#D5E5D9] text-xs text-[#202824] focus:border-[#205C43] outline-none appearance-none cursor-pointer"
             >
-              <option value="exp-desc" className="bg-[#0C0F17] text-white">
-                Most Experienced (Years)
-              </option>
-              <option value="exp-asc" className="bg-[#0C0F17] text-white">
-                Earliest Call / Rising Counsel
-              </option>
-              <option value="name-asc" className="bg-[#0C0F17] text-white">
-                Alphabetical (A to Z)
-              </option>
+              <option value="exp-desc">Most Experienced (Years)</option>
+              <option value="exp-asc">Earliest Call / Rising Counsel</option>
+              <option value="name-asc">Alphabetical (A to Z)</option>
             </select>
-            <ChevronDown className="absolute right-3 top-[34px] w-3.5 h-3.5 text-white/40 pointer-events-none" />
+            <ChevronDown className="absolute right-3 top-[34px] w-3.5 h-3.5 text-[#69736D] pointer-events-none" />
           </div>
         </div>
 
         {/* Results Bar & Active Filter Chips */}
-        <div className="pt-2 flex flex-wrap items-center justify-between gap-3 text-xs border-t border-white/[0.06]">
+        <div className="pt-2 flex flex-wrap items-center justify-between gap-3 text-xs border-t border-[#D5E5D9]">
           <div className="flex items-center gap-2">
-            <span className="font-mono text-[11px] text-[#A5A3B2]">
-              Showing <strong className="text-white">{filteredLawyers.length}</strong> of{" "}
+            <span className="font-mono text-[11px] text-[#69736D]">
+              Showing <strong className="text-[#202824]">{filteredLawyers.length}</strong> of{" "}
               {initialLawyers.length} verified advocates
             </span>
             {hasActiveFilters && (
-              <span className="text-[10px] font-mono text-[#C5A059] bg-[#C5A059]/10 px-2 py-0.5 rounded border border-[#C5A059]/25">
+              <span className="text-[10px] font-mono text-[#205C43] bg-[#EAF3ED] px-2 py-0.5 rounded border border-[#D5E5D9] font-semibold">
                 Filtered
               </span>
             )}
@@ -369,7 +365,7 @@ export function LawyerDirectoryClient({
           {hasActiveFilters && (
             <button
               onClick={clearAllFilters}
-              className="text-xs text-[#DFBE7E] hover:underline flex items-center gap-1 font-medium"
+              className="text-xs text-[#205C43] hover:underline flex items-center gap-1 font-semibold"
             >
               <X className="w-3.5 h-3.5" />
               Reset all filters
@@ -381,59 +377,59 @@ export function LawyerDirectoryClient({
       {/* Distinct States: 1. Backend Error, 2. Database Empty, 3. Filtered Empty, 4. Results Grid */}
       {directoryState === "error" ? (
         /* State 3: Backend Failure */
-        <div className="p-10 sm:p-14 rounded-xl bg-surface-raised border border-red-500/30 text-center space-y-4 max-w-xl mx-auto shadow-2xl">
-          <div className="w-12 h-12 rounded-xl bg-red-950/40 border border-red-500/30 flex items-center justify-center text-red-400 mx-auto">
+        <div className="p-10 sm:p-14 rounded-2xl bg-white border border-rose-200 text-center space-y-4 max-w-xl mx-auto shadow-sm">
+          <div className="w-12 h-12 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-700 mx-auto">
             <AlertCircle className="w-6 h-6" />
           </div>
-          <h2 className="text-xl font-serif text-white font-medium">
+          <h2 className="text-xl font-serif text-[#202824] font-medium">
             Directory Service Temporarily Unavailable
           </h2>
-          <p className="text-xs sm:text-sm text-[#A5A3B2] leading-relaxed max-w-md mx-auto">
+          <p className="text-xs sm:text-sm text-[#69736D] leading-relaxed max-w-md mx-auto">
             {errorMessage ||
               "We are having trouble connecting to our Bar Council verification registry right now. Our technical team has been notified. You can retry the connection or start an AI Legal Intake session."}
           </p>
           <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
             <button
               onClick={() => window.location.reload()}
-              className="px-5 py-2.5 rounded-lg bg-[#C5A059] hover:bg-[#DFBE7E] text-xs font-semibold text-[#090B10] transition-colors flex items-center gap-1.5 shadow-md shadow-[#C5A059]/15"
+              className="px-5 py-2.5 rounded-xl bg-[#205C43] hover:bg-[#174530] text-xs font-semibold text-white transition-colors flex items-center gap-1.5 shadow-xs"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               Retry Connection
             </button>
             <Link
               href="/intake"
-              className="px-5 py-2.5 rounded-lg bg-surface-raised hover:bg-surface-hover text-xs font-semibold text-white border border-border-default transition-colors flex items-center gap-1.5"
+              className="px-5 py-2.5 rounded-xl bg-[#EAF3ED] hover:bg-[#D5E5D9] text-xs font-semibold text-[#205C43] border border-[#D5E5D9] transition-colors flex items-center gap-1.5 shadow-xs"
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#C5A059]" />
+              <Sparkles className="w-3.5 h-3.5 text-[#205C43]" />
               Start AI Legal Intake
             </Link>
           </div>
         </div>
       ) : directoryState === "empty" || initialLawyers.length === 0 ? (
         /* State 2: Honest Database Empty State */
-        <div className="p-10 sm:p-14 rounded-xl bg-surface-raised border border-border-default text-center space-y-4 max-w-xl mx-auto shadow-2xl">
-          <div className="w-12 h-12 rounded-xl bg-surface-raised border border-border-strong flex items-center justify-center text-white mx-auto">
-            <Scale className="w-6 h-6 text-[#C5A059]" />
+        <div className="p-10 sm:p-14 rounded-2xl bg-white border border-[#D5E5D9] text-center space-y-4 max-w-xl mx-auto shadow-xs">
+          <div className="w-12 h-12 rounded-xl bg-[#EAF3ED] border border-[#D5E5D9] flex items-center justify-center text-[#205C43] mx-auto">
+            <Scale className="w-6 h-6" />
           </div>
-          <h2 className="text-xl font-serif text-white font-medium">
+          <h2 className="text-xl font-serif text-[#202824] font-medium">
             Advocate Directory Initializing
           </h2>
-          <p className="text-xs sm:text-sm text-[#A5A3B2] leading-relaxed max-w-md mx-auto">
+          <p className="text-xs sm:text-sm text-[#69736D] leading-relaxed max-w-md mx-auto">
             No advocate profiles are currently published on the live registry. As independent advocates complete Bar Council enrollment validation and grant publication consent under Rule 36, their verified profiles will appear here.
           </p>
           <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/intake"
-              className="px-5 py-2.5 rounded-lg bg-[#C5A059] hover:bg-[#DFBE7E] text-xs font-semibold text-[#090B10] transition-colors flex items-center gap-1.5 shadow-md shadow-[#C5A059]/15"
+              className="px-5 py-2.5 rounded-xl bg-[#205C43] hover:bg-[#174530] text-xs font-semibold text-white transition-colors flex items-center gap-1.5 shadow-xs"
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#090B10]" />
+              <Sparkles className="w-3.5 h-3.5" />
               Start AI Legal Intake
             </Link>
             <Link
-              href="/auth/login?intent=lawyer"
-              className="px-5 py-2.5 rounded-lg bg-surface-raised hover:bg-surface-hover text-xs font-semibold text-white border border-border-default transition-colors flex items-center gap-1.5"
+              href="/auth/sign-up?intent=lawyer"
+              className="px-5 py-2.5 rounded-xl bg-white hover:bg-[#EAF3ED] text-xs font-semibold text-[#202824] border border-[#D5E5D9] transition-colors flex items-center gap-1.5 shadow-xs"
             >
-              <Users className="w-3.5 h-3.5 text-white/70" />
+              <Users className="w-3.5 h-3.5 text-[#205C43]" />
               Enroll as an Advocate
             </Link>
           </div>
@@ -449,35 +445,22 @@ export function LawyerDirectoryClient({
                 key={lawyer.id}
                 whileHover={shouldReduceMotion ? undefined : { scale: 1.018 }}
                 transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                className="relative p-6 rounded-xl bg-[#0C0F17]/95 border border-border-default hover:border-border-strong transition-colors shadow-xl hover:shadow-2xl hover:shadow-black/70 flex flex-col justify-between group overflow-hidden"
+                className="relative p-6 rounded-2xl bg-white border border-[#D5E5D9] hover:border-[#205C43]/40 transition-all shadow-xs hover:shadow-md flex flex-col justify-between group overflow-hidden"
               >
-                {/* 1px Crisp Gold-to-Transparent Gradient Border on Hover */}
-                <div
-                  className="absolute inset-0 rounded-xl pointer-events-none p-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, rgba(197, 160, 89, 0.8) 0%, rgba(197, 160, 89, 0.25) 45%, transparent 85%)",
-                    WebkitMask:
-                      "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-                    WebkitMaskComposite: "xor",
-                    maskComposite: "exclude",
-                  }}
-                />
-
-                <div className="relative z-[1]">
+                <div>
                   {/* Card Header */}
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-3.5">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#252E46] to-[#121622] flex items-center justify-center font-serif text-sm font-semibold text-[#DFBE7E] border border-border-default group-hover:border-[#C5A059]/30 transition-colors shrink-0 shadow-inner">
+                      <div className="w-12 h-12 rounded-full bg-[#EAF3ED] flex items-center justify-center font-serif text-sm font-semibold text-[#205C43] border border-[#D5E5D9] shrink-0 shadow-2xs">
                         {initials}
                       </div>
                       <div>
-                        <h3 className="font-semibold text-white text-base group-hover:text-[#DFBE7E] transition-colors leading-tight">
+                        <h3 className="font-semibold text-[#202824] text-base group-hover:text-[#205C43] transition-colors leading-tight">
                           {lawyer.professional_name}
                         </h3>
                         <div className="flex items-center gap-1.5 mt-1">
-                          <span className="text-[10px] font-mono text-[#DFBE7E] bg-[#C5A059]/10 px-2 py-0.5 rounded-lg border border-[#C5A059]/30 flex items-center gap-1 font-semibold">
-                            <CheckCircle2 className="w-3 h-3 text-[#C5A059]" />
+                          <span className="text-[10px] font-mono text-[#205C43] bg-[#EAF3ED] px-2 py-0.5 rounded-md border border-[#D5E5D9] flex items-center gap-1 font-semibold">
+                            <CheckCircle2 className="w-3 h-3 text-[#205C43]" />
                             BCI Verified
                           </span>
                         </div>
@@ -486,34 +469,34 @@ export function LawyerDirectoryClient({
                   </div>
 
                   {/* Location & Experience Meta */}
-                  <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-border-subtle text-xs text-[#A5A3B2]">
+                  <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-[#D5E5D9] text-xs text-[#69736D]">
                     <div className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-white/70 shrink-0" />
+                      <MapPin className="w-3.5 h-3.5 text-[#205C43] shrink-0" />
                       <span className="truncate">{lawyer.city}, {lawyer.state}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-white/70 shrink-0" />
+                      <Clock className="w-3.5 h-3.5 text-[#205C43] shrink-0" />
                       <span>{lawyer.experience_years} Years Experience</span>
                     </div>
                   </div>
 
                   {/* Bio */}
                   {lawyer.bio && (
-                    <p className="text-xs text-[#A5A3B2] leading-relaxed line-clamp-3 mt-3.5">
+                    <p className="text-xs text-[#69736D] leading-relaxed line-clamp-3 mt-3.5">
                       {lawyer.bio}
                     </p>
                   )}
 
                   {/* Practice Area Chips */}
                   <div className="mt-4 space-y-1.5">
-                    <span className="text-[10px] font-mono text-white/40 uppercase tracking-wider block">
+                    <span className="text-[10px] font-mono text-[#69736D] uppercase tracking-wider block font-semibold">
                       Specializations
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {lawyer.practice_areas.map((pa) => (
                         <span
                           key={pa}
-                          className="px-2.5 py-0.5 rounded-lg bg-surface-raised text-[11px] font-medium text-white/80 border border-border-subtle"
+                          className="px-2.5 py-0.5 rounded-md bg-[#F8FAF9] text-[11px] font-medium text-[#202824] border border-[#D5E5D9]"
                         >
                           {pa}
                         </span>
@@ -522,8 +505,8 @@ export function LawyerDirectoryClient({
                   </div>
 
                   {/* Languages Spoken */}
-                  <div className="mt-3.5 flex items-center gap-1.5 text-[11px] text-[#A5A3B2]">
-                    <LanguagesIcon className="w-3.5 h-3.5 text-white/70 shrink-0" />
+                  <div className="mt-3.5 flex items-center gap-1.5 text-[11px] text-[#69736D]">
+                    <LanguagesIcon className="w-3.5 h-3.5 text-[#205C43] shrink-0" />
                     <span className="truncate">
                       {lawyer.languages.join(", ")}
                     </span>
@@ -531,11 +514,11 @@ export function LawyerDirectoryClient({
                 </div>
 
                 {/* Card Action */}
-                <div className="pt-5 mt-5 border-t border-border-subtle relative z-[1]">
+                <div className="pt-5 mt-5 border-t border-[#D5E5D9]">
                   <MagneticWrapper className="w-full" maxDisplacement={6}>
                     <Link
                       href={consultationHref}
-                      className="w-full py-2.5 rounded-lg bg-[#C5A059] hover:bg-[#DFBE7E] text-[#090B10] font-semibold text-xs transition-colors shadow-md shadow-[#C5A059]/15 flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C5A059] block"
+                      className="w-full py-2.5 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white font-semibold text-xs transition-colors shadow-xs flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#205C43] block text-center"
                     >
                       <span>Request Consultation</span>
                       <ArrowRight className="w-3.5 h-3.5 inline ml-1" />
@@ -548,21 +531,21 @@ export function LawyerDirectoryClient({
         </div>
       ) : (
         /* Filter Empty State (when user filters match 0 results) */
-        <div className="p-12 sm:p-16 rounded-xl bg-surface-raised border border-border-default text-center space-y-4 max-w-xl mx-auto shadow-2xl">
-          <div className="w-12 h-12 rounded-xl bg-surface-raised border border-border-default flex items-center justify-center text-[#DFBE7E] mx-auto">
-            <Scale className="w-6 h-6 text-[#C5A059]" />
+        <div className="p-12 sm:p-16 rounded-2xl bg-white border border-[#D5E5D9] text-center space-y-4 max-w-xl mx-auto shadow-xs">
+          <div className="w-12 h-12 rounded-xl bg-[#EAF3ED] border border-[#D5E5D9] flex items-center justify-center text-[#205C43] mx-auto">
+            <Scale className="w-6 h-6 text-[#205C43]" />
           </div>
-          <h2 className="text-xl font-serif text-white font-medium">
+          <h2 className="text-xl font-serif text-[#202824] font-medium">
             No advocates match these filters
           </h2>
-          <p className="text-xs sm:text-sm text-[#A5A3B2] leading-relaxed max-w-md mx-auto">
+          <p className="text-xs sm:text-sm text-[#69736D] leading-relaxed max-w-md mx-auto">
             Try broadening your search keywords, switching practice areas, or
             clearing active filters to view all verified practitioners.
           </p>
           <div className="pt-2">
             <button
               onClick={clearAllFilters}
-              className="px-5 py-2.5 rounded-lg bg-surface-raised hover:bg-surface-hover text-xs font-semibold text-white border border-border-default transition-colors"
+              className="px-5 py-2.5 rounded-xl bg-[#F8FAF9] hover:bg-[#EAF3ED] text-xs font-semibold text-[#202824] border border-[#D5E5D9] transition-colors"
             >
               Clear All Filters
             </button>

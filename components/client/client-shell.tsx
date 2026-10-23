@@ -13,6 +13,7 @@ import { ConsultationsTab } from "./consultations-tab";
 import { DocumentsTab } from "./documents-tab";
 import { ProfileTab } from "./profile-tab";
 import { LogoutButton } from "@/components/logout-button";
+import { CinematicVideoBackground } from "@/components/marketing/cinematic-video-background";
 import {
   Scale,
   LayoutDashboard,
@@ -109,7 +110,10 @@ export function ClientShell({
   ];
 
   return (
-    <div className="min-h-screen bg-[#FDFEFC] text-[#202824] flex flex-col font-sans antialiased">
+    <div className="min-h-screen bg-[#FDFEFC] text-[#202824] flex flex-col font-sans antialiased relative overflow-x-hidden">
+      {/* Low-Intensity Atmospheric Green Smoke Treatment for Client Portal */}
+      <CinematicVideoBackground variant="portal" />
+
       {/* Top Application Bar */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#D5E5D9] px-4 sm:px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">

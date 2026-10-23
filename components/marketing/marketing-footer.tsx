@@ -2,12 +2,11 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { Scale, ShieldCheck } from "lucide-react";
 
 export function MarketingFooter() {
-  const pathname = usePathname();
-  const isDarkSubpage = pathname === "/lawyers" || pathname?.startsWith("/intake");
+  // Site-wide white and green brand identity
+  const isDarkSubpage = false;
 
   return (
     <footer

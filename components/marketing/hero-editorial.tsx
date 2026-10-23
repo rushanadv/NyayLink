@@ -9,6 +9,7 @@ import {
   ArrowRight,
   Briefcase,
   UserCheck,
+  Sparkles,
 } from "lucide-react";
 import { ParticleText } from "@/components/effects/particle-text";
 import { CaseStatusWidget } from "./case-status-widget";
@@ -72,6 +73,19 @@ export function HeroEditorial() {
             </Link>
 
             <CourtOnboardingQrModal />
+          </div>
+
+          {/* Contextual Secondary Guidance Link */}
+          <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs">
+            <span className="text-[#69736D]">Need preliminary analysis first?</span>
+            <Link
+              href="/intake"
+              className="inline-flex items-center gap-1.5 font-semibold text-[#205C43] hover:text-[#174530] hover:underline transition-colors"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#205C43]" />
+              <span>Get Initial Legal Guidance</span>
+              <ArrowRight className="w-3 h-3" />
+            </Link>
           </div>
 
 
