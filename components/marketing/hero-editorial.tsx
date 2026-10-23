@@ -18,7 +18,11 @@ import { MagneticWrapper } from "@/components/ui/magnetic-wrapper";
 import { CourtOnboardingQrModal } from "@/components/lawyer/court-onboarding-qr-modal";
 
 
+import { useLanguage } from "@/lib/i18n/context";
+
 export function HeroEditorial() {
+  const { t } = useLanguage();
+
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-16 lg:py-14">
       {/* Two-Column Balanced Editorial Grid */}
@@ -32,7 +36,7 @@ export function HeroEditorial() {
           <div className="flex items-center gap-2.5">
             <span className="w-5 h-px bg-[#205C43]" />
             <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#69736D] font-semibold">
-              NYAYLINK / LEGAL SERVICES
+              {t.home.hero.eyebrow}
             </span>
           </div>
 
@@ -40,14 +44,14 @@ export function HeroEditorial() {
           <div className="space-y-3.5 w-full">
             <h1 className="tracking-tight leading-[1.08] text-left">
               <ParticleText
-                text={"Find the right legal\npath forward."}
+                text={t.home.hero.title}
                 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[46px] xl:text-[54px] font-normal tracking-tight text-[#202824] leading-[1.08] text-left block"
                 highlightColor="#205C43"
                 textColor="#202824"
               />
             </h1>
             <p className="text-base sm:text-lg text-[#69736D] font-light leading-relaxed max-w-xl text-left pt-1">
-              NyayLink connects citizens and businesses with verified State Bar Council advocates across India. Explore statutory remedies in plain language and consult certified counsel under transparent milestone escrow.
+              {t.home.hero.subtitle}
             </p>
           </div>
 
@@ -59,7 +63,7 @@ export function HeroEditorial() {
                 className="px-6 py-3.5 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white font-semibold text-xs transition-all shadow-md shadow-[#205C43]/15 flex items-center justify-center gap-2 text-center"
               >
                 <UserCheck className="w-4 h-4 text-[#EAF3ED]" />
-                <span>I Need Legal Help</span>
+                <span>{t.home.hero.needHelp}</span>
                 <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Link>
             </MagneticWrapper>
@@ -69,7 +73,7 @@ export function HeroEditorial() {
               className="px-5 py-3.5 rounded-xl bg-white hover:bg-[#EAF3ED] border border-[#D5E5D9] text-[#202824] font-semibold text-xs transition-all flex items-center justify-center gap-2 text-center shadow-xs"
             >
               <Briefcase className="w-4 h-4 text-[#205C43]" />
-              <span>Join as an Advocate</span>
+              <span>{t.home.hero.joinAdvocate}</span>
             </Link>
 
             <CourtOnboardingQrModal />
@@ -77,13 +81,13 @@ export function HeroEditorial() {
 
           {/* Contextual Secondary Guidance Link */}
           <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs">
-            <span className="text-[#69736D]">Need preliminary analysis first?</span>
+            <span className="text-[#69736D]">{t.home.hero.preliminaryQuestion}</span>
             <Link
               href="/intake"
               className="inline-flex items-center gap-1.5 font-semibold text-[#205C43] hover:text-[#174530] hover:underline transition-colors"
             >
               <Sparkles className="w-3.5 h-3.5 text-[#205C43]" />
-              <span>Get Initial Legal Guidance</span>
+              <span>{t.home.hero.preliminaryLink}</span>
               <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
@@ -96,7 +100,7 @@ export function HeroEditorial() {
                 <ShieldCheck className="w-3.5 h-3.5 text-[#205C43]" />
               </div>
               <span className="text-[11px] font-medium text-[#202824]">
-                BCI Rule 36 Compliant
+                {t.home.hero.bciRule36}
               </span>
             </div>
 
@@ -105,7 +109,7 @@ export function HeroEditorial() {
                 <Scale className="w-3.5 h-3.5 text-[#205C43]" />
               </div>
               <span className="text-[11px] font-medium text-[#202824]">
-                Bar Council Enrolled
+                {t.home.hero.barCouncilEnrolled}
               </span>
             </div>
 
@@ -114,7 +118,7 @@ export function HeroEditorial() {
                 <Lock className="w-3.5 h-3.5 text-[#205C43]" />
               </div>
               <span className="text-[11px] font-medium text-[#202824]">
-                Milestone Escrow Security
+                {t.home.hero.milestoneEscrow}
               </span>
             </div>
 
@@ -123,7 +127,7 @@ export function HeroEditorial() {
                 <span className="font-mono text-[10px] font-bold text-[#205C43]">65B</span>
               </div>
               <span className="text-[11px] font-medium text-[#202824]">
-                Aadhaar Digital Vakalatnama
+                {t.home.hero.digitalVakalatnama}
               </span>
             </div>
           </div>

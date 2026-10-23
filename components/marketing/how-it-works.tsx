@@ -11,39 +11,39 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
+import { useLanguage } from "@/lib/i18n/context";
+
 export function HowItWorks() {
+  const { t } = useLanguage();
   const shouldReduceMotion = useReducedMotion();
 
   const steps = [
     {
-      number: "01",
-      title: "Describe what you need help with",
-      subtitle: "Plain-language and vernacular intake",
-      description:
-        "Speak or write your matter in everyday words or regional Indian languages. Our legal intake structures the factual core, identifies relevant statutes under Bharatiya Nyaya Sanhita, CPC, or specialized acts, and checks limitation periods.",
-      badge: "Vernacular Intake",
+      number: t.home.howItWorks.step1Number,
+      title: t.home.howItWorks.step1Title,
+      subtitle: t.home.howItWorks.step1Subtitle,
+      description: t.home.howItWorks.step1Desc,
+      badge: t.home.howItWorks.step1Badge,
       icon: MessageSquareText,
-      detail: "Translates everyday speech into structured legal issues and forum jurisdiction.",
+      detail: t.home.howItWorks.step1Detail,
     },
     {
-      number: "02",
-      title: "Explore relevant information & verified counsel",
-      subtitle: "Bar Council of India roll validation",
-      description:
-        "Filter enrolled advocates by specific court jurisdiction (Supreme Court, High Courts, NCLT, DRT, District Courts), matter specialization, and spoken language. Every advocate listing is cross-checked against official Bar Council registers.",
-      badge: "Real-time BCI Check",
+      number: t.home.howItWorks.step2Number,
+      title: t.home.howItWorks.step2Title,
+      subtitle: t.home.howItWorks.step2Subtitle,
+      description: t.home.howItWorks.step2Desc,
+      badge: t.home.howItWorks.step2Badge,
       icon: FileSearch,
-      detail: "View upfront, transparent consultation fees with zero surprise clerk expenses.",
+      detail: t.home.howItWorks.step2Detail,
     },
     {
-      number: "03",
-      title: "Connect and consult under milestone escrow",
-      subtitle: "Protected legal engagement",
-      description:
-        "Book a scheduled 15-minute preliminary strategy conference. Execute an enforceable digital Vakalatnama using Aadhaar OTP under Section 65B. Your legal retainer is held in milestone escrow and disbursed only as agreed filing stages complete.",
-      badge: "Milestone Escrow",
+      number: t.home.howItWorks.step3Number,
+      title: t.home.howItWorks.step3Title,
+      subtitle: t.home.howItWorks.step3Subtitle,
+      description: t.home.howItWorks.step3Desc,
+      badge: t.home.howItWorks.step3Badge,
       icon: ShieldCheck,
-      detail: "100% of escrow retainer released directly to counsel with zero referral commission.",
+      detail: t.home.howItWorks.step3Detail,
     },
   ];
 
@@ -55,14 +55,14 @@ export function HowItWorks() {
           <span className="w-4 h-px bg-[#205C43]" />
           <span className="text-[#205C43] font-bold">03</span>
           <span className="text-[#D5E5D9]">{"//"}</span>
-          <span className="text-[#69736D] font-semibold">PROCEDURAL FLOW</span>
+          <span className="text-[#69736D] font-semibold">{t.home.howItWorks.eyebrow}</span>
         </div>
 
         <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#202824] font-normal tracking-tight text-balance">
-          How NyayLink works.
+          {t.home.howItWorks.title}
         </h2>
         <p className="text-base text-[#69736D] leading-relaxed max-w-2xl font-light">
-          Three structured stages engineered to eliminate procedural opacity and connect citizens directly with verified advocates.
+          {t.home.howItWorks.subtitle}
         </p>
       </div>
 

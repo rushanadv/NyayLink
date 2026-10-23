@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -107,6 +107,18 @@ export function LawyerShell({
     },
   ];
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.classList.add("modal-open");
+    } else {
+      document.body.classList.remove("modal-open");
+    }
+    return () => {
+      document.body.classList.remove("modal-open");
+    };
+  }, [isMobileMenuOpen]);
+
   return (
     <div className="min-h-screen bg-[#FDFEFC] text-[#202824] flex flex-col font-sans antialiased relative overflow-x-hidden">
       {/* Low-Intensity Atmospheric Green Smoke Treatment for Advocate Chambers */}
@@ -163,7 +175,7 @@ export function LawyerShell({
         <aside className="hidden md:flex flex-col w-64 bg-white border-r border-[#D5E5D9] p-4 shrink-0 justify-between">
           <div className="space-y-1.5">
             <div className="px-3 py-2 text-[10px] font-mono font-semibold uppercase tracking-wider text-[#69736D]">
-              Chamber Management
+              {isHindi ? "चैंबर प्रबंधन" : "Chamber Management"}
             </div>
             {navItems.map((item) => {
               const isActive = currentTab === item.id;
@@ -202,7 +214,9 @@ export function LawyerShell({
           {/* Verification Status Pill in Sidebar */}
           <div className="p-3.5 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] space-y-1.5">
             <div className="flex items-center justify-between text-[11px]">
-              <span className="font-mono text-[#69736D] uppercase">Verification</span>
+              <span className="font-mono text-[#69736D] uppercase">
+                {isHindi ? "सत्यापन स्थिति" : "Verification"}
+              </span>
               <span
                 className={`font-mono px-1.5 py-0.5 rounded border ${
                   verification?.status === "approved"
@@ -210,13 +224,15 @@ export function LawyerShell({
                     : "text-amber-800 bg-amber-50 border-amber-200"
                 }`}
               >
-                {verification?.status === "approved" ? "BCI Verified" : "Pending"}
+                {verification?.status === "approved"
+                  ? (isHindi ? "बीसीआई सत्यापित" : "BCI Verified")
+                  : (isHindi ? "प्रक्रियाधीन" : "Pending")}
               </span>
             </div>
             <p className="text-[10px] text-[#69736D] leading-tight">
               {lawyerProfile?.is_published
-                ? "Discoverable to registered clients."
-                : "Hidden from client directory."}
+                ? (isHindi ? "पंजीकृत मुवक्किलों को दृश्यमान।" : "Discoverable to registered clients.")
+                : (isHindi ? "क्लाइंट निर्देशिका से छिपा हुआ।" : "Hidden from client directory.")}
             </p>
           </div>
 
@@ -229,7 +245,7 @@ export function LawyerShell({
             >
               <div className="flex items-center gap-2">
                 <Sparkles className="w-3.5 h-3.5 text-[#205C43]" />
-                <span>AI Intake Gateway</span>
+                <span>{isHindi ? "एआई कानूनी इंटेक" : "AI Intake Gateway"}</span>
               </div>
               <ExternalLink className="w-3 h-3 text-[#69736D]" />
             </Link>
@@ -238,12 +254,20 @@ export function LawyerShell({
 
         {/* Mobile Sidebar Drawer */}
         {isMobileMenuOpen && (
-          <div className="fixed inset-0 z-50 md:hidden bg-black/40 backdrop-blur-xs flex">
-            <div className="w-64 bg-white h-full p-4 flex flex-col justify-between shadow-2xl animate-in slide-in-from-left duration-200">
+          <div
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setIsMobileMenuOpen(false);
+            }}
+            className="fixed inset-0 z-50 md:hidden bg-black/40 backdrop-blur-xs flex"
+          >
+            <div
+              data-lenis-prevent
+              className="w-64 bg-white h-full p-4 flex flex-col justify-between shadow-2xl animate-in slide-in-from-left duration-200 overflow-y-auto"
+            >
               <div className="space-y-3">
                 <div className="flex items-center justify-between pb-3 border-b border-[#D5E5D9]">
                   <span className="font-serif font-semibold text-sm text-[#202824]">
-                    Advocate Chambers
+                    {isHindi ? "अधिवक्ता चैंबर" : "Advocate Chambers"}
                   </span>
                   <button
                     onClick={() => setIsMobileMenuOpen(false)}

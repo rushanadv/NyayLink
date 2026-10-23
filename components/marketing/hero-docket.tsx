@@ -13,12 +13,14 @@ import {
   Sparkles,
   Lock,
 } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/context";
 
 export function HeroDocket() {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<number>(0);
   const [isPaused, setIsPaused] = useState<boolean>(false);
 
-  // Auto-advance tabs every 5 seconds unless user hovers/interacts
+  // Auto-advance tabs every 5.5 seconds unless user hovers/interacts
   useEffect(() => {
     if (isPaused) return;
 
@@ -40,13 +42,13 @@ export function HeroDocket() {
         <div className="flex items-center gap-2.5 shrink-0">
           <span className="w-2 h-2 rounded-full bg-[#205C43] animate-pulse" />
           <span className="font-mono text-[11px] uppercase tracking-wider text-[#202824] font-semibold whitespace-nowrap">
-            Docket Dossier #NL-2026-DL
+            {t.home.docket.tag}
           </span>
         </div>
         <div className="flex items-center gap-1.5 font-mono text-[11px] text-[#69736D] shrink-0">
-          <span className="hidden sm:inline">Jurisdiction:</span>
+          <span className="hidden sm:inline">{t.home.docket.jurisdictionLabel}</span>
           <span className="px-2 py-0.5 rounded bg-white border border-[#D5E5D9] text-[#202824] font-medium truncate max-w-[210px] sm:max-w-none">
-            High Court of Delhi & Tribunals
+            {t.home.docket.jurisdictionVal}
           </span>
         </div>
       </div>
@@ -70,7 +72,7 @@ export function HeroDocket() {
           >
             1
           </span>
-          <span className="truncate text-[11px]">01 / Grievance</span>
+          <span className="truncate text-[11px]">{t.home.docket.tabGrievance}</span>
         </button>
 
         <button
@@ -90,7 +92,7 @@ export function HeroDocket() {
           >
             2
           </span>
-          <span className="truncate text-[11px]">02 / Analysis</span>
+          <span className="truncate text-[11px]">{t.home.docket.tabAnalysis}</span>
         </button>
 
         <button
@@ -110,7 +112,7 @@ export function HeroDocket() {
           >
             3
           </span>
-          <span className="truncate text-[11px]">03 / Counsel</span>
+          <span className="truncate text-[11px]">{t.home.docket.tabCounsel}</span>
         </button>
       </div>
 
@@ -129,10 +131,10 @@ export function HeroDocket() {
               >
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-mono text-[10px] uppercase tracking-wider text-[#205C43] font-bold">
-                    Stage 01 · Plain Language Inquiry
+                    {t.home.docket.stage1Title}
                   </span>
                   <span className="text-[11px] text-[#69736D] flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-[#205C43]" /> Logged via Vernacular Intake
+                    <Clock className="w-3 h-3 text-[#205C43]" /> {t.home.docket.stage1Logged}
                   </span>
                 </div>
 
@@ -140,10 +142,10 @@ export function HeroDocket() {
                 <div className="p-4 rounded-xl bg-[#EAF3ED]/30 border border-[#D5E5D9] text-xs space-y-2">
                   <div className="flex items-center gap-2 text-[#69736D] text-[11px] font-mono">
                     <FileText className="w-3.5 h-3.5 text-[#202824]" />
-                    <span>Citizen Submission (Gurugram Project):</span>
+                    <span>{t.home.docket.stage1SubmissionLabel}</span>
                   </div>
                   <p className="text-[#202824] text-[13px] leading-relaxed italic font-serif">
-                    &ldquo;The developer promised delivery by December 2024. It is now 14 months past deadline, no occupancy certificate has been issued, and they are demanding advance maintenance before handover.&rdquo;
+                    {t.home.docket.stage1SubmissionText}
                   </p>
                 </div>
 
@@ -151,18 +153,18 @@ export function HeroDocket() {
                 <div className="grid grid-cols-2 gap-3 pt-1 text-xs">
                   <div className="p-3 rounded-lg border border-[#D5E5D9] bg-white">
                     <span className="text-[10px] font-mono uppercase tracking-wider text-[#69736D] block">
-                      Domain Category
+                      {t.home.docket.domainCategory}
                     </span>
                     <span className="text-xs font-semibold text-[#202824] mt-0.5 block truncate">
-                      RERA & Consumer
+                      {t.home.docket.domainVal}
                     </span>
                   </div>
                   <div className="p-3 rounded-lg border border-[#D5E5D9] bg-white">
                     <span className="text-[10px] font-mono uppercase tracking-wider text-[#69736D] block">
-                      Limitation Period
+                      {t.home.docket.limitationPeriod}
                     </span>
                     <span className="text-xs font-semibold text-[#205C43] mt-0.5 block flex items-center gap-1 truncate">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#205C43] shrink-0" /> Active & Timely
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#205C43] shrink-0" /> {t.home.docket.limitationVal}
                     </span>
                   </div>
                 </div>
@@ -180,10 +182,10 @@ export function HeroDocket() {
               >
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-mono text-[10px] uppercase tracking-wider text-[#205C43] font-bold">
-                    Stage 02 · Statutory Issue & Forum Analysis
+                    {t.home.docket.stage2Title}
                   </span>
                   <span className="text-[11px] text-[#69736D] flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-[#205C43]" /> Real Statutes
+                    <Sparkles className="w-3 h-3 text-[#205C43]" /> {t.home.docket.stage2RealStatutes}
                   </span>
                 </div>
 
@@ -192,31 +194,31 @@ export function HeroDocket() {
                   <div className="flex items-center gap-2">
                     <Scale className="w-4 h-4 text-[#205C43] shrink-0" />
                     <span className="text-xs font-semibold text-[#202824] leading-snug">
-                      Section 18, Real Estate (Regulation & Development) Act, 2016
+                      {t.home.docket.stage2StatuteTitle}
                     </span>
                   </div>
                   <p className="text-xs text-[#69736D] leading-relaxed">
-                    Litigant possesses right to either withdraw with full refund plus interest at SBI MCLR + 2%, or seek monthly delayed compensation.
+                    {t.home.docket.stage2StatuteDesc}
                   </p>
 
                   <div className="pt-2 border-t border-[#D5E5D9] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 text-[11px] font-mono">
-                    <span className="text-[#69736D]">Statutory Forum:</span>
-                    <span className="text-[#202824] font-semibold truncate">Haryana RERA (HARERA)</span>
+                    <span className="text-[#69736D]">{t.home.docket.stage2ForumLabel}</span>
+                    <span className="text-[#202824] font-semibold truncate">{t.home.docket.stage2ForumVal}</span>
                   </div>
                 </div>
 
                 {/* Procedural Checklist Preview */}
                 <div className="space-y-1.5 text-xs text-[#69736D]">
                   <span className="text-[10px] font-mono uppercase tracking-wider text-[#202824] font-semibold block">
-                    Filing Evidence Checklist:
+                    {t.home.docket.checklistTitle}
                   </span>
                   <div className="flex items-center gap-2 text-[11px]">
                     <CheckCircle2 className="w-3.5 h-3.5 text-[#205C43] shrink-0" />
-                    <span className="truncate">Buyer-Builder Agreement with Clause 14</span>
+                    <span className="truncate">{t.home.docket.checklistItem1}</span>
                   </div>
                   <div className="flex items-center gap-2 text-[11px]">
                     <CheckCircle2 className="w-3.5 h-3.5 text-[#205C43] shrink-0" />
-                    <span className="truncate">Bank disbursement statement verifying payments</span>
+                    <span className="truncate">{t.home.docket.checklistItem2}</span>
                   </div>
                 </div>
               </motion.div>
@@ -233,10 +235,10 @@ export function HeroDocket() {
               >
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-mono text-[10px] uppercase tracking-wider text-[#205C43] font-bold">
-                    Stage 03 · Verified State Bar Council Counsel
+                    {t.home.docket.stage3Title}
                   </span>
                   <span className="text-[11px] text-[#69736D] flex items-center gap-1 font-mono">
-                    <Lock className="w-3.5 h-3.5 text-[#205C43]" /> Escrow Secured
+                    <Lock className="w-3.5 h-3.5 text-[#205C43]" /> {t.home.docket.stage3Escrow}
                   </span>
                 </div>
 
@@ -248,35 +250,35 @@ export function HeroDocket() {
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <h4 className="text-sm font-semibold text-[#202824]">Adv. Rajesh Sharma</h4>
+                        <h4 className="text-sm font-semibold text-[#202824]">{t.home.docket.advocateName}</h4>
                         <span className="px-1.5 py-0.5 rounded bg-[#EAF3ED] border border-[#D5E5D9] text-[9px] font-mono text-[#205C43] font-semibold uppercase">
-                          BCI Verified
+                          {t.home.docket.bciVerifiedBadge}
                         </span>
                       </div>
                       <p className="text-xs text-[#69736D] mt-0.5 truncate">
-                        Enrolment: D/1482/2009 · High Court & RERA
+                        {t.home.docket.advocateRoll}
                       </p>
                       <div className="mt-1.5 flex items-center gap-2 text-[11px] font-mono text-[#69736D] flex-wrap">
-                        <span>Hindi, English</span>
+                        <span>{t.home.docket.advocateLanguages}</span>
                         <span>·</span>
-                        <span className="text-[#205C43] font-semibold">15 Cases Before HARERA</span>
+                        <span className="text-[#205C43] font-semibold">{t.home.docket.advocateStat}</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="text-right shrink-0">
-                    <span className="text-sm sm:text-base font-bold text-[#202824]">₹1,500</span>
-                    <p className="text-[10px] text-[#69736D]">15-min fixed</p>
+                    <span className="text-sm sm:text-base font-bold text-[#202824]">{t.home.docket.advocateFee}</span>
+                    <p className="text-[10px] text-[#69736D]">{t.home.docket.advocateFeeLabel}</p>
                   </div>
                 </div>
 
                 <div className="p-3 rounded-lg bg-[#EAF3ED]/40 border border-[#D5E5D9] text-xs flex items-center justify-between">
                   <div className="flex items-center gap-2 text-[11px] text-[#69736D]">
                     <ShieldCheck className="w-4 h-4 text-[#205C43] shrink-0" />
-                    <span className="truncate">Digital Vakalatnama & Milestone Escrow Ready</span>
+                    <span className="truncate">{t.home.docket.digitalVakalatnamaEscrow}</span>
                   </div>
                   <span className="font-mono text-[10px] text-[#205C43] font-semibold shrink-0 ml-2">
-                    Zero Surprise Fees
+                    {t.home.docket.zeroSurpriseFees}
                   </span>
                 </div>
               </motion.div>
@@ -287,14 +289,14 @@ export function HeroDocket() {
         {/* Bottom Contextual Progression Bar */}
         <div className="pt-4 mt-2 border-t border-[#D5E5D9] flex items-center justify-between text-xs">
           <div className="flex items-center gap-1.5 text-[11px] text-[#69736D]">
-            <span>Click stages above to explore procedural path</span>
+            <span>{t.home.docket.clickStagesPrompt}</span>
           </div>
 
           <Link
             href="/auth/login?intent=client"
             className="inline-flex items-center gap-1.5 font-semibold text-xs text-[#202824] hover:text-[#205C43] transition-colors"
           >
-            <span>Proceed as Client</span>
+            <span>{t.home.docket.proceedClient}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>

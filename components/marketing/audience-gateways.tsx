@@ -10,8 +10,10 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { MagneticWrapper } from "@/components/ui/magnetic-wrapper";
+import { useLanguage } from "@/lib/i18n/context";
 
 export function AudienceGateways() {
+  const { t } = useLanguage();
   const shouldReduceMotion = useReducedMotion();
 
   return (
@@ -22,14 +24,14 @@ export function AudienceGateways() {
           <span className="w-4 h-px bg-[#205C43]" />
           <span className="text-[#205C43] font-bold">02</span>
           <span className="text-[#D5E5D9]">{"//"}</span>
-          <span className="text-[#69736D] font-semibold">CHOOSE YOUR PATH</span>
+          <span className="text-[#69736D] font-semibold">{t.home.gateways.eyebrow}</span>
         </div>
 
         <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#202824] font-normal tracking-tight text-balance">
-          Two distinct gateways. One verified platform.
+          {t.home.gateways.title}
         </h2>
         <p className="text-base text-[#69736D] leading-relaxed max-w-2xl font-light">
-          Whether you are navigating a legal dispute or managing litigation chambers, NyayLink provides structured, compliant infrastructure.
+          {t.home.gateways.subtitle}
         </p>
       </div>
 
@@ -51,20 +53,20 @@ export function AudienceGateways() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#EAF3ED] border border-[#D5E5D9] text-xs font-mono text-[#205C43]">
                 <User className="w-3.5 h-3.5 text-[#205C43]" />
-                <span className="font-semibold text-[#202824]">FOR CITIZENS & ENTERPRISES</span>
+                <span className="font-semibold text-[#202824]">{t.home.gateways.clientTag}</span>
               </div>
               <span className="text-[11px] font-mono text-[#205C43] bg-[#EAF3ED] px-2.5 py-0.5 rounded-md border border-[#D5E5D9] font-medium">
-                Escrow Protected
+                {t.home.gateways.escrowProtected}
               </span>
             </div>
 
             {/* Title & Copy */}
             <div className="space-y-2">
               <h3 className="font-serif text-2xl sm:text-3xl text-[#202824] tracking-tight">
-                I need legal help
+                {t.home.gateways.clientTitle}
               </h3>
               <p className="text-sm text-[#69736D] leading-relaxed">
-                For individuals, families, and businesses seeking legal clarity, exploring statutory remedies, or consulting verified counsel with guaranteed upfront fees.
+                {t.home.gateways.clientDesc}
               </p>
             </div>
 
@@ -73,19 +75,22 @@ export function AudienceGateways() {
               <div className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-[#205C43] shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-[#202824] font-semibold">Plain-Language Legal Intake:</strong> Describe your situation in your native language and receive structured statutory clarity.
+                  <strong className="text-[#202824] font-semibold">{t.home.gateways.clientFeature1Title} </strong>
+                  {t.home.gateways.clientFeature1Desc}
                 </span>
               </div>
               <div className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-[#205C43] shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-[#202824] font-semibold">Upfront Flat Consultation Fees:</strong> Scheduled 15-minute consultations with zero surprise clerk expenses.
+                  <strong className="text-[#202824] font-semibold">{t.home.gateways.clientFeature2Title} </strong>
+                  {t.home.gateways.clientFeature2Desc}
                 </span>
               </div>
               <div className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-[#205C43] shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-[#202824] font-semibold">Milestone Escrow Security:</strong> Retainer funds released to advocates only upon verified procedural filing stages.
+                  <strong className="text-[#202824] font-semibold">{t.home.gateways.clientFeature3Title} </strong>
+                  {t.home.gateways.clientFeature3Desc}
                 </span>
               </div>
             </div>
@@ -98,7 +103,7 @@ export function AudienceGateways() {
                 href="/auth/login?intent=client"
                 className="px-6 py-3.5 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white font-semibold text-xs transition-all shadow-md shadow-[#205C43]/15 flex items-center justify-center gap-2 group-hover:bg-[#174530]"
               >
-                <span>Continue as a client</span>
+                <span>{t.home.gateways.clientCta}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </MagneticWrapper>
@@ -107,7 +112,7 @@ export function AudienceGateways() {
               href="/lawyers"
               className="text-xs text-[#69736D] hover:text-[#202824] font-medium transition-colors text-center sm:text-right"
             >
-              Browse 480+ verified lawyers →
+              {t.home.gateways.browseLawyers}
             </Link>
           </div>
         </motion.div>
@@ -128,20 +133,20 @@ export function AudienceGateways() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#D5E5D9] text-xs font-mono text-[#174530]">
                 <Briefcase className="w-3.5 h-3.5 text-[#174530]" />
-                <span className="font-semibold text-[#202824]">FOR PRACTICING ADVOCATES</span>
+                <span className="font-semibold text-[#202824]">{t.home.gateways.lawyerTag}</span>
               </div>
               <span className="text-[11px] font-mono text-[#174530] bg-white px-2.5 py-0.5 rounded-md border border-[#D5E5D9] font-semibold">
-                BCI Rule 36 Compliant
+                {t.home.gateways.lawyerBadge}
               </span>
             </div>
 
             {/* Title & Copy */}
             <div className="space-y-2">
               <h3 className="font-serif text-2xl sm:text-3xl text-[#202824] tracking-tight">
-                I&apos;m an advocate
+                {t.home.gateways.lawyerTitle}
               </h3>
               <p className="text-sm text-[#69736D] leading-relaxed">
-                For State Bar Council practitioners accessing their chamber workspace, daily court cause list tracking, and verified client consultations.
+                {t.home.gateways.lawyerDesc}
               </p>
             </div>
 
@@ -150,19 +155,22 @@ export function AudienceGateways() {
               <div className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-[#174530] shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-[#202824] font-semibold">Daily e-Courts Cause List Sync:</strong> Real-time item number alerts delivered directly to your WhatsApp and chamber calendar.
+                  <strong className="text-[#202824] font-semibold">{t.home.gateways.lawyerFeature1Title} </strong>
+                  {t.home.gateways.lawyerFeature1Desc}
                 </span>
               </div>
               <div className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-[#174530] shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-[#202824] font-semibold">Digital Vakalatnama (Section 65B):</strong> Execute client representation agreements digitally with Aadhaar OTP authentication.
+                  <strong className="text-[#202824] font-semibold">{t.home.gateways.lawyerFeature2Title} </strong>
+                  {t.home.gateways.lawyerFeature2Desc}
                 </span>
               </div>
               <div className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-[#174530] shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-[#202824] font-semibold">Zero Commission Fee Model:</strong> 100% of client retainer disbursed directly to your designated bank account.
+                  <strong className="text-[#202824] font-semibold">{t.home.gateways.lawyerFeature3Title} </strong>
+                  {t.home.gateways.lawyerFeature3Desc}
                 </span>
               </div>
             </div>
@@ -175,7 +183,7 @@ export function AudienceGateways() {
                 href="/auth/login?intent=lawyer"
                 className="px-6 py-3.5 rounded-xl bg-[#174530] hover:bg-[#0E2C1E] text-white font-semibold text-xs transition-all shadow-md shadow-[#174530]/15 flex items-center justify-center gap-2 group-hover:bg-[#0E2C1E]"
               >
-                <span>Continue as a lawyer</span>
+                <span>{t.home.gateways.lawyerCta}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </MagneticWrapper>
@@ -184,7 +192,7 @@ export function AudienceGateways() {
               href="#trust"
               className="text-xs text-[#69736D] hover:text-[#202824] font-medium transition-colors text-center sm:text-right"
             >
-              Review Rule 36 non-solicitation rules →
+              {t.home.gateways.rule36Link}
             </Link>
           </div>
         </motion.div>
@@ -192,3 +200,4 @@ export function AudienceGateways() {
     </section>
   );
 }
+

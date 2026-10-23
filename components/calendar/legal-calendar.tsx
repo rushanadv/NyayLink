@@ -92,6 +92,32 @@ const PRIORITY_BADGES: Record<CalendarPriority, { label: string; hiLabel: string
   urgent: { label: "Urgent", hiLabel: "अति आवश्यक", color: "text-red-800 bg-red-100 font-bold animate-pulse" },
 };
 
+/**
+ * Asia/Kolkata (IST: UTC+05:30) timezone helpers.
+ * Prevents UTC day-shift bugs when working with date strings in Indian legal calendar.
+ */
+export function getISTDateString(d: Date | string | number): string {
+  const dateObj = typeof d === "object" ? d : new Date(d);
+  if (isNaN(dateObj.getTime())) return "";
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(dateObj);
+}
+
+export function getISTTimeString(d: Date | string | number): string {
+  const dateObj = typeof d === "object" ? d : new Date(d);
+  if (isNaN(dateObj.getTime())) return "10:30";
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Kolkata",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(dateObj);
+}
+
 export function LegalCalendar({
   role = "lawyer",
   initialEvents = [],
@@ -116,9 +142,9 @@ export function LegalCalendar({
   // Form states for creating/editing
   const [formTitle, setFormTitle] = useState("");
   const [formType, setFormType] = useState<LegalEventType>("hearing");
-  const [formStartDate, setFormStartDate] = useState(new Date().toISOString().slice(0, 10));
+  const [formStartDate, setFormStartDate] = useState(() => getISTDateString(new Date()));
   const [formStartTime, setFormStartTime] = useState("10:30");
-  const [formEndDate, setFormEndDate] = useState(new Date().toISOString().slice(0, 10));
+  const [formEndDate, setFormEndDate] = useState(() => getISTDateString(new Date()));
   const [formEndTime, setFormEndTime] = useState("11:30");
   const [formIsAllDay, setFormIsAllDay] = useState(false);
   const [formMatterId, setFormMatterId] = useState("");
@@ -128,8 +154,27 @@ export function LegalCalendar({
   const [formNotes, setFormNotes] = useState("");
   const [formPriority, setFormPriority] = useState<CalendarPriority>("medium");
   const [formReminderMinutes, setFormReminderMinutes] = useState(60);
-  const [formIsCourtVerified, setFormIsCourtVerified] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Lock body scroll and register Escape key when modal is open
+  useEffect(() => {
+    if (isCreateModalOpen || isEditModalOpen) {
+      document.body.classList.add("modal-open");
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") {
+          setIsCreateModalOpen(false);
+          setIsEditModalOpen(false);
+        }
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        document.body.classList.remove("modal-open");
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    } else {
+      document.body.classList.remove("modal-open");
+    }
+  }, [isCreateModalOpen, isEditModalOpen]);
 
   // Load events from API on mount
   const fetchEvents = useCallback(async () => {
@@ -244,7 +289,6 @@ export function LegalCalendar({
     setFormNotes("");
     setFormPriority("medium");
     setFormReminderMinutes(60);
-    setFormIsCourtVerified(false);
     setErrorFeedback(null);
     setIsCreateModalOpen(true);
   };
@@ -256,10 +300,10 @@ export function LegalCalendar({
 
     setFormTitle(event.title);
     setFormType(event.event_type);
-    setFormStartDate(startDateObj.toISOString().slice(0, 10));
-    setFormStartTime(startDateObj.toTimeString().slice(0, 5));
-    setFormEndDate(endDateObj.toISOString().slice(0, 10));
-    setFormEndTime(endDateObj.toTimeString().slice(0, 5));
+    setFormStartDate(getISTDateString(startDateObj));
+    setFormStartTime(getISTTimeString(startDateObj));
+    setFormEndDate(getISTDateString(endDateObj));
+    setFormEndTime(getISTTimeString(endDateObj));
     setFormIsAllDay(Boolean(event.is_all_day));
     setFormMatterId(event.matter_id || "");
     setFormAssociatedName(event.associated_name || "");
@@ -268,7 +312,6 @@ export function LegalCalendar({
     setFormNotes(event.notes || "");
     setFormPriority(event.priority);
     setFormReminderMinutes(event.reminder_minutes ?? 60);
-    setFormIsCourtVerified(Boolean(event.is_court_verified));
     setErrorFeedback(null);
     setIsEditModalOpen(true);
   };
@@ -285,10 +328,10 @@ export function LegalCalendar({
     setErrorFeedback(null);
 
     const startIso = formIsAllDay
-      ? `${formStartDate}T00:00:00.000Z`
+      ? `${formStartDate}T00:00:00.000+05:30`
       : `${formStartDate}T${formStartTime}:00.000+05:30`;
     const endIso = formIsAllDay
-      ? `${formEndDate}T23:59:59.000Z`
+      ? `${formEndDate}T23:59:59.000+05:30`
       : `${formEndDate}T${formEndTime}:00.000+05:30`;
 
     const payload = {
@@ -305,7 +348,7 @@ export function LegalCalendar({
       priority: formPriority,
       status: "scheduled",
       reminder_minutes: formReminderMinutes,
-      is_court_verified: formIsCourtVerified,
+      is_court_verified: false,
     };
 
     try {
@@ -340,10 +383,10 @@ export function LegalCalendar({
     setErrorFeedback(null);
 
     const startIso = formIsAllDay
-      ? `${formStartDate}T00:00:00.000Z`
+      ? `${formStartDate}T00:00:00.000+05:30`
       : `${formStartDate}T${formStartTime}:00.000+05:30`;
     const endIso = formIsAllDay
-      ? `${formEndDate}T23:59:59.000Z`
+      ? `${formEndDate}T23:59:59.000+05:30`
       : `${formEndDate}T${formEndTime}:00.000+05:30`;
 
     const payload = {
@@ -360,7 +403,7 @@ export function LegalCalendar({
       notes: formNotes.trim() || null,
       priority: formPriority,
       reminder_minutes: formReminderMinutes,
-      is_court_verified: formIsCourtVerified,
+      is_court_verified: Boolean(selectedEvent.is_court_verified),
     };
 
     try {
@@ -434,12 +477,12 @@ export function LegalCalendar({
       isToday: boolean;
     }> = [];
 
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = getISTDateString(new Date());
 
     // Prev month days
     for (let i = startOffset - 1; i >= 0; i--) {
       const d = new Date(year, month - 1, daysInPrevMonth - i);
-      const dateString = d.toISOString().slice(0, 10);
+      const dateString = getISTDateString(d);
       days.push({
         date: d,
         isCurrentMonth: false,
@@ -451,7 +494,7 @@ export function LegalCalendar({
     // Current month days
     for (let i = 1; i <= daysInMonth; i++) {
       const d = new Date(year, month, i);
-      const dateString = `${year}-${String(month + 1).padStart(2, "0")}-${String(i).padStart(2, "0")}`;
+      const dateString = getISTDateString(d);
       days.push({
         date: d,
         isCurrentMonth: true,
@@ -464,7 +507,7 @@ export function LegalCalendar({
     const remaining = (7 - (days.length % 7)) % 7;
     for (let i = 1; i <= remaining; i++) {
       const d = new Date(year, month + 1, i);
-      const dateString = d.toISOString().slice(0, 10);
+      const dateString = getISTDateString(d);
       days.push({
         date: d,
         isCurrentMonth: false,
@@ -476,11 +519,11 @@ export function LegalCalendar({
     return days;
   }, [currentDate]);
 
-  // Group events by date string (YYYY-MM-DD)
+  // Group events by date string (YYYY-MM-DD in IST)
   const eventsByDate = useMemo(() => {
     const map: Record<string, CalendarEvent[]> = {};
     filteredEvents.forEach((event) => {
-      const dateStr = new Date(event.start_time).toISOString().slice(0, 10);
+      const dateStr = getISTDateString(event.start_time);
       if (!map[dateStr]) map[dateStr] = [];
       map[dateStr].push(event);
     });
@@ -543,7 +586,7 @@ export function LegalCalendar({
 
           <button
             type="button"
-            onClick={() => handleOpenCreateForDate(new Date().toISOString().slice(0, 10))}
+            onClick={() => handleOpenCreateForDate(getISTDateString(new Date()))}
             className="px-4 py-2.5 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white text-xs sm:text-sm font-medium flex items-center gap-2 transition-all shadow-xs hover:shadow-md cursor-pointer"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
@@ -703,7 +746,7 @@ export function LegalCalendar({
               <div className="grid grid-cols-7 auto-rows-fr divide-x divide-y divide-[#D5E5D9]/80 border-b border-[#D5E5D9]">
                 {monthDays.map((dayItem, index) => {
                   const dayEvents = eventsByDate[dayItem.dateString] || [];
-                  const isSelected = selectedEvent && new Date(selectedEvent.start_time).toISOString().slice(0, 10) === dayItem.dateString;
+                  const isSelected = selectedEvent && getISTDateString(selectedEvent.start_time) === dayItem.dateString;
 
                   return (
                     <div
@@ -781,8 +824,8 @@ export function LegalCalendar({
             <div className="p-4 divide-y divide-[#D5E5D9]/70">
               <div className="grid grid-cols-7 text-center font-mono text-xs pb-3 text-[#69736D]">
                 {weekDays.map((wd, i) => {
-                  const dateStr = wd.toISOString().slice(0, 10);
-                  const isToday = dateStr === new Date().toISOString().slice(0, 10);
+                  const dateStr = getISTDateString(wd);
+                  const isToday = dateStr === getISTDateString(new Date());
                   return (
                     <div key={i} className="space-y-1">
                       <div className="text-[11px] font-semibold">{weekDayLabels[i]}</div>
@@ -800,7 +843,7 @@ export function LegalCalendar({
 
               <div className="grid grid-cols-7 divide-x divide-[#D5E5D9]/60 min-h-[360px] pt-3">
                 {weekDays.map((wd, i) => {
-                  const dateStr = wd.toISOString().slice(0, 10);
+                  const dateStr = getISTDateString(wd);
                   const dayEvents = eventsByDate[dateStr] || [];
                   return (
                     <div
@@ -840,48 +883,51 @@ export function LegalCalendar({
           )}
 
           {/* VIEW 3: DAY VIEW */}
-          {viewMode === "day" && (
-            <div className="p-6 space-y-4">
-              <div className="flex items-center justify-between pb-4 border-b border-[#D5E5D9]">
-                <h3 className="font-serif text-xl text-[#202824]">
-                  {dateFormatter.format(currentDate)}
-                </h3>
-                <span className="font-mono text-xs text-[#205C43] font-semibold">
-                  {(eventsByDate[currentDate.toISOString().slice(0, 10)] || []).length} {isHindi ? "शेड्यूल आइटम" : "Scheduled Items"}
-                </span>
-              </div>
+          {viewMode === "day" && (() => {
+            const currentDayStr = getISTDateString(currentDate);
+            const currentDayEvents = eventsByDate[currentDayStr] || [];
+            return (
+              <div className="p-6 space-y-4">
+                <div className="flex items-center justify-between pb-4 border-b border-[#D5E5D9]">
+                  <h3 className="font-serif text-xl text-[#202824]">
+                    {dateFormatter.format(currentDate)}
+                  </h3>
+                  <span className="font-mono text-xs text-[#205C43] font-semibold">
+                    {currentDayEvents.length} {isHindi ? "शेड्यूल आइटम" : "Scheduled Items"}
+                  </span>
+                </div>
 
-              <div className="space-y-3">
-                {(eventsByDate[currentDate.toISOString().slice(0, 10)] || []).length === 0 ? (
-                  <div className="p-12 text-center text-[#69736D] space-y-2">
-                    <CalendarIcon className="w-8 h-8 mx-auto opacity-40 text-[#205C43]" />
-                    <p className="text-xs">{t.calendar.noEvents}</p>
-                    <button
-                      type="button"
-                      onClick={() => handleOpenCreateForDate(currentDate.toISOString().slice(0, 10))}
-                      className="text-xs font-semibold text-[#205C43] hover:underline"
-                    >
-                      + {t.calendar.newEvent}
-                    </button>
-                  </div>
-                ) : (
-                  (eventsByDate[currentDate.toISOString().slice(0, 10)] || []).map((ev) => (
-                    <div
-                      key={ev.id}
-                      onClick={() => setSelectedEvent(ev)}
-                      className="p-4 rounded-xl border border-[#D5E5D9] bg-white hover:bg-[#F8FAF9] cursor-pointer shadow-xs transition-all flex items-start justify-between gap-4"
-                    >
-                      <div className="space-y-1.5">
-                        <div className="flex items-center gap-2">
-                          <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-full font-semibold ${EVENT_TYPE_COLORS[ev.event_type].badge}`}>
-                            {ev.event_type}
-                          </span>
-                          {ev.is_court_verified && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-50 text-purple-800 border border-purple-200">
-                              <ShieldCheck className="w-3 h-3 text-purple-700" />
-                              {t.calendar.causeListBadge}
+                <div className="space-y-3">
+                  {currentDayEvents.length === 0 ? (
+                    <div className="p-12 text-center text-[#69736D] space-y-2">
+                      <CalendarIcon className="w-8 h-8 mx-auto opacity-40 text-[#205C43]" />
+                      <p className="text-xs">{t.calendar.noEvents}</p>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenCreateForDate(currentDayStr)}
+                        className="text-xs font-semibold text-[#205C43] hover:underline"
+                      >
+                        + {t.calendar.newEvent}
+                      </button>
+                    </div>
+                  ) : (
+                    currentDayEvents.map((ev) => (
+                      <div
+                        key={ev.id}
+                        onClick={() => setSelectedEvent(ev)}
+                        className="p-4 rounded-xl border border-[#D5E5D9] bg-white hover:bg-[#F8FAF9] cursor-pointer shadow-xs transition-all flex items-start justify-between gap-4"
+                      >
+                        <div className="space-y-1.5">
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-full font-semibold ${EVENT_TYPE_COLORS[ev.event_type].badge}`}>
+                              {t.calendar[ev.event_type] || ev.event_type}
                             </span>
-                          )}
+                            {ev.is_court_verified && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-50 text-purple-800 border border-purple-200">
+                                <ShieldCheck className="w-3 h-3 text-purple-700" />
+                                {t.calendar.causeListBadge}
+                              </span>
+                            )}
                         </div>
                         <h4 className="text-sm font-semibold text-[#202824]">{ev.title}</h4>
                         <div className="flex items-center gap-4 text-xs text-[#69736D]">
@@ -903,7 +949,8 @@ export function LegalCalendar({
                 )}
               </div>
             </div>
-          )}
+            );
+          })()}
 
           {/* VIEW 4: AGENDA / LIST VIEW */}
           {viewMode === "agenda" && (
@@ -938,7 +985,7 @@ export function LegalCalendar({
                         <div className="space-y-1.5 flex-1">
                           <div className="flex items-center gap-2">
                             <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-full font-semibold ${styling.badge}`}>
-                              {ev.event_type}
+                              {t.calendar[ev.event_type] || ev.event_type}
                             </span>
                             {ev.is_court_verified ? (
                               <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-50 text-purple-800 border border-purple-200">
@@ -1021,7 +1068,7 @@ export function LegalCalendar({
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-full font-semibold ${EVENT_TYPE_COLORS[selectedEvent.event_type].badge}`}>
-                    {selectedEvent.event_type}
+                    {t.calendar[selectedEvent.event_type] || selectedEvent.event_type}
                   </span>
                   <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${PRIORITY_BADGES[selectedEvent.priority].color}`}>
                     {isHindi ? PRIORITY_BADGES[selectedEvent.priority].hiLabel : PRIORITY_BADGES[selectedEvent.priority].label}
@@ -1150,187 +1197,219 @@ export function LegalCalendar({
       {/* CREATE EVENT MODAL */}
       <AnimatePresence>
         {isCreateModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/60 backdrop-blur-xs [color-scheme:light] overflow-y-auto"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setIsCreateModalOpen(false);
+              }
+            }}
+          >
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-lg bg-white rounded-2xl border border-[#D5E5D9] shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto"
+              initial={{ opacity: 0, scale: 0.96, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 10 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              data-lenis-prevent
+              className="relative w-full max-w-lg bg-white rounded-2xl border border-[#D5E5D9] shadow-2xl overflow-hidden flex flex-col max-h-[calc(100vh-2rem)] sm:max-h-[85vh] [color-scheme:light]"
+              onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between pb-3 border-b border-[#D5E5D9]">
-                <h3 className="font-serif text-xl font-medium text-[#202824]">
-                  {t.calendar.newEvent}
-                </h3>
+              <div className="shrink-0 px-6 py-4 border-b border-[#D5E5D9] bg-white flex items-center justify-between">
+                <div>
+                  <h3 className="font-serif text-lg sm:text-xl font-semibold text-[#202824]">
+                    {t.calendar.newEvent}
+                  </h3>
+                  <p className="text-[11px] text-[#69736D] mt-0.5">
+                    {isHindi ? "चैंबर आंतरिक कार्यसूची एवं केस सुनवाई प्रविष्टि" : "Chamber docket & legal proceeding record"}
+                  </p>
+                </div>
                 <button
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
-                  className="p-1 rounded-lg text-[#69736D] hover:text-[#202824]"
+                  className="p-1.5 rounded-lg text-[#69736D] hover:text-[#202824] hover:bg-[#F2F7F4] transition-colors"
+                  aria-label={t.common.cancel}
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              {errorFeedback && (
-                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-800 flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-red-700" />
-                  <span>{errorFeedback}</span>
-                </div>
-              )}
+              <form onSubmit={handleCreateSubmit} className="flex-1 flex flex-col min-h-0 text-xs">
+                <div className="flex-1 overflow-y-auto p-6 space-y-4 data-lenis-prevent overscroll-contain">
+                  {errorFeedback && (
+                    <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-800 flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0 text-red-700" />
+                      <span>{errorFeedback}</span>
+                    </div>
+                  )}
 
-              <form onSubmit={handleCreateSubmit} className="space-y-4 text-xs">
-                <div>
-                  <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1">
-                    {t.calendar.eventTitle} *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formTitle}
-                    onChange={(e) => setFormTitle(e.target.value)}
-                    placeholder={isHindi ? "उदा. उच्च न्यायालय में अग्रिम जमानत सुनवाई" : "e.g. Anticipatory Bail Hearing — Court 4"}
-                    className="w-full px-3 py-2 rounded-xl border border-[#D5E5D9] focus:outline-none focus:ring-1 focus:ring-[#205C43]"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
+                  {/* Title */}
                   <div>
-                    <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1">
-                      {t.calendar.eventType}
-                    </label>
-                    <select
-                      value={formType}
-                      onChange={(e) => setFormType(e.target.value as LegalEventType)}
-                      className="w-full px-3 py-2 rounded-xl border border-[#D5E5D9] bg-white focus:outline-none focus:ring-1 focus:ring-[#205C43]"
-                    >
-                      <option value="hearing">{t.calendar.hearing}</option>
-                      <option value="consultation">{t.calendar.consultation}</option>
-                      <option value="deadline">{t.calendar.deadline}</option>
-                      <option value="filing">{t.calendar.filing}</option>
-                      <option value="meeting">{t.calendar.meeting}</option>
-                      <option value="task">{t.calendar.task}</option>
-                      <option value="reminder">{t.calendar.reminder}</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1">
-                      {t.common.priority}
-                    </label>
-                    <select
-                      value={formPriority}
-                      onChange={(e) => setFormPriority(e.target.value as CalendarPriority)}
-                      className="w-full px-3 py-2 rounded-xl border border-[#D5E5D9] bg-white focus:outline-none focus:ring-1 focus:ring-[#205C43]"
-                    >
-                      <option value="low">{isHindi ? "सामान्य" : "Low"}</option>
-                      <option value="medium">{isHindi ? "मध्यम" : "Medium"}</option>
-                      <option value="high">{isHindi ? "उच्च" : "High"}</option>
-                      <option value="urgent">{isHindi ? "अति आवश्यक" : "Urgent"}</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Date & Time fields */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1">
-                      {isHindi ? "प्रारंभ तिथि" : "Start Date"}
+                    <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1.5">
+                      {t.calendar.eventTitle} *
                     </label>
                     <input
-                      type="date"
-                      value={formStartDate}
-                      onChange={(e) => setFormStartDate(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-[#D5E5D9] focus:outline-none focus:ring-1 focus:ring-[#205C43]"
+                      type="text"
+                      required
+                      value={formTitle}
+                      onChange={(e) => setFormTitle(e.target.value)}
+                      placeholder={isHindi ? "उदा. उच्च न्यायालय में अग्रिम जमानत सुनवाई" : "e.g. Anticipatory Bail Hearing — Court 4"}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5E5D9] bg-white text-[#202824] placeholder-[#8F9A93] focus:outline-none focus:ring-2 focus:ring-[#205C43]/20 focus:border-[#205C43] transition-all text-xs font-normal [color-scheme:light]"
                     />
                   </div>
-                  {!formIsAllDay && (
+
+                  {/* Event Type & Priority */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1">
+                      <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1.5">
+                        {t.calendar.eventType}
+                      </label>
+                      <select
+                        value={formType}
+                        onChange={(e) => setFormType(e.target.value as LegalEventType)}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5E5D9] bg-white text-[#202824] focus:outline-none focus:ring-2 focus:ring-[#205C43]/20 focus:border-[#205C43] transition-all text-xs font-normal [color-scheme:light]"
+                      >
+                        <option value="hearing">{t.calendar.hearing}</option>
+                        <option value="consultation">{t.calendar.consultation}</option>
+                        <option value="deadline">{t.calendar.deadline}</option>
+                        <option value="filing">{t.calendar.filing}</option>
+                        <option value="meeting">{t.calendar.meeting}</option>
+                        <option value="task">{t.calendar.task}</option>
+                        <option value="reminder">{t.calendar.reminder}</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1.5">
+                        {t.common.priority}
+                      </label>
+                      <select
+                        value={formPriority}
+                        onChange={(e) => setFormPriority(e.target.value as CalendarPriority)}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5E5D9] bg-white text-[#202824] focus:outline-none focus:ring-2 focus:ring-[#205C43]/20 focus:border-[#205C43] transition-all text-xs font-normal [color-scheme:light]"
+                      >
+                        <option value="low">{isHindi ? "सामान्य" : "Low"}</option>
+                        <option value="medium">{isHindi ? "मध्यम" : "Medium"}</option>
+                        <option value="high">{isHindi ? "उच्च" : "High"}</option>
+                        <option value="urgent">{isHindi ? "अति आवश्यक" : "Urgent"}</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Date & Time fields */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1.5">
+                        {isHindi ? "प्रारंभ तिथि" : "Start Date"}
+                      </label>
+                      <input
+                        type="date"
+                        value={formStartDate}
+                        onChange={(e) => setFormStartDate(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5E5D9] bg-white text-[#202824] focus:outline-none focus:ring-2 focus:ring-[#205C43]/20 focus:border-[#205C43] transition-all text-xs font-normal [color-scheme:light]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1.5">
                         {isHindi ? "प्रारंभ समय (IST)" : "Start Time (IST)"}
                       </label>
                       <input
                         type="time"
                         value={formStartTime}
                         onChange={(e) => setFormStartTime(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl border border-[#D5E5D9] focus:outline-none focus:ring-1 focus:ring-[#205C43]"
+                        disabled={formIsAllDay}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5E5D9] bg-white text-[#202824] focus:outline-none focus:ring-2 focus:ring-[#205C43]/20 focus:border-[#205C43] transition-all text-xs font-normal disabled:bg-[#F8FAF9] disabled:text-[#8F9A93] [color-scheme:light]"
                       />
                     </div>
-                  )}
-                </div>
+                  </div>
 
-                {/* Court verified toggle */}
-                <div className="flex items-center gap-2 p-3 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9]">
-                  <input
-                    type="checkbox"
-                    id="court-verified-check"
-                    checked={formIsCourtVerified}
-                    onChange={(e) => setFormIsCourtVerified(e.target.checked)}
-                    className="w-4 h-4 rounded text-[#205C43] focus:ring-[#205C43]"
-                  />
-                  <label htmlFor="court-verified-check" className="cursor-pointer select-none">
-                    <span className="font-semibold block text-[#202824]">
-                      {t.calendar.courtVerified}
-                    </span>
-                    <span className="text-[11px] text-[#69736D] block leading-tight">
-                      {isHindi
-                        ? "आधिकारिक कॉज लिस्ट में प्रकाशित (अन्यथा यह चैंबर आंतरिक अनुसूची रहेगा)"
-                        : "Official court hearing on daily cause list"}
-                    </span>
-                  </label>
-                </div>
-
-                {/* Location / Meeting link */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1">
-                      {t.calendar.location}
-                    </label>
+                  {/* All-day Checkbox */}
+                  <div className="flex items-center gap-2">
                     <input
-                      type="text"
-                      value={formLocation}
-                      onChange={(e) => setFormLocation(e.target.value)}
-                      placeholder={isHindi ? "उदा. न्यायालय कक्ष 4, दिल्ली उच्च न्यायालय" : "e.g. Courtroom 4, High Court"}
-                      className="w-full px-3 py-2 rounded-xl border border-[#D5E5D9] focus:outline-none focus:ring-1 focus:ring-[#205C43]"
+                      type="checkbox"
+                      id="all-day-check-create"
+                      checked={formIsAllDay}
+                      onChange={(e) => setFormIsAllDay(e.target.checked)}
+                      className="w-4 h-4 rounded text-[#205C43] focus:ring-[#205C43] border-[#D5E5D9] accent-[#205C43]"
+                    />
+                    <label htmlFor="all-day-check-create" className="text-xs text-[#202824] cursor-pointer select-none">
+                      {isHindi ? "पूरा दिन (कोई विशिष्ट समय नहीं)" : "All day event (no specific time)"}
+                    </label>
+                  </div>
+
+                  {/* Honest Chamber Docket Verification Notice */}
+                  <div className="p-3.5 rounded-xl bg-[#F4F8F5] border border-[#D5E5D9] flex items-start gap-3">
+                    <Scale className="w-4 h-4 text-[#205C43] shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <div className="text-[11px] font-semibold text-[#202824] flex items-center gap-1.5">
+                        <span>{isHindi ? "चैंबर आंतरिक प्रविष्टि (अधिवक्ता द्वारा दर्ज)" : "Chamber Docket Entry (Self-Reported)"}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#EAF3ED] text-[#205C43] font-mono font-medium">
+                          {isHindi ? "आंतरिक" : "Internal"}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[#69736D] leading-relaxed">
+                        {isHindi
+                          ? "यह प्रविष्टि आपके चैंबर व मुवक्किल कैलेंडर में सुरक्षित रहेगी। आधिकारिक न्यायालय सत्यापन केवल दैनिक कॉज लिस्ट मिलान के उपरांत प्रदर्शित होता है।"
+                          : "Recorded in your chamber and client schedule. Official court cause-list verification badge appears when verified via judicial listing records."}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Location & Associated Party */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1.5">
+                        {t.calendar.location}
+                      </label>
+                      <input
+                        type="text"
+                        value={formLocation}
+                        onChange={(e) => setFormLocation(e.target.value)}
+                        placeholder={isHindi ? "उदा. न्यायालय कक्ष 4, दिल्ली उच्च न्यायालय" : "e.g. Courtroom 4, High Court"}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5E5D9] bg-white text-[#202824] placeholder-[#8F9A93] focus:outline-none focus:ring-2 focus:ring-[#205C43]/20 focus:border-[#205C43] transition-all text-xs font-normal [color-scheme:light]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1.5">
+                        {isHindi ? "संबंधित पक्षकार" : "Associated Party"}
+                      </label>
+                      <input
+                        type="text"
+                        value={formAssociatedName}
+                        onChange={(e) => setFormAssociatedName(e.target.value)}
+                        placeholder={isHindi ? "उदा. राजेश कुमार (मुवक्किल)" : "e.g. Rajesh Kumar (Client)"}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5E5D9] bg-white text-[#202824] placeholder-[#8F9A93] focus:outline-none focus:ring-2 focus:ring-[#205C43]/20 focus:border-[#205C43] transition-all text-xs font-normal [color-scheme:light]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Procedural Notes */}
+                  <div>
+                    <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1.5">
+                      {t.calendar.notes}
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={formNotes}
+                      onChange={(e) => setFormNotes(e.target.value)}
+                      placeholder={isHindi ? "कानूनी निर्देश, आवश्यक दस्तावेज या केस संदर्भ..." : "Hearing preparation notes, required case documents..."}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5E5D9] bg-white text-[#202824] placeholder-[#8F9A93] focus:outline-none focus:ring-2 focus:ring-[#205C43]/20 focus:border-[#205C43] transition-all text-xs font-normal [color-scheme:light] resize-y"
                     />
                   </div>
-                  <div>
-                    <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1">
-                      {isHindi ? "संबंधित पक्षकार" : "Associated Party"}
-                    </label>
-                    <input
-                      type="text"
-                      value={formAssociatedName}
-                      onChange={(e) => setFormAssociatedName(e.target.value)}
-                      placeholder={isHindi ? "उदा. राजेश कुमार (मुवक्किल)" : "e.g. Rajesh Kumar (Client)"}
-                      className="w-full px-3 py-2 rounded-xl border border-[#D5E5D9] focus:outline-none focus:ring-1 focus:ring-[#205C43]"
-                    />
-                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1">
-                    {t.calendar.notes}
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={formNotes}
-                    onChange={(e) => setFormNotes(e.target.value)}
-                    placeholder={isHindi ? "कानूनी निर्देश, आवश्यक दस्तावेज या केस संदर्भ..." : "Hearing preparation notes, required case documents..."}
-                    className="w-full px-3 py-2 rounded-xl border border-[#D5E5D9] focus:outline-none focus:ring-1 focus:ring-[#205C43]"
-                  />
-                </div>
-
-                <div className="pt-2 flex items-center justify-end gap-2 border-t border-[#D5E5D9]">
+                {/* Sticky Action Footer */}
+                <div className="shrink-0 px-6 py-3.5 border-t border-[#D5E5D9] bg-[#F8FAF9]/95 flex items-center justify-end gap-2.5 backdrop-blur-xs">
                   <button
                     type="button"
                     onClick={() => setIsCreateModalOpen(false)}
-                    className="px-4 py-2 rounded-xl border border-[#D5E5D9] hover:bg-[#F8FAF9] text-[#69736D]"
+                    className="px-4 py-2 rounded-xl border border-[#D5E5D9] bg-white hover:bg-[#F2F7F4] text-[#4F5953] font-medium text-xs transition-colors"
                   >
                     {t.common.cancel}
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-5 py-2 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white font-medium shadow-xs"
+                    className="px-5 py-2 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white font-medium text-xs shadow-xs transition-all disabled:opacity-50"
                   >
                     {isSubmitting ? t.common.loading : t.common.create}
                   </button>
@@ -1344,165 +1423,237 @@ export function LegalCalendar({
       {/* EDIT EVENT MODAL */}
       <AnimatePresence>
         {isEditModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/60 backdrop-blur-xs [color-scheme:light] overflow-y-auto"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setIsEditModalOpen(false);
+              }
+            }}
+          >
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-lg bg-white rounded-2xl border border-[#D5E5D9] shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto"
+              initial={{ opacity: 0, scale: 0.96, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 10 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              data-lenis-prevent
+              className="relative w-full max-w-lg bg-white rounded-2xl border border-[#D5E5D9] shadow-2xl overflow-hidden flex flex-col max-h-[calc(100vh-2rem)] sm:max-h-[85vh] [color-scheme:light]"
+              onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between pb-3 border-b border-[#D5E5D9]">
-                <h3 className="font-serif text-xl font-medium text-[#202824]">
-                  {t.calendar.editEvent}
-                </h3>
+              <div className="shrink-0 px-6 py-4 border-b border-[#D5E5D9] bg-white flex items-center justify-between">
+                <div>
+                  <h3 className="font-serif text-lg sm:text-xl font-semibold text-[#202824]">
+                    {t.calendar.editEvent}
+                  </h3>
+                  <p className="text-[11px] text-[#69736D] mt-0.5">
+                    {isHindi ? "कानूनी ईवेंट विवरण व अनुसूची संशोधन" : "Update legal proceeding record and schedule"}
+                  </p>
+                </div>
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(false)}
-                  className="p-1 rounded-lg text-[#69736D] hover:text-[#202824]"
+                  className="p-1.5 rounded-lg text-[#69736D] hover:text-[#202824] hover:bg-[#F2F7F4] transition-colors"
+                  aria-label={t.common.cancel}
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              {errorFeedback && (
-                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-800 flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-red-700" />
-                  <span>{errorFeedback}</span>
-                </div>
-              )}
+              <form onSubmit={handleEditSubmit} className="flex-1 flex flex-col min-h-0 text-xs">
+                <div className="flex-1 overflow-y-auto p-6 space-y-4 data-lenis-prevent overscroll-contain">
+                  {errorFeedback && (
+                    <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-800 flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0 text-red-700" />
+                      <span>{errorFeedback}</span>
+                    </div>
+                  )}
 
-              <form onSubmit={handleEditSubmit} className="space-y-4 text-xs">
-                <div>
-                  <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1">
-                    {t.calendar.eventTitle} *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formTitle}
-                    onChange={(e) => setFormTitle(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-[#D5E5D9] focus:outline-none focus:ring-1 focus:ring-[#205C43]"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
+                  {/* Title */}
                   <div>
-                    <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1">
-                      {t.calendar.eventType}
-                    </label>
-                    <select
-                      value={formType}
-                      onChange={(e) => setFormType(e.target.value as LegalEventType)}
-                      className="w-full px-3 py-2 rounded-xl border border-[#D5E5D9] bg-white focus:outline-none focus:ring-1 focus:ring-[#205C43]"
-                    >
-                      <option value="hearing">{t.calendar.hearing}</option>
-                      <option value="consultation">{t.calendar.consultation}</option>
-                      <option value="deadline">{t.calendar.deadline}</option>
-                      <option value="filing">{t.calendar.filing}</option>
-                      <option value="meeting">{t.calendar.meeting}</option>
-                      <option value="task">{t.calendar.task}</option>
-                      <option value="reminder">{t.calendar.reminder}</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1">
-                      {t.common.priority}
-                    </label>
-                    <select
-                      value={formPriority}
-                      onChange={(e) => setFormPriority(e.target.value as CalendarPriority)}
-                      className="w-full px-3 py-2 rounded-xl border border-[#D5E5D9] bg-white focus:outline-none focus:ring-1 focus:ring-[#205C43]"
-                    >
-                      <option value="low">{isHindi ? "सामान्य" : "Low"}</option>
-                      <option value="medium">{isHindi ? "मध्यम" : "Medium"}</option>
-                      <option value="high">{isHindi ? "उच्च" : "High"}</option>
-                      <option value="urgent">{isHindi ? "अति आवश्यक" : "Urgent"}</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1">
-                      {isHindi ? "प्रारंभ तिथि" : "Start Date"}
+                    <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1.5">
+                      {t.calendar.eventTitle} *
                     </label>
                     <input
-                      type="date"
-                      value={formStartDate}
-                      onChange={(e) => setFormStartDate(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-[#D5E5D9] focus:outline-none focus:ring-1 focus:ring-[#205C43]"
+                      type="text"
+                      required
+                      value={formTitle}
+                      onChange={(e) => setFormTitle(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5E5D9] bg-white text-[#202824] placeholder-[#8F9A93] focus:outline-none focus:ring-2 focus:ring-[#205C43]/20 focus:border-[#205C43] transition-all text-xs font-normal [color-scheme:light]"
                     />
                   </div>
-                  <div>
-                    <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1">
-                      {isHindi ? "प्रारंभ समय (IST)" : "Start Time (IST)"}
-                    </label>
+
+                  {/* Event Type & Priority */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1.5">
+                        {t.calendar.eventType}
+                      </label>
+                      <select
+                        value={formType}
+                        onChange={(e) => setFormType(e.target.value as LegalEventType)}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5E5D9] bg-white text-[#202824] focus:outline-none focus:ring-2 focus:ring-[#205C43]/20 focus:border-[#205C43] transition-all text-xs font-normal [color-scheme:light]"
+                      >
+                        <option value="hearing">{t.calendar.hearing}</option>
+                        <option value="consultation">{t.calendar.consultation}</option>
+                        <option value="deadline">{t.calendar.deadline}</option>
+                        <option value="filing">{t.calendar.filing}</option>
+                        <option value="meeting">{t.calendar.meeting}</option>
+                        <option value="task">{t.calendar.task}</option>
+                        <option value="reminder">{t.calendar.reminder}</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1.5">
+                        {t.common.priority}
+                      </label>
+                      <select
+                        value={formPriority}
+                        onChange={(e) => setFormPriority(e.target.value as CalendarPriority)}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5E5D9] bg-white text-[#202824] focus:outline-none focus:ring-2 focus:ring-[#205C43]/20 focus:border-[#205C43] transition-all text-xs font-normal [color-scheme:light]"
+                      >
+                        <option value="low">{isHindi ? "सामान्य" : "Low"}</option>
+                        <option value="medium">{isHindi ? "मध्यम" : "Medium"}</option>
+                        <option value="high">{isHindi ? "उच्च" : "High"}</option>
+                        <option value="urgent">{isHindi ? "अति आवश्यक" : "Urgent"}</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Date & Time fields */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1.5">
+                        {isHindi ? "प्रारंभ तिथि" : "Start Date"}
+                      </label>
+                      <input
+                        type="date"
+                        value={formStartDate}
+                        onChange={(e) => setFormStartDate(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5E5D9] bg-white text-[#202824] focus:outline-none focus:ring-2 focus:ring-[#205C43]/20 focus:border-[#205C43] transition-all text-xs font-normal [color-scheme:light]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1.5">
+                        {isHindi ? "प्रारंभ समय (IST)" : "Start Time (IST)"}
+                      </label>
+                      <input
+                        type="time"
+                        value={formStartTime}
+                        onChange={(e) => setFormStartTime(e.target.value)}
+                        disabled={formIsAllDay}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5E5D9] bg-white text-[#202824] focus:outline-none focus:ring-2 focus:ring-[#205C43]/20 focus:border-[#205C43] transition-all text-xs font-normal disabled:bg-[#F8FAF9] disabled:text-[#8F9A93] [color-scheme:light]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* All-day Checkbox */}
+                  <div className="flex items-center gap-2">
                     <input
-                      type="time"
-                      value={formStartTime}
-                      onChange={(e) => setFormStartTime(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-[#D5E5D9] focus:outline-none focus:ring-1 focus:ring-[#205C43]"
+                      type="checkbox"
+                      id="all-day-check-edit"
+                      checked={formIsAllDay}
+                      onChange={(e) => setFormIsAllDay(e.target.checked)}
+                      className="w-4 h-4 rounded text-[#205C43] focus:ring-[#205C43] border-[#D5E5D9] accent-[#205C43]"
+                    />
+                    <label htmlFor="all-day-check-edit" className="text-xs text-[#202824] cursor-pointer select-none">
+                      {isHindi ? "पूरा दिन (कोई विशिष्ट समय नहीं)" : "All day event (no specific time)"}
+                    </label>
+                  </div>
+
+                  {/* Verification Status Banner */}
+                  {selectedEvent?.is_court_verified ? (
+                    <div className="p-3.5 rounded-xl bg-purple-50/70 border border-purple-200 flex items-start gap-3">
+                      <ShieldCheck className="w-4 h-4 text-purple-700 shrink-0 mt-0.5" />
+                      <div className="space-y-1">
+                        <div className="text-[11px] font-semibold text-purple-900 flex items-center gap-1.5">
+                          <span>{t.calendar.courtVerified}</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-100 text-purple-800 font-mono font-medium">
+                            {t.calendar.causeListBadge}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-purple-800 leading-relaxed">
+                          {isHindi
+                            ? "यह प्रविष्टि आधिकारिक न्यायालय दैनिक कॉज लिस्ट व रोस्टर से सत्यापित है।"
+                            : "This proceeding is verified against official court daily cause lists and roster records."}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-3.5 rounded-xl bg-[#F4F8F5] border border-[#D5E5D9] flex items-start gap-3">
+                      <Scale className="w-4 h-4 text-[#205C43] shrink-0 mt-0.5" />
+                      <div className="space-y-1">
+                        <div className="text-[11px] font-semibold text-[#202824] flex items-center gap-1.5">
+                          <span>{isHindi ? "चैंबर आंतरिक प्रविष्टि (अधिवक्ता द्वारा दर्ज)" : "Chamber Docket Entry (Self-Reported)"}</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#EAF3ED] text-[#205C43] font-mono font-medium">
+                            {isHindi ? "आंतरिक" : "Internal"}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[#69736D] leading-relaxed">
+                          {isHindi
+                            ? "यह प्रविष्टि आपके चैंबर व मुवक्किल कैलेंडर में सुरक्षित रहेगी। आधिकारिक न्यायालय सत्यापन केवल दैनिक कॉज लिस्ट मिलान के उपरांत प्रदर्शित होता है।"
+                            : "Recorded in your chamber and client schedule. Official court cause-list verification badge appears when verified via judicial listing records."}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Location & Associated Party */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1.5">
+                        {t.calendar.location}
+                      </label>
+                      <input
+                        type="text"
+                        value={formLocation}
+                        onChange={(e) => setFormLocation(e.target.value)}
+                        placeholder={isHindi ? "उदा. न्यायालय कक्ष 4, दिल्ली उच्च न्यायालय" : "e.g. Courtroom 4, High Court"}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5E5D9] bg-white text-[#202824] placeholder-[#8F9A93] focus:outline-none focus:ring-2 focus:ring-[#205C43]/20 focus:border-[#205C43] transition-all text-xs font-normal [color-scheme:light]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1.5">
+                        {isHindi ? "संबंधित पक्षकार" : "Associated Party"}
+                      </label>
+                      <input
+                        type="text"
+                        value={formAssociatedName}
+                        onChange={(e) => setFormAssociatedName(e.target.value)}
+                        placeholder={isHindi ? "उदा. राजेश कुमार (मुवक्किल)" : "e.g. Rajesh Kumar (Client)"}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5E5D9] bg-white text-[#202824] placeholder-[#8F9A93] focus:outline-none focus:ring-2 focus:ring-[#205C43]/20 focus:border-[#205C43] transition-all text-xs font-normal [color-scheme:light]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Procedural Notes */}
+                  <div>
+                    <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1.5">
+                      {t.calendar.notes}
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={formNotes}
+                      onChange={(e) => setFormNotes(e.target.value)}
+                      placeholder={isHindi ? "कानूनी निर्देश, आवश्यक दस्तावेज या केस संदर्भ..." : "Hearing preparation notes, required case documents..."}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5E5D9] bg-white text-[#202824] placeholder-[#8F9A93] focus:outline-none focus:ring-2 focus:ring-[#205C43]/20 focus:border-[#205C43] transition-all text-xs font-normal [color-scheme:light] resize-y"
                     />
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 p-3 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9]">
-                  <input
-                    type="checkbox"
-                    id="court-verified-edit-check"
-                    checked={formIsCourtVerified}
-                    onChange={(e) => setFormIsCourtVerified(e.target.checked)}
-                    className="w-4 h-4 rounded text-[#205C43] focus:ring-[#205C43]"
-                  />
-                  <label htmlFor="court-verified-edit-check" className="cursor-pointer select-none">
-                    <span className="font-semibold block text-[#202824]">
-                      {t.calendar.courtVerified}
-                    </span>
-                    <span className="text-[11px] text-[#69736D] block leading-tight">
-                      {isHindi
-                        ? "आधिकारिक कॉज लिस्ट में प्रकाशित"
-                        : "Official court hearing on daily cause list"}
-                    </span>
-                  </label>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1">
-                    {t.calendar.location}
-                  </label>
-                  <input
-                    type="text"
-                    value={formLocation}
-                    onChange={(e) => setFormLocation(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-[#D5E5D9] focus:outline-none focus:ring-1 focus:ring-[#205C43]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-semibold text-[#202824] uppercase font-mono mb-1">
-                    {t.calendar.notes}
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={formNotes}
-                    onChange={(e) => setFormNotes(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-[#D5E5D9] focus:outline-none focus:ring-1 focus:ring-[#205C43]"
-                  />
-                </div>
-
-                <div className="pt-2 flex items-center justify-end gap-2 border-t border-[#D5E5D9]">
+                {/* Sticky Action Footer */}
+                <div className="shrink-0 px-6 py-3.5 border-t border-[#D5E5D9] bg-[#F8FAF9]/95 flex items-center justify-end gap-2.5 backdrop-blur-xs">
                   <button
                     type="button"
                     onClick={() => setIsEditModalOpen(false)}
-                    className="px-4 py-2 rounded-xl border border-[#D5E5D9] hover:bg-[#F8FAF9] text-[#69736D]"
+                    className="px-4 py-2 rounded-xl border border-[#D5E5D9] bg-white hover:bg-[#F2F7F4] text-[#4F5953] font-medium text-xs transition-colors"
                   >
                     {t.common.cancel}
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-5 py-2 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white font-medium shadow-xs"
+                    className="px-5 py-2 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white font-medium text-xs shadow-xs transition-all disabled:opacity-50"
                   >
                     {isSubmitting ? t.common.loading : t.common.save}
                   </button>

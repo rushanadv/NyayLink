@@ -4,9 +4,10 @@ import React from "react";
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { NyayLinkLogo } from "@/components/ui/nyaylink-logo";
+import { useLanguage } from "@/lib/i18n/context";
 
 export function MarketingFooter() {
-  // Site-wide white and green brand identity
+  const { t, isHindi } = useLanguage();
   const isDarkSubpage = false;
 
   return (
@@ -23,9 +24,7 @@ export function MarketingFooter() {
           <div className="md:col-span-5 space-y-4">
             <NyayLinkLogo size="sm" />
             <p className="text-xs leading-relaxed max-w-sm">
-              Democratizing access to verified legal counsel across India.
-              Plain-language intake, transparent milestone escrow, and certified Bar
-              Council advocacy.
+              {t.home.footer.mission}
             </p>
             <div
               className={`flex items-center gap-2 text-[11px] ${
@@ -33,7 +32,7 @@ export function MarketingFooter() {
               }`}
             >
               <ShieldCheck className="w-4 h-4 text-[#205C43]" />
-              <span>Section 36 Advocates Act, 1961 Compliant</span>
+              <span>{t.home.footer.complianceBadge}</span>
             </div>
           </div>
 
@@ -45,7 +44,7 @@ export function MarketingFooter() {
                   isDarkSubpage ? "text-white" : "text-[#202824]"
                 }`}
               >
-                Platform
+                {t.home.footer.platformHeading}
               </h4>
               <ul className="space-y-2">
                 <li>
@@ -55,7 +54,7 @@ export function MarketingFooter() {
                       isDarkSubpage ? "hover:text-white" : "hover:text-[#205C43]"
                     }`}
                   >
-                    Find Advocates
+                    {t.home.footer.findAdvocates}
                   </Link>
                 </li>
                 <li>
@@ -65,7 +64,7 @@ export function MarketingFooter() {
                       isDarkSubpage ? "hover:text-white" : "hover:text-[#205C43]"
                     }`}
                   >
-                    AI Legal Intake
+                    {t.home.footer.aiIntake}
                   </Link>
                 </li>
                 <li>
@@ -75,7 +74,7 @@ export function MarketingFooter() {
                       isDarkSubpage ? "hover:text-white" : "hover:text-[#205C43]"
                     }`}
                   >
-                    How It Works
+                    {t.home.footer.howItWorks}
                   </Link>
                 </li>
                 <li>
@@ -85,7 +84,7 @@ export function MarketingFooter() {
                       isDarkSubpage ? "hover:text-white" : "hover:text-[#205C43]"
                     }`}
                   >
-                    BCI Verification
+                    {t.home.footer.bciVerification}
                   </Link>
                 </li>
               </ul>
@@ -97,7 +96,7 @@ export function MarketingFooter() {
                   isDarkSubpage ? "text-white" : "text-[#202824]"
                 }`}
               >
-                Advocates
+                {t.home.footer.advocatesHeading}
               </h4>
               <ul className="space-y-2">
                 <li>
@@ -107,7 +106,7 @@ export function MarketingFooter() {
                       isDarkSubpage ? "hover:text-white" : "hover:text-[#205C43]"
                     }`}
                   >
-                    Advocate Sign In
+                    {t.home.footer.chamberLogin}
                   </Link>
                 </li>
                 <li>
@@ -117,7 +116,7 @@ export function MarketingFooter() {
                       isDarkSubpage ? "hover:text-white" : "hover:text-[#205C43]"
                     }`}
                   >
-                    Chambers Portal
+                    {t.home.footer.causeListSync}
                   </Link>
                 </li>
                 <li>
@@ -127,7 +126,7 @@ export function MarketingFooter() {
                       isDarkSubpage ? "hover:text-white" : "hover:text-[#205C43]"
                     }`}
                   >
-                    Digital Vakalatnama
+                    {t.home.hero.digitalVakalatnama}
                   </Link>
                 </li>
                 <li>
@@ -137,7 +136,7 @@ export function MarketingFooter() {
                       isDarkSubpage ? "hover:text-white" : "hover:text-[#205C43]"
                     }`}
                   >
-                    Rule 36 Guidelines
+                    {t.home.footer.ethicsGuidelines}
                   </Link>
                 </li>
               </ul>
@@ -149,20 +148,20 @@ export function MarketingFooter() {
                   isDarkSubpage ? "text-white" : "text-[#202824]"
                 }`}
               >
-                Ethics & Standards
+                {t.home.footer.legalHeading}
               </h4>
               <ul className="space-y-2">
                 <li>
-                  <span className="cursor-default">Bar Council Rules</span>
+                  <span className="cursor-default">{t.home.footer.rule36Disclaimer}</span>
                 </li>
                 <li>
-                  <span className="cursor-default">Privileged Briefs</span>
+                  <span className="cursor-default">{t.home.footer.escrowProtection}</span>
                 </li>
                 <li>
-                  <span className="cursor-default">Privacy Safeguards</span>
+                  <span className="cursor-default">{t.home.footer.privacyPolicy}</span>
                 </li>
                 <li>
-                  <span className="cursor-default">Platform Terms</span>
+                  <span className="cursor-default">{t.home.footer.termsService}</span>
                 </li>
               </ul>
             </div>
@@ -179,12 +178,9 @@ export function MarketingFooter() {
         >
           <p>
             <strong className={isDarkSubpage ? "text-white/80" : "text-[#202824]"}>
-              Regulatory Disclosure:
-            </strong>{" "}
-            NyayLink is an informational infrastructure and technology platform, not a law firm.
-            In strict compliance with Section 36 of the Advocates Act, 1961, and Bar Council of India
-            Rules, NyayLink does not advertise legal services, solicit briefs, or receive referral commissions.
-            Advocate-client privilege attaches directly upon mutual consultation acceptance.
+              {isHindi ? "विधिक प्रकटीकरण: " : "Regulatory Disclosure: "}
+            </strong>
+            {t.home.footer.disclaimerNotice}
           </p>
         </div>
 
@@ -194,11 +190,11 @@ export function MarketingFooter() {
             isDarkSubpage ? "text-white/40" : "text-[#69736D]"
           }`}
         >
-          <p>© 2026 NyayLink Technologies. All rights reserved.</p>
+          <p>{t.home.footer.copyright}</p>
           <div className="flex items-center gap-4">
             <span className="font-mono text-[10px] text-[#205C43] flex items-center gap-1.5 font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-[#205C43] animate-pulse" />
-              National Jurisdiction Active · Supreme Court & State High Courts
+              {isHindi ? "राष्ट्रीय क्षेत्राधिकार सक्रिय · सर्वोच्च न्यायालय व सभी उच्च न्यायालय" : "National Jurisdiction Active · Supreme Court & State High Courts"}
             </span>
           </div>
         </div>

@@ -5,8 +5,10 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, UserCheck, Briefcase } from "lucide-react";
 import { MagneticWrapper } from "@/components/ui/magnetic-wrapper";
+import { useLanguage } from "@/lib/i18n/context";
 
 export function ClosingCta() {
+  const { t } = useLanguage();
   const shouldReduceMotion = useReducedMotion();
 
   return (
@@ -26,15 +28,15 @@ export function ClosingCta() {
             <span className="w-4 h-px bg-[#205C43]" />
             <span className="text-[#205C43] font-bold">06</span>
             <span className="text-[#D5E5D9]">{"//"}</span>
-            <span className="text-[#69736D] font-semibold">GET STARTED</span>
+            <span className="text-[#69736D] font-semibold">{t.home.closingCta.eyebrow}</span>
             <span className="w-4 h-px bg-[#205C43]" />
           </div>
 
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#202824] font-normal tracking-tight text-balance">
-            Find the right legal path forward.
+            {t.home.closingCta.title}
           </h2>
           <p className="text-base sm:text-lg text-[#69736D] leading-relaxed max-w-xl mx-auto font-light">
-            Connect with verified counsel or access your advocate chamber workspace today.
+            {t.home.closingCta.subtitle}
           </p>
         </div>
 
@@ -45,10 +47,10 @@ export function ClosingCta() {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-xs font-mono font-semibold text-[#202824]">
                 <UserCheck className="w-4 h-4 text-[#205C43]" />
-                <span>NEED LEGAL HELP?</span>
+                <span>{t.home.closingCta.clientCardTitle}</span>
               </div>
               <p className="text-xs text-[#69736D] leading-relaxed">
-                Describe your situation, clarify remedies, and consult verified counsel under milestone escrow.
+                {t.home.closingCta.clientCardDesc}
               </p>
             </div>
 
@@ -57,7 +59,7 @@ export function ClosingCta() {
                 href="/auth/login?intent=client"
                 className="w-full py-3 px-4 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white font-semibold text-xs transition-all shadow-sm flex items-center justify-center gap-2"
               >
-                <span>Continue as a client</span>
+                <span>{t.home.closingCta.clientCardCta}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </MagneticWrapper>
@@ -68,10 +70,10 @@ export function ClosingCta() {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-xs font-mono font-semibold text-[#202824]">
                 <Briefcase className="w-4 h-4 text-[#174530]" />
-                <span>PRACTICING ADVOCATE?</span>
+                <span>{t.home.closingCta.lawyerCardTitle}</span>
               </div>
               <p className="text-xs text-[#69736D] leading-relaxed">
-                Access your cause list alerts, digital Vakalatnama signing, and client brief dossiers.
+                {t.home.closingCta.lawyerCardDesc}
               </p>
             </div>
 
@@ -80,7 +82,7 @@ export function ClosingCta() {
                 href="/auth/login?intent=lawyer"
                 className="w-full py-3 px-4 rounded-xl bg-[#174530] hover:bg-[#0E2C1E] text-white font-semibold text-xs transition-all shadow-sm flex items-center justify-center gap-2"
               >
-                <span>Continue as a lawyer</span>
+                <span>{t.home.closingCta.lawyerCardCta}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </MagneticWrapper>

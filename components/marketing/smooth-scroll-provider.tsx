@@ -17,6 +17,8 @@ interface SmoothScrollContextType {
     options?: { offset?: number; duration?: number }
   ) => void;
   scrollProgress: MotionValue<number>;
+  stop: () => void;
+  start: () => void;
 }
 
 const defaultMotionValue = {
@@ -30,6 +32,8 @@ const SmoothScrollContext = createContext<SmoothScrollContextType>({
   lenis: null,
   scrollTo: () => {},
   scrollProgress: defaultMotionValue,
+  stop: () => {},
+  start: () => {},
 });
 
 export function useSmoothScroll() {
@@ -46,8 +50,8 @@ export function SmoothScrollProvider({
   const scrollProgress = useMotionValue<number>(0);
 
   useEffect(() => {
-    // 1. Native scroll listener fallback and initial measurement
-    const handleNativeScroll = () => {
+    // 1. Initial measurement
+    const measureScroll = () => {
       const scrollHeight =
         document.documentElement.scrollHeight - window.innerHeight;
       const p =
@@ -57,9 +61,7 @@ export function SmoothScrollProvider({
       scrollProgress.set(p);
     };
 
-    window.addEventListener("scroll", handleNativeScroll, { passive: true });
-    window.addEventListener("resize", handleNativeScroll, { passive: true });
-    handleNativeScroll();
+    measureScroll();
 
     // 2. Respect prefers-reduced-motion
     const prefersReducedMotion = window.matchMedia(
@@ -67,26 +69,33 @@ export function SmoothScrollProvider({
     ).matches;
 
     if (prefersReducedMotion) {
+      window.addEventListener("scroll", measureScroll, { passive: true });
+      window.addEventListener("resize", measureScroll, { passive: true });
       return () => {
-        window.removeEventListener("scroll", handleNativeScroll);
-        window.removeEventListener("resize", handleNativeScroll);
+        window.removeEventListener("scroll", measureScroll);
+        window.removeEventListener("resize", measureScroll);
       };
     }
 
-    // 3. Initialize Lenis smooth scroll
+    // 3. Initialize responsive, lightweight Lenis smooth scroll
     const lenis = new Lenis({
-      duration: 1.15,
+      duration: 0.9,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: "vertical",
       gestureOrientation: "vertical",
       smoothWheel: true,
-      touchMultiplier: 1.2,
+      wheelMultiplier: 1.0,
+      touchMultiplier: 1.0,
+      // Protect any element or ancestor with [data-lenis-prevent] from scroll hijacking
+      prevent: (node: HTMLElement) =>
+        node.hasAttribute("data-lenis-prevent") ||
+        Boolean(node.closest("[data-lenis-prevent]")),
     });
 
     lenisRef.current = lenis;
     setLenisInstance(lenis);
 
-    // Synchronize Lenis progress directly into the shared MotionValue
+    // Synchronize Lenis progress directly into the shared MotionValue (single source of truth)
     lenis.on("scroll", (e: { progress: number }) => {
       if (typeof e.progress === "number") {
         scrollProgress.set(Math.min(1, Math.max(0, e.progress)));
@@ -102,8 +111,6 @@ export function SmoothScrollProvider({
 
     return () => {
       cancelAnimationFrame(rafId);
-      window.removeEventListener("scroll", handleNativeScroll);
-      window.removeEventListener("resize", handleNativeScroll);
       lenis.destroy();
       lenisRef.current = null;
       setLenisInstance(null);
@@ -117,7 +124,7 @@ export function SmoothScrollProvider({
     if (lenisRef.current) {
       lenisRef.current.scrollTo(target, {
         offset: options?.offset ?? -80,
-        duration: options?.duration ?? 1.2,
+        duration: options?.duration ?? 0.9,
       });
     } else {
       if (typeof target === "string") {
@@ -129,9 +136,21 @@ export function SmoothScrollProvider({
     }
   };
 
+  const stop = () => {
+    if (lenisRef.current) {
+      lenisRef.current.stop();
+    }
+  };
+
+  const start = () => {
+    if (lenisRef.current) {
+      lenisRef.current.start();
+    }
+  };
+
   return (
     <SmoothScrollContext.Provider
-      value={{ lenis: lenisInstance, scrollTo, scrollProgress }}
+      value={{ lenis: lenisInstance, scrollTo, scrollProgress, stop, start }}
     >
       {children}
     </SmoothScrollContext.Provider>

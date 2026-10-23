@@ -3,27 +3,34 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X, Activity } from "lucide-react";
-import { ROTATING_STATS } from "@/lib/marketing/stats-data";
+import { useLanguage } from "@/lib/i18n/context";
 
 export function CaseStatusWidget() {
+  const { t } = useLanguage();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isDismissed, setIsDismissed] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 
+  const stats = [
+    { id: "cases", ...t.home.stats.cases },
+    { id: "lawyers", ...t.home.stats.lawyers },
+    { id: "clarity", ...t.home.stats.clarity },
+  ];
+
   useEffect(() => {
     if (isDismissed || isPaused) return;
 
     const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % ROTATING_STATS.length);
+      setCurrentIndex((prev) => (prev + 1) % stats.length);
     }, 5000);
 
     return () => clearInterval(timer);
-  }, [isDismissed, isPaused]);
+  }, [isDismissed, isPaused, stats.length]);
 
   if (isDismissed) return null;
 
-  const currentStat = ROTATING_STATS[currentIndex];
+  const currentStat = stats[currentIndex % stats.length];
 
   return (
     <motion.aside
@@ -44,23 +51,23 @@ export function CaseStatusWidget() {
 
       <span className="font-mono text-[10px] uppercase tracking-wider text-[#69736D] font-semibold hidden sm:inline-flex items-center gap-1 shrink-0">
         <Activity className="w-2.5 h-2.5 text-[#205C43]" />
-        Live Registry
+        {t.home.liveRegistry}
       </span>
 
       <div className="h-2.5 w-px bg-[#D5E5D9] hidden sm:block shrink-0" />
 
       {/* Rotating Stat Content with stable width to prevent dismiss button jitter */}
-      <div className="overflow-hidden w-[150px] sm:w-[185px] md:w-[315px] h-5 relative flex items-center">
+      <div className="overflow-hidden w-[160px] sm:w-[200px] md:w-[330px] h-5 relative flex items-center">
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.div
-            key={currentStat.id}
+            key={`${currentStat.id}-${currentIndex}`}
             initial={shouldReduceMotion ? false : { opacity: 0, y: 7 }}
             animate={{ opacity: 1, y: 0 }}
             exit={shouldReduceMotion ? undefined : { opacity: 0, y: -7 }}
             transition={{ duration: 0.28, ease: "easeInOut" }}
             className="absolute inset-0 flex items-center gap-1.5 whitespace-nowrap text-[11px]"
           >
-            <span className="font-semibold text-[#202824] tracking-tight shrink-0">
+            <span className="font-semibold text-[#202824] tracking-tight shrink-0 font-mono">
               {currentStat.metric}
             </span>
             <span className="text-[#3E4942] font-medium shrink-0">
@@ -84,3 +91,4 @@ export function CaseStatusWidget() {
     </motion.aside>
   );
 }
+

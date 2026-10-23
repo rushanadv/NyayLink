@@ -218,4 +218,242 @@ export const en: Dictionary = {
     quickStats: "Institutional Metrics",
     courtAlerts: "Cause List Alerts",
   },
+  home: {
+    liveRegistry: "Live Registry",
+    stats: {
+      cases: {
+        metric: "12,400+",
+        label: "Guided Intakes",
+        sublabel: "Pilot platform volume",
+      },
+      lawyers: {
+        metric: "480+",
+        label: "Enrolled Advocates",
+        sublabel: "State Bar Council validated",
+      },
+      clarity: {
+        metric: "92%",
+        label: "Comprehension Rate",
+        sublabel: "Vernacular triage pilot feedback",
+      },
+    },
+    hero: {
+      eyebrow: "NYAYLINK / LEGAL SERVICES",
+      title: "Find the right legal\npath forward.",
+      subtitle:
+        "NyayLink connects citizens and businesses with verified State Bar Council advocates across India. Explore statutory remedies in plain language and consult certified counsel under transparent milestone escrow.",
+      needHelp: "I Need Legal Help",
+      joinAdvocate: "Join as an Advocate",
+      preliminaryQuestion: "Need preliminary analysis first?",
+      preliminaryLink: "Get Initial Legal Guidance",
+      bciRule36: "BCI Rule 36 Compliant",
+      barCouncilEnrolled: "Bar Council Enrolled",
+      milestoneEscrow: "Milestone Escrow Security",
+      digitalVakalatnama: "Aadhaar Digital Vakalatnama",
+    },
+    docket: {
+      tag: "Docket Dossier #NL-2026-DL",
+      jurisdictionLabel: "Jurisdiction:",
+      jurisdictionVal: "High Court of Delhi & Tribunals",
+      tabGrievance: "01 / Grievance",
+      tabAnalysis: "02 / Analysis",
+      tabCounsel: "03 / Counsel",
+      stage1Title: "Stage 01 · Plain Language Inquiry",
+      stage1Logged: "Logged via Vernacular Intake",
+      stage1SubmissionLabel: "Citizen Submission (Gurugram Project):",
+      stage1SubmissionText:
+        "“The developer promised delivery by December 2024. It is now 14 months past deadline, no occupancy certificate has been issued, and they are demanding advance maintenance before handover.”",
+      domainCategory: "Domain Category",
+      domainVal: "RERA & Consumer",
+      limitationPeriod: "Limitation Period",
+      limitationVal: "Active & Timely",
+      stage2Title: "Stage 02 · Statutory Issue & Forum Analysis",
+      stage2RealStatutes: "Real Statutes",
+      stage2StatuteTitle:
+        "Section 18, Real Estate (Regulation & Development) Act, 2016",
+      stage2StatuteDesc:
+        "Litigant possesses right to either withdraw with full refund plus interest at SBI MCLR + 2%, or seek monthly delayed compensation.",
+      stage2ForumLabel: "Statutory Forum:",
+      stage2ForumVal: "Haryana RERA (HARERA)",
+      checklistTitle: "Filing Evidence Checklist:",
+      checklistItem1: "Buyer-Builder Agreement with Clause 14",
+      checklistItem2: "Bank disbursement statement verifying payments",
+      stage3Title: "Stage 03 · Verified State Bar Council Counsel",
+      stage3Escrow: "Escrow Secured",
+      advocateName: "Adv. Rajesh Sharma",
+      bciVerifiedBadge: "BCI Verified",
+      advocateRoll: "Enrolment: D/1482/2009 · High Court & RERA",
+      advocateLanguages: "Hindi, English",
+      advocateStat: "15 Cases Before HARERA",
+      advocateFee: "₹1,500",
+      advocateFeeLabel: "15-min fixed",
+      digitalVakalatnamaEscrow: "Digital Vakalatnama & Milestone Escrow Ready",
+      zeroSurpriseFees: "Zero Surprise Fees",
+      clickStagesPrompt: "Click stages above to explore procedural path",
+      proceedClient: "Proceed as Client",
+    },
+    gateways: {
+      eyebrow: "CHOOSE YOUR PATH",
+      title: "Two distinct gateways. One verified platform.",
+      subtitle:
+        "Whether you are navigating a legal dispute or managing litigation chambers, NyayLink provides structured, compliant infrastructure.",
+      clientTag: "FOR CITIZENS & ENTERPRISES",
+      escrowProtected: "Escrow Protected",
+      clientTitle: "I need legal help",
+      clientDesc:
+        "For individuals, families, and businesses seeking legal clarity, exploring statutory remedies, or consulting verified counsel with guaranteed upfront fees.",
+      clientFeature1Title: "Plain-Language Legal Intake:",
+      clientFeature1Desc:
+        "Describe your situation in your native language and receive structured statutory clarity.",
+      clientFeature2Title: "Upfront Flat Consultation Fees:",
+      clientFeature2Desc:
+        "Scheduled 15-minute consultations with zero surprise clerk expenses.",
+      clientFeature3Title: "Milestone Escrow Security:",
+      clientFeature3Desc:
+        "Retainer funds released to advocates only upon verified procedural filing stages.",
+      clientCta: "Continue as a client",
+      browseLawyers: "Browse 480+ verified lawyers →",
+      lawyerTag: "FOR PRACTICING ADVOCATES",
+      lawyerBadge: "BCI Rule 36 Compliant",
+      lawyerTitle: "I'm an advocate",
+      lawyerDesc:
+        "For State Bar Council practitioners accessing their chamber workspace, daily court cause list tracking, and verified client consultations.",
+      lawyerFeature1Title: "Daily e-Courts Cause List Sync:",
+      lawyerFeature1Desc:
+        "Real-time item number alerts delivered directly to your WhatsApp and chamber calendar.",
+      lawyerFeature2Title: "Digital Vakalatnama (Section 65B):",
+      lawyerFeature2Desc:
+        "Execute client representation agreements digitally with Aadhaar OTP authentication.",
+      lawyerFeature3Title: "Zero Commission Fee Model:",
+      lawyerFeature3Desc:
+        "100% of client retainer disbursed directly to your designated bank account.",
+      lawyerCta: "Continue as a lawyer",
+      rule36Link: "Review Rule 36 non-solicitation rules →",
+    },
+    howItWorks: {
+      eyebrow: "PROCEDURAL FLOW",
+      title: "How NyayLink works.",
+      subtitle:
+        "Three structured stages engineered to eliminate procedural opacity and connect citizens directly with verified advocates.",
+      step1Number: "01",
+      step1Badge: "Vernacular Intake",
+      step1Title: "Describe what you need help with",
+      step1Subtitle: "Plain-language and vernacular intake",
+      step1Desc:
+        "Speak or write your matter in everyday words or regional Indian languages. Our legal intake structures the factual core, identifies relevant statutes under Bharatiya Nyaya Sanhita, CPC, or specialized acts, and checks limitation periods.",
+      step1Detail:
+        "Translates everyday speech into structured legal issues and forum jurisdiction.",
+      step2Number: "02",
+      step2Badge: "Real-time BCI Check",
+      step2Title: "Explore relevant information & verified counsel",
+      step2Subtitle: "Bar Council of India roll validation",
+      step2Desc:
+        "Filter enrolled advocates by specific court jurisdiction (Supreme Court, High Courts, NCLT, DRT, District Courts), matter specialization, and spoken language. Every advocate listing is cross-checked against official Bar Council registers.",
+      step2Detail:
+        "View upfront, transparent consultation fees with zero surprise clerk expenses.",
+      step3Number: "03",
+      step3Badge: "Milestone Escrow",
+      step3Title: "Connect and consult under milestone escrow",
+      step3Subtitle: "Protected legal engagement",
+      step3Desc:
+        "Book a scheduled 15-minute preliminary strategy conference. Execute an enforceable digital Vakalatnama using Aadhaar OTP under Section 65B. Your legal retainer is held in milestone escrow and disbursed only as agreed filing stages complete.",
+      step3Detail:
+        "100% of escrow retainer released directly to counsel with zero referral commission.",
+    },
+    twoAudiences: {
+      eyebrow: "TWO AUDIENCES",
+      title: "Two audiences. One unified platform.",
+      subtitle:
+        "Whether you need structured guidance on a dispute or modern digital infrastructure for your legal practice, NyayLink connects both sides with transparency and compliance.",
+      clientBadge: "CLIENT EXPERIENCE",
+      clientSubBadge: "Accessible & Transparent",
+      clientTitle: "Demystifying the Indian legal process for citizens.",
+      clientDesc:
+        "Navigating legal issues often involves confusing jargon, uncertain court fees, and difficulty identifying the right advocate. NyayLink replaces uncertainty with structured clarity: understand your matter in plain language, verify your advocate's credentials, and consult with full fee protection.",
+      clientF1Title: "Plain-Language Problem Framing:",
+      clientF1Desc:
+        "Express your situation without having to know legal sections beforehand.",
+      clientF2Title: "Verified Bar Council Credentials:",
+      clientF2Desc:
+        "Search advocates by enrollment ID, specific courts, and language.",
+      clientF3Title: "Transparent Milestone Escrow:",
+      clientF3Desc:
+        "Your payment remains securely protected until agreed consultation steps occur.",
+      clientCta: "Continue as a Client",
+      browseAdvocates: "Explore verified counsel directory →",
+      lawyerBadge: "ADVOCATE CHAMBERS",
+      lawyerSubBadge: "BCI Rule 36 Protected",
+      lawyerTitle:
+        "Dedicated digital infrastructure for practicing advocates.",
+      lawyerDesc:
+        "Modern chamber management built specifically for Indian legal practitioners. Manage cause list dockets, receive pre-triaged client matters, and collect milestone fees with zero marketing or solicitation violations.",
+      lawyerF1Title: "Automated Daily Cause List Alerts:",
+      lawyerF1Desc:
+        "Instant notifications when your matters appear on court cause lists.",
+      lawyerF2Title: "Aadhaar Digital Vakalatnama:",
+      lawyerF2Desc:
+        "Issue and sign verified representation memos instantly under Section 65B.",
+      lawyerF3Title: "Zero Referral Commissions:",
+      lawyerF3Desc:
+        "Operate completely free of intermediary fee cuts under Bar Council rules.",
+      lawyerCta: "Continue as an Advocate",
+      learnAdvocatePortal: "Learn about the advocate chamber portal →",
+    },
+    trust: {
+      eyebrow: "LEGAL ETHICS & COMPLIANCE",
+      title: "Engineered strictly under Rule 36 of the Bar Council of India Rules.",
+      desc:
+        "The Advocates Act, 1961 and Rule 36 of the BCI Rules strictly prohibit advocates from advertising, soliciting briefs, or paying referral commissions. NyayLink operates purely as neutral infrastructure: enabling direct citizen search, transparent milestone escrow, and verifiable public enrollment records.",
+      neutralTech: "Neutral Technology Infrastructure",
+      card1Title: "BCI Rule 36 Compliance",
+      card1Desc:
+        "Zero client solicitation, zero fee-sharing, and zero advertisement. Purely neutral informational directory.",
+      card2Title: "Advocate-Client Privilege",
+      card2Desc:
+        "256-bit AES encryption protecting privileged legal consultations, documents, and case brief records.",
+      card3Title: "Bar Council Enrolment Check",
+      card3Desc:
+        "Every advocate profile is verified against State Bar Council rolls prior to directory listing.",
+      card4Title: "Milestone Escrow Protection",
+      card4Desc:
+        "Retainer fees held in transparent bank escrow; released only as verifiable filing milestones complete.",
+    },
+    closingCta: {
+      eyebrow: "GET STARTED",
+      title: "Find the right legal path forward.",
+      subtitle:
+        "Connect with verified counsel or access your advocate chamber workspace today.",
+      clientCardTitle: "NEED LEGAL HELP?",
+      clientCardDesc:
+        "Describe your situation, clarify remedies, and consult verified counsel under milestone escrow.",
+      clientCardCta: "Continue as a client",
+      lawyerCardTitle: "PRACTICING ADVOCATE?",
+      lawyerCardDesc:
+        "Access your cause list alerts, digital Vakalatnama signing, and client brief dossiers.",
+      lawyerCardCta: "Continue as a lawyer",
+    },
+    footer: {
+      mission:
+        "Democratizing access to verified legal counsel across India. Plain-language intake, transparent milestone escrow, and certified Bar Council advocacy.",
+      complianceBadge: "Section 36 Advocates Act, 1961 Compliant",
+      platformHeading: "Platform",
+      advocatesHeading: "Advocates",
+      legalHeading: "Compliance & Legal",
+      findAdvocates: "Find Advocates",
+      aiIntake: "AI Legal Intake",
+      howItWorks: "How It Works",
+      bciVerification: "BCI Verification",
+      chamberLogin: "Chambers Login",
+      causeListSync: "Cause List Sync",
+      escrowProtection: "Escrow Protection",
+      ethicsGuidelines: "Ethics Guidelines",
+      privacyPolicy: "Privacy Policy",
+      termsService: "Terms of Service",
+      rule36Disclaimer: "BCI Rule 36 Statement",
+      disclaimerNotice:
+        "NyayLink is an informational and technology platform, not a law firm, and does not provide legal advice or solicit briefs. All advocate engagements are governed directly between client and certified counsel under the Advocates Act, 1961.",
+      copyright: "© 2026 NyayLink. All rights reserved. Made for Indian Jurisprudence.",
+    },
+  },
 };
+

@@ -39,6 +39,18 @@ export function MarketingNavbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Lock background scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.classList.add("modal-open");
+    } else {
+      document.body.classList.remove("modal-open");
+    }
+    return () => {
+      document.body.classList.remove("modal-open");
+    };
+  }, [mobileMenuOpen]);
+
   const handleNavClick = (id: string) => {
     setMobileMenuOpen(false);
     if (typeof window !== "undefined" && window.location.pathname !== "/") {

@@ -5,8 +5,10 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ShieldCheck, Lock, RefreshCw, FileCheck2 } from "lucide-react";
 import { MomentumRing } from "@/components/effects/momentum-ring";
 import { ParticleImage } from "@/components/effects/particle-image";
+import { useLanguage } from "@/lib/i18n/context";
 
 export function TrustCompliance() {
+  const { t } = useLanguage();
   const shouldReduceMotion = useReducedMotion();
 
   return (
@@ -25,24 +27,21 @@ export function TrustCompliance() {
               <span className="w-4 h-px bg-[#205C43]" />
               <span className="text-[#205C43] font-bold">05</span>
               <span className="text-[#D5E5D9]">{"//"}</span>
-              <span className="text-[#69736D] font-semibold">LEGAL ETHICS & COMPLIANCE</span>
+              <span className="text-[#69736D] font-semibold">{t.home.trust.eyebrow}</span>
             </div>
 
             <h2 className="font-serif text-3xl sm:text-4xl lg:text-[40px] text-[#202824] font-normal leading-snug tracking-tight text-balance">
-              Engineered strictly under Rule 36 of the Bar Council of India Rules.
+              {t.home.trust.title}
             </h2>
             <p className="text-sm text-[#69736D] leading-relaxed max-w-2xl font-light">
-              The Advocates Act, 1961 and Rule 36 of the BCI Rules strictly prohibit advocates from
-              advertising, soliciting briefs, or paying referral commissions. NyayLink operates purely
-              as neutral infrastructure: enabling direct citizen search, transparent milestone escrow,
-              and verifiable public enrollment records.
+              {t.home.trust.desc}
             </p>
           </div>
 
           <div className="lg:col-span-4 flex flex-col items-center justify-center p-4 select-none">
             <ParticleImage size={210} highlightColor="#205C43" accentColor="#174530" />
             <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-[#69736D]">
-              Neutral Technology Infrastructure
+              {t.home.trust.neutralTech}
             </p>
           </div>
         </div>
@@ -60,10 +59,10 @@ export function TrustCompliance() {
             </div>
             <div>
               <span className="font-mono text-[11px] uppercase tracking-wider text-[#205C43] block font-semibold">
-                BCI Rule 36 Compliance
+                {t.home.trust.card1Title}
               </span>
               <span className="text-xs text-[#69736D] block mt-1 leading-relaxed">
-                Zero client solicitation, zero fee-sharing, and zero advertisement. Purely neutral informational directory.
+                {t.home.trust.card1Desc}
               </span>
             </div>
           </div>
@@ -74,10 +73,10 @@ export function TrustCompliance() {
             </div>
             <div>
               <span className="font-mono text-[11px] uppercase tracking-wider text-[#174530] block font-semibold">
-                Advocate-Client Privilege
+                {t.home.trust.card2Title}
               </span>
               <span className="text-xs text-[#69736D] block mt-1 leading-relaxed">
-                256-bit AES encryption protecting privileged legal consultations, documents, and case brief records.
+                {t.home.trust.card2Desc}
               </span>
             </div>
           </div>
@@ -88,10 +87,10 @@ export function TrustCompliance() {
             </div>
             <div>
               <span className="font-mono text-[11px] uppercase tracking-wider text-[#205C43] block font-semibold">
-                Bar Council Enrolment Check
+                {t.home.trust.card3Title}
               </span>
               <span className="text-xs text-[#69736D] block mt-1 leading-relaxed">
-                Every advocate profile is verified against State Bar Council rolls prior to directory listing.
+                {t.home.trust.card3Desc}
               </span>
             </div>
           </div>
@@ -102,10 +101,10 @@ export function TrustCompliance() {
             </div>
             <div>
               <span className="font-mono text-[11px] uppercase tracking-wider text-[#174530] block font-semibold">
-                Section 65B Digital Execution
+                {t.home.trust.card4Title}
               </span>
               <span className="text-xs text-[#69736D] block mt-1 leading-relaxed">
-                Digital Vakalatnama signed via Aadhaar OTP, legally valid under the Indian Evidence Act.
+                {t.home.trust.card4Desc}
               </span>
             </div>
           </div>

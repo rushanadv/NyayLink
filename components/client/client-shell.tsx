@@ -217,16 +217,18 @@ export function ClientShell({
           <div className="p-3.5 rounded-xl bg-gradient-to-br from-[#EAF3ED] to-[#F8FAF9] border border-[#D5E5D9] space-y-2">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-[#205C43]">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Need Quick Answers?</span>
+              <span>{isHindi ? "त्वरित उत्तर चाहिए?" : "Need Quick Answers?"}</span>
             </div>
             <p className="text-[11px] text-[#69736D] leading-relaxed">
-              Use Nyay AI to structure facts before consulting counsel.
+              {isHindi
+                ? "वकील से परामर्श से पहले तथ्यों को व्यवस्थित करें।"
+                : "Use Nyay AI to structure facts before consulting counsel."}
             </p>
             <Link
               href="/intake"
               className="text-[11px] font-semibold text-[#205C43] hover:underline flex items-center gap-1"
             >
-              <span>Start Intake</span>
+              <span>{isHindi ? "इंटेक शुरू करें" : "Start Intake"}</span>
               <ExternalLink className="w-3 h-3" />
             </Link>
           </div>
@@ -234,12 +236,20 @@ export function ClientShell({
 
         {/* Mobile Sidebar Overlay */}
         {isMobileMenuOpen && (
-          <div className="fixed inset-0 z-50 md:hidden bg-black/40 backdrop-blur-xs flex">
-            <div className="w-64 bg-white h-full p-4 flex flex-col justify-between shadow-2xl animate-in slide-in-from-left duration-200">
+          <div
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setIsMobileMenuOpen(false);
+            }}
+            className="fixed inset-0 z-50 md:hidden bg-black/40 backdrop-blur-xs flex"
+          >
+            <div
+              data-lenis-prevent
+              className="w-64 bg-white h-full p-4 flex flex-col justify-between shadow-2xl animate-in slide-in-from-left duration-200 overflow-y-auto"
+            >
               <div className="space-y-3">
                 <div className="flex items-center justify-between pb-3 border-b border-[#D5E5D9]">
                   <span className="font-serif font-semibold text-sm text-[#202824]">
-                    Client Navigation
+                    {isHindi ? "मुवक्किल मेन्यू" : "Client Navigation"}
                   </span>
                   <button
                     onClick={() => setIsMobileMenuOpen(false)}
