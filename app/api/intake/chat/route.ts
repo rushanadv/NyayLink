@@ -5,10 +5,10 @@ export const maxDuration = 60;
 
 // Configurable Models (server-side only)
 const getPrimaryModel = (): string =>
-  process.env.OPENROUTER_MODEL?.trim() || "nvidia/nemotron-3.5-super-vl:free";
+  process.env.GROQ_MODEL?.trim() || "openai/gpt-oss-120b";
 
 const getFallbackModel = (): string =>
-  process.env.OPENROUTER_FALLBACK_MODEL?.trim() || "nvidia/nemotron-3.5-lightning:free";
+  process.env.GROQ_FALLBACK_MODEL?.trim() || "openai/gpt-oss-20b";
 
 // In-memory rate limiting: IP -> timestamps array
 const rateLimitMap = new Map<string, number[]>();
@@ -56,7 +56,7 @@ interface RequestBody {
   isContinuation?: boolean;
 }
 
-async function requestOpenRouter(
+async function requestGroq(
   model: string,
   messages: ChatMessage[],
   apiKey: string,
@@ -73,24 +73,27 @@ async function requestOpenRouter(
     }
   }
 
+  const payload: Record<string, unknown> = {
+    model,
+    messages,
+    max_tokens: 2048,
+    temperature: 0.25,
+    stream: true,
+  };
+
+  // Configure reasoning only using options supported by the selected Groq model
+  if (model.includes("gpt-oss")) {
+    payload.reasoning_format = "hidden";
+  }
+
   try {
-    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
-        "HTTP-Referer": "https://nyay.live",
-        "X-Title": "NyayLink Legal Intake Assistant",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model,
-        messages,
-        max_tokens: 1500,
-        temperature: 0.25,
-        stream: true,
-        // Disable reasoning token overhead for dramatic TTFT speedup on supported reasoning models
-        reasoning: { effort: "none" },
-      }),
+      body: JSON.stringify(payload),
       signal: controller.signal,
     });
     return res;
@@ -127,13 +130,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Secret Validation
-    const apiKey = process.env.OPENROUTER_API_KEY;
-    if (!apiKey || apiKey === "your-openrouter-key-here" || apiKey.trim() === "") {
+    // 2. Secret Validation (Server-Side Only - Never Exposed)
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey || apiKey === "your-groq-api-key-here" || apiKey.trim() === "") {
+      console.error("[AI Intake] Server configuration notice: GROQ_API_KEY is not configured.");
       return NextResponse.json(
         {
           error:
-            "OPENROUTER_API_KEY is not configured on the server. Please configure your key in environment settings.",
+            "The legal intake assistant service is temporarily unconfigured or undergoing maintenance. Please retry in a few moments.",
         },
         { status: 503 }
       );
@@ -192,47 +196,49 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 5. Connect to OpenRouter (Primary Model -> Fallback on failure)
+    // 5. Connect to Groq (Primary Model -> Fallback on failure)
     const primaryModel = getPrimaryModel();
     const fallbackModel = getFallbackModel();
 
     let activeResponse: Response | null = null;
     let selectedModel = primaryModel;
-    let primaryErrorDetail = "";
     let primaryStatus = 0;
 
     try {
-      const primaryRes = await requestOpenRouter(primaryModel, fullMessages, apiKey, req.signal);
+      const primaryRes = await requestGroq(primaryModel, fullMessages, apiKey, req.signal);
       if (primaryRes.ok && primaryRes.body) {
         activeResponse = primaryRes;
       } else {
         primaryStatus = primaryRes.status;
         const errText = await primaryRes.text();
-        primaryErrorDetail = errText;
-        console.warn(`[AI Intake] Primary model (${primaryModel}) failed [${primaryStatus}]`);
+        console.warn(`[AI Intake] Primary Groq model (${primaryModel}) failed [${primaryStatus}]: ${errText.slice(0, 160)}`);
       }
     } catch (err: unknown) {
-      primaryErrorDetail = err instanceof Error ? err.message : String(err);
-      console.warn(`[AI Intake] Primary model network error: ${primaryErrorDetail}`);
+      const errMsg = err instanceof Error ? err.message : String(err);
+      console.warn(`[AI Intake] Primary Groq model network error: ${errMsg}`);
     }
 
     // Fallback if primary model failed before emitting tokens
     if (!activeResponse) {
-      console.info(`[AI Intake] Initiating fallback model (${fallbackModel})...`);
+      console.info(`[AI Intake] Initiating fallback Groq model (${fallbackModel})...`);
       selectedModel = fallbackModel;
       try {
-        const fallbackRes = await requestOpenRouter(fallbackModel, fullMessages, apiKey, req.signal);
+        const fallbackRes = await requestGroq(fallbackModel, fullMessages, apiKey, req.signal);
         if (fallbackRes.ok && fallbackRes.body) {
           activeResponse = fallbackRes;
         } else {
           const fallbackStatus = fallbackRes.status;
           const fallbackErrText = await fallbackRes.text();
           console.error(
-            `[AI Intake] Fallback model (${fallbackModel}) failed [${fallbackStatus}]: ${fallbackErrText.slice(0, 160)}`
+            `[AI Intake] Fallback Groq model (${fallbackModel}) failed [${fallbackStatus}]: ${fallbackErrText.slice(0, 160)}`
           );
 
+          const is429 = primaryStatus === 429 || fallbackStatus === 429;
           const is404 = primaryStatus === 404 || fallbackStatus === 404;
-          const errorMsg = is404
+
+          const errorMsg = is429
+            ? "AI legal intake is currently handling high request volume. Please retry in a few moments."
+            : is404
             ? "The AI legal model is temporarily undergoing maintenance upstream. Please retry in a few moments."
             : "AI intake is temporarily unavailable from the upstream provider. Please retry shortly.";
 
@@ -250,7 +256,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 6. Robust Server-Side SSE Token Parser and Stream Transmitter
-    const openRouterReader = activeResponse.body!.getReader();
+    const groqReader = activeResponse.body!.getReader();
     const encoder = new TextEncoder();
     const decoder = new TextDecoder();
 
@@ -264,7 +270,7 @@ export async function POST(req: NextRequest) {
 
         try {
           while (true) {
-            const { done, value } = await openRouterReader.read();
+            const { done, value } = await groqReader.read();
             if (done) {
               break;
             }
@@ -285,20 +291,21 @@ export async function POST(req: NextRequest) {
                 try {
                   const json = JSON.parse(trimmed.slice(6));
 
-                  // OpenRouter mid-stream error format
+                  // Groq mid-stream error format
                   if (json.error) {
                     const rawMsg = json.error?.message || "Upstream provider stream error.";
-                    console.error("[AI Intake] SSE chunk error received:", rawMsg);
-                    streamError = rawMsg;
+                    console.error("[AI Intake] Groq SSE chunk error received:", rawMsg);
+                    streamError = "Generation interrupted by upstream service.";
                     break;
                   }
 
-                  const delta = json.choices?.[0]?.delta?.content;
-                  if (delta) {
+                  const delta = json.choices?.[0]?.delta;
+                  const content = delta?.content;
+                  if (content) {
                     if (timeToFirstToken === null) {
                       timeToFirstToken = Date.now() - requestStartTime;
                     }
-                    controller.enqueue(encoder.encode(delta));
+                    controller.enqueue(encoder.encode(content));
                     hasEmittedTokens = true;
                   }
 
@@ -348,7 +355,7 @@ export async function POST(req: NextRequest) {
         }
       },
       cancel() {
-        openRouterReader.cancel().catch(() => {});
+        groqReader.cancel().catch(() => {});
       },
     });
 

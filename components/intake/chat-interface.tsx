@@ -16,11 +16,12 @@ import {
   Lock,
   ThumbsUp,
   ThumbsDown,
-  FileQuestion,
-  Scale,
-  ShieldCheck,
-  HelpCircle,
+  Shield,
+  Users,
+  Home,
+  Briefcase,
   PlusCircle,
+  ArrowDown,
 } from "lucide-react";
 import { MagneticWrapper } from "@/components/ui/magnetic-wrapper";
 import { FormattedMarkdown, markdownToPlainText } from "@/components/intake/formatted-markdown";
@@ -56,26 +57,31 @@ const INDIAN_STATES = [
   "Andhra Pradesh",
 ];
 
+// Curated suggested inquiries covering core Indian legal domains
 const SUGGESTED_INQUIRIES = [
   {
-    category: "Consumer Rights",
-    icon: HelpCircle,
-    prompt: "What is the procedure for filing a consumer forum complaint for defective goods?",
+    category: "Police & Criminal",
+    icon: Shield,
+    title: "FIR & Police Cognizance",
+    prompt: "What are my legal rights and recourse if a police station refuses to register an FIR for a cognizable offence under the BNSS?",
   },
   {
-    category: "Jurisprudence",
-    icon: Scale,
-    prompt: "What are the essential differences between civil disputes and criminal proceedings in India?",
+    category: "Family & Matrimonial",
+    icon: Users,
+    title: "Mutual Consent & Maintenance",
+    prompt: "What is the procedure, statutory waiting period, and documentation required for mutual consent divorce and interim maintenance under Indian law?",
   },
   {
-    category: "Advocate Prep",
-    icon: ShieldCheck,
-    prompt: "How should I organize facts and evidence before consulting a verified advocate?",
+    category: "Property & Tenancy",
+    icon: Home,
+    title: "Security Deposit & Eviction",
+    prompt: "My landlord withheld my security deposit for 4 months without justification. What are my legal remedies under the Tenancy Act and Consumer Forum?",
   },
   {
-    category: "Tenancy & Contracts",
-    icon: FileQuestion,
-    prompt: "My landlord withheld my security deposit for 5 months without explanation. What are my remedies?",
+    category: "Consumer & Workplace",
+    icon: Briefcase,
+    title: "Withheld Salary & Notice",
+    prompt: "My employer withheld my full and final settlement and salary without written explanation. How do I proceed under Indian labour and contract laws?",
   },
 ];
 
@@ -89,24 +95,38 @@ export function ChatInterface() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [failedPrompt, setFailedPrompt] = useState<string | null>(null);
   const [failedUserMessageId, setFailedUserMessageId] = useState<string | null>(null);
+  const [isScrolledUp, setIsScrolledUp] = useState(false);
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Smooth scroll to bottom when new messages arrive or while actively streaming
+  // Monitor scroll position to avoid forcefully snapping user down if they deliberately scrolled up
+  const handleScroll = () => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const distanceToBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    setIsScrolledUp(distanceToBottom > 120);
+  };
+
+  // Smart smooth scrolling: automatically tracks bottom if user is already near bottom
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
+  }, []);
+
   useEffect(() => {
-    if (messages.length > 0 || isLoading) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (!isScrolledUp) {
+      scrollToBottom(isLoading ? "auto" : "smooth");
     }
-  }, [messages.length, isLoading]);
+  }, [messages, isLoading, isScrolledUp, scrollToBottom]);
 
   // Adjust textarea height dynamically to content
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 180)}px`;
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 160)}px`;
     }
   };
 
@@ -158,6 +178,7 @@ export function ChatInterface() {
     setFailedPrompt(text);
     setIsLoading(true);
     setApiError(null);
+    setIsScrolledUp(false);
 
     const assistantPlaceholderId = `assistant-${Date.now()}`;
     setMessages((prev) => [
@@ -193,7 +214,7 @@ export function ChatInterface() {
       });
 
       if (!response.ok) {
-        let errMessage = "Server encountered an issue connecting to the AI provider.";
+        let errMessage = "Server encountered an issue connecting to the legal intake assistant.";
         try {
           const errData = await response.json();
           if (errData?.error) errMessage = errData.error;
@@ -241,7 +262,7 @@ export function ChatInterface() {
 
       if (hasErrorChunk) {
         const errMatch = accumulated.match(/__NYAYLINK_ERROR__:\s*([^\n]+)/);
-        const errMsg = errMatch ? errMatch[1] : "Stream terminated with an upstream error.";
+        const errMsg = errMatch ? errMatch[1] : "Stream terminated with an upstream service notice.";
         setApiError(errMsg);
       }
 
@@ -263,12 +284,13 @@ export function ChatInterface() {
       setFailedUserMessageId(null);
     } catch (err: unknown) {
       if (abortController.signal.aborted) {
-        // Handled cleanly via handleStopGeneration
+        // Stop generation handled cleanly
         return;
       }
-      const msg = err instanceof Error ? err.message : "Failed to connect to NyayLink AI.";
+      const msg = err instanceof Error ? err.message : "Failed to connect to NyayLink legal intake.";
       setApiError(msg);
 
+      // Preserve previously received partial text if any
       setMessages((prev) => {
         const existing = prev.find((m) => m.id === assistantPlaceholderId);
         if (existing && existing.content.trim().length > 0) {
@@ -286,7 +308,7 @@ export function ChatInterface() {
     }
   };
 
-  // Continue Answer (when truncated)
+  // Continue Answer (when token limit reached)
   const handleContinueAnswer = async (messageId: string) => {
     if (isLoading) return;
     setIsLoading(true);
@@ -379,7 +401,7 @@ export function ChatInterface() {
       );
     } catch (err: unknown) {
       if (abortController.signal.aborted) return;
-      const msg = err instanceof Error ? err.message : "Failed to continue AI response.";
+      const msg = err instanceof Error ? err.message : "Failed to continue response.";
       setApiError(msg);
       setMessages((prev) =>
         prev.map((msg) =>
@@ -404,9 +426,7 @@ export function ChatInterface() {
         await navigator.clipboard.writeText(plainText);
         copied = true;
       }
-    } catch {
-      // Handled via fallback below
-    }
+    } catch {}
 
     if (!copied) {
       try {
@@ -446,6 +466,10 @@ export function ChatInterface() {
     setInput("");
     setApiError(null);
     setFailedPrompt(null);
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.focus();
+    }
   };
 
   // Keyboard Navigation: Enter to send, Shift+Enter for newline
@@ -462,29 +486,29 @@ export function ChatInterface() {
   return (
     <PerimeterGlowContainer
       isActive={isLoading}
-      className="w-full max-w-4xl mx-auto h-[calc(100dvh-9.5rem)] sm:h-[calc(100svh-11.5rem)] min-h-[460px] sm:min-h-[500px] max-h-[720px] flex flex-col shadow-xl"
+      className="w-full max-w-4xl mx-auto h-[calc(100dvh-12.5rem)] sm:h-[calc(100svh-14rem)] min-h-[500px] sm:min-h-[560px] max-h-[820px] flex flex-col shadow-xl"
     >
-      {/* Top Bar: Identity, Jurisdiction, and New Chat */}
-      <div className="shrink-0 px-4 sm:px-5 py-2.5 sm:py-3 border-b border-[#D5E5D9] bg-[#FDFEFC] flex flex-wrap items-center justify-between gap-2.5 text-xs select-none">
+      {/* Top Bar: Identity, Jurisdiction, and Actions */}
+      <div className="shrink-0 px-4 sm:px-5 py-2.5 sm:py-3 border-b border-[#D5E5D9] bg-[#FFFFFF] flex flex-wrap items-center justify-between gap-2.5 text-xs select-none">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#EAF3ED] border border-[#D5E5D9] flex items-center justify-center text-[#205C43]">
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
             <h2 className="text-[#202824] font-semibold text-xs flex items-center gap-1.5">
-              Nyay AI Legal Intake
-              <span className="w-1.5 h-1.5 rounded-full bg-[#205C43] animate-pulse" />
+              <span>NyayLink AI Legal Intake</span>
+              <span className={`w-1.5 h-1.5 rounded-full ${isLoading ? "bg-amber-500 animate-ping" : "bg-[#205C43]"}`} />
             </h2>
-            <p className="text-[10px] text-[#69736D] font-mono">
-              BNS & Indian Procedural Jurisprudence Grounded
+            <p className="text-[10.5px] text-[#69736D] font-mono">
+              BNS &amp; Indian Jurisprudence Grounded
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          {/* State Jurisdiction Picker */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-[#D5E5D9] text-[11px] text-[#69736D] shadow-2xs">
-            <MapPin className="w-3.5 h-3.5 text-[#205C43]" />
+          {/* Jurisdiction State Selector */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F8FAF9] hover:bg-[#EAF3ED]/60 border border-[#D5E5D9] text-[11px] text-[#69736D] shadow-2xs transition-colors">
+            <MapPin className="w-3.5 h-3.5 text-[#205C43] shrink-0" />
             <select
               value={selectedState}
               onChange={(e) => setSelectedState(e.target.value)}
@@ -499,7 +523,7 @@ export function ChatInterface() {
             </select>
           </div>
 
-          {/* New Consultation / Reset Button */}
+          {/* New Query / Reset Button */}
           {messages.length > 0 && (
             <button
               type="button"
@@ -512,7 +536,7 @@ export function ChatInterface() {
             </button>
           )}
 
-          {/* Connect with Advocate CTA Button (Appears after 1 exchange) */}
+          {/* Connect with Advocate CTA Button (appears after first exchange) */}
           {hasCompletedExchange && (
             <MagneticWrapper maxDisplacement={5}>
               <Link
@@ -531,7 +555,7 @@ export function ChatInterface() {
       <div className="shrink-0 px-4 sm:px-5 py-1.5 bg-[#EAF3ED]/40 border-b border-[#D5E5D9] flex items-center justify-between text-[11px] text-[#69736D]">
         <div className="flex items-center gap-2">
           <Lock className="w-3 h-3 text-[#205C43]" />
-          <span>Session is private & non-identifying. No broker touting.</span>
+          <span>Session is private and non-identifying. No advocate touting.</span>
         </div>
         <span className="font-mono text-[10px] text-[#205C43] font-semibold hidden sm:inline">
           Sec 36 Advocates Act Compliant
@@ -539,14 +563,18 @@ export function ChatInterface() {
       </div>
 
       {/* Messages Scroll Area */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-5 bg-[#FFFFFF] scroll-smooth">
-        {/* Initial Empty State with Interactive Compass Motif and Gemini-style suggested prompts */}
+      <div
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-5 bg-[#FFFFFF] scroll-smooth relative"
+      >
+        {/* Initial Empty State with Refined Suggested Prompts */}
         {messages.length === 0 && !isLoading && (
-          <div className="space-y-4 py-2">
+          <div className="space-y-4 sm:space-y-5 py-2">
             <LegalCompassMotif />
 
             {/* Suggested Prompt Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
               {SUGGESTED_INQUIRIES.map((item, idx) => {
                 const IconComponent = item.icon;
                 return (
@@ -554,16 +582,21 @@ export function ChatInterface() {
                     key={idx}
                     type="button"
                     onClick={() => handleSendMessage(item.prompt)}
-                    className="p-2.5 sm:p-3 rounded-xl border border-[#D5E5D9] hover:border-[#205C43]/50 bg-white hover:bg-[#F8FAF9] text-left transition-all group flex items-start gap-2.5 shadow-2xs hover:shadow-xs cursor-pointer"
+                    className="p-3 sm:p-3.5 rounded-xl border border-[#D5E5D9] hover:border-[#205C43]/50 bg-[#FDFEFC] hover:bg-[#F3F8F5] text-left transition-all group flex items-start gap-3 shadow-2xs hover:shadow-xs cursor-pointer"
                   >
-                    <div className="w-7 h-7 rounded-lg bg-[#EAF3ED] border border-[#D5E5D9] flex items-center justify-center text-[#205C43] shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
-                      <IconComponent className="w-3.5 h-3.5" />
+                    <div className="w-8 h-8 rounded-lg bg-[#EAF3ED] border border-[#D5E5D9] flex items-center justify-center text-[#205C43] shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
+                      <IconComponent className="w-4 h-4" />
                     </div>
-                    <div className="flex-1 space-y-0.5">
-                      <span className="text-[10px] font-mono uppercase tracking-wider text-[#205C43] font-semibold block">
-                        {item.category}
-                      </span>
-                      <p className="text-xs text-[#202824] leading-relaxed group-hover:text-[#174530]">
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-mono uppercase tracking-wider text-[#205C43] font-semibold">
+                          {item.category}
+                        </span>
+                        <span className="text-[10.5px] font-medium text-[#69736D] group-hover:text-[#174530]">
+                          {item.title}
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#202824] leading-relaxed line-clamp-2">
                         {item.prompt}
                       </p>
                     </div>
@@ -583,18 +616,18 @@ export function ChatInterface() {
               className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}
             >
               <div
-                className={`w-full max-w-3xl transition-all ${
+                className={`w-full transition-all ${
                   isUser
-                    ? "ml-auto max-w-xl p-3.5 sm:p-4 rounded-2xl bg-[#205C43] text-white shadow-xs"
-                    : "p-5 sm:p-6 rounded-2xl bg-[#F8FAF9] border border-[#D5E5D9] shadow-xs text-[#202824]"
+                    ? "ml-auto max-w-xl p-3.5 sm:p-4 rounded-2xl rounded-tr-sm bg-[#205C43] text-white shadow-xs"
+                    : "max-w-3xl p-5 sm:p-6 rounded-2xl rounded-tl-sm bg-[#FDFEFC] border border-[#D5E5D9] shadow-xs text-[#202824]"
                 }`}
               >
                 {!isUser && (
-                  <div className="flex items-center justify-between text-xs font-semibold mb-3 select-none border-b border-[#D5E5D9]/50 pb-2">
+                  <div className="flex items-center justify-between text-xs font-semibold mb-3 select-none border-b border-[#D5E5D9]/60 pb-2">
                     <div className="flex items-center gap-2 text-[#205C43]">
                       <NyayLinkLogo variant="symbol" size={18} href={false} />
                       <span className="font-serif tracking-tight text-sm font-semibold text-[#174530]">
-                        Preliminary Legal Orientation
+                        Legal Orientation
                       </span>
                     </div>
                     <span className="text-[10px] font-mono text-[#69736D] uppercase">
@@ -605,7 +638,7 @@ export function ChatInterface() {
 
                 {/* Content Rendering */}
                 {isUser ? (
-                  <p className="text-xs sm:text-sm text-white leading-relaxed font-sans whitespace-pre-wrap">
+                  <p className="text-xs sm:text-[13.5px] text-white leading-relaxed font-sans whitespace-pre-wrap">
                     {message.content}
                   </p>
                 ) : (
@@ -623,8 +656,8 @@ export function ChatInterface() {
                       <button
                         type="button"
                         onClick={() => handleCopyAnswer(message.id, message.content)}
-                        className="px-2.5 py-1 rounded-md bg-white hover:bg-[#EAF3ED] border border-[#D5E5D9] text-[#205C43] hover:text-[#174530] text-[11px] font-medium flex items-center gap-1 transition-colors cursor-pointer"
-                        title="Copy plain-text answer"
+                        className="px-2.5 py-1 rounded-md bg-white hover:bg-[#EAF3ED] border border-[#D5E5D9] text-[#205C43] hover:text-[#174530] text-[11px] font-medium flex items-center gap-1 transition-colors cursor-pointer shadow-2xs"
+                        title="Copy plain-text answer to clipboard"
                       >
                         {copiedId === message.id ? (
                           <>
@@ -644,7 +677,7 @@ export function ChatInterface() {
                         type="button"
                         onClick={() => handleSendMessage(undefined, true)}
                         disabled={isLoading}
-                        className="px-2.5 py-1 rounded-md bg-white hover:bg-[#EAF3ED] border border-[#D5E5D9] text-[#69736D] hover:text-[#202824] text-[11px] font-medium flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-50"
+                        className="px-2.5 py-1 rounded-md bg-white hover:bg-[#EAF3ED] border border-[#D5E5D9] text-[#69736D] hover:text-[#202824] text-[11px] font-medium flex items-center gap-1 transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
                         title="Regenerate this response"
                       >
                         <RotateCcw className="w-3 h-3 text-[#69736D]" />
@@ -688,7 +721,7 @@ export function ChatInterface() {
                     <button
                       type="button"
                       onClick={() => handleContinueAnswer(message.id)}
-                      className="px-2.5 py-1 rounded-lg bg-[#EAF3ED] border border-[#D5E5D9] text-[#205C43] hover:bg-[#D5E5D9] text-[11px] font-medium flex items-center gap-1 transition-colors cursor-pointer"
+                      className="px-2.5 py-1 rounded-lg bg-[#EAF3ED] border border-[#D5E5D9] text-[#205C43] hover:bg-[#D5E5D9] text-[11px] font-medium flex items-center gap-1 transition-colors cursor-pointer shadow-2xs"
                     >
                       <ArrowRight className="w-3 h-3" />
                       Continue answer
@@ -705,7 +738,7 @@ export function ChatInterface() {
                     <button
                       type="button"
                       onClick={() => handleSendMessage(undefined, true)}
-                      className="px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 hover:bg-rose-100 text-[11px] font-medium flex items-center gap-1 transition-colors cursor-pointer"
+                      className="px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 hover:bg-rose-100 text-[11px] font-medium flex items-center gap-1 transition-colors cursor-pointer shadow-2xs"
                     >
                       <RotateCcw className="w-3 h-3 text-rose-700" />
                       Retry from here
@@ -719,15 +752,15 @@ export function ChatInterface() {
 
         {/* Initial Thinking Indicator */}
         {isLoading && messages[messages.length - 1]?.content === "" && (
-          <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#EAF3ED] border border-[#D5E5D9] text-[#205C43] max-w-xs text-xs font-mono shadow-xs">
+          <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#EAF3ED] border border-[#D5E5D9] text-[#205C43] max-w-sm text-xs font-mono shadow-xs animate-pulse">
             <Sparkles className="w-3.5 h-3.5 text-[#205C43] animate-spin" />
-            <span>Consulting statutory provisions...</span>
+            <span>Consulting statutory provisions under Indian law...</span>
           </div>
         )}
 
         {/* API Error Notification */}
         {apiError && (
-          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs flex items-start gap-2.5">
+          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs flex items-start gap-2.5 shadow-2xs">
             <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
             <div className="flex-1 space-y-1">
               <p className="font-semibold text-rose-950">Intake Connection Notice</p>
@@ -769,14 +802,14 @@ export function ChatInterface() {
 
         {/* Post-Exchange Advocate Handoff Banner */}
         {hasCompletedExchange && !isLoading && (
-          <div className="p-4 rounded-xl bg-gradient-to-br from-[#EAF3ED] via-white to-[#F4FAF6] border border-[#D5E5D9] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs mt-4 shadow-xs">
+          <div className="p-4 rounded-xl bg-gradient-to-br from-[#EAF3ED] via-white to-[#F3F8F5] border border-[#D5E5D9] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs mt-4 shadow-xs">
             <div className="space-y-0.5">
               <span className="font-semibold text-[#202824] flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#205C43]" />
                 Preliminary Legal Analysis Prepared
               </span>
               <p className="text-[#69736D] text-[11px]">
-                Would you like a verified Bar Council advocate to formally assess your documents?
+                Would you like a verified Bar Council advocate to formally assess your case documents?
               </p>
             </div>
             <MagneticWrapper maxDisplacement={6}>
@@ -791,10 +824,23 @@ export function ChatInterface() {
           </div>
         )}
 
+        {/* Floating Scroll to Bottom Button */}
+        {isScrolledUp && (
+          <button
+            type="button"
+            onClick={() => scrollToBottom("smooth")}
+            className="sticky bottom-2 ml-auto p-2 rounded-full bg-white hover:bg-[#EAF3ED] border border-[#D5E5D9] text-[#205C43] shadow-md transition-all flex items-center gap-1 text-[11px] font-medium z-20 cursor-pointer"
+            title="Scroll to latest messages"
+          >
+            <ArrowDown className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Latest</span>
+          </button>
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Multiline Modern Composer */}
+      {/* Multiline Modern Message Composer */}
       <div className="shrink-0 p-3 sm:p-4 border-t border-[#D5E5D9] bg-white space-y-2">
         <div className="relative flex items-end gap-2 p-2 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] focus-within:border-[#205C43] focus-within:ring-2 focus-within:ring-[#205C43]/15 transition-all shadow-xs">
           <textarea
@@ -805,7 +851,7 @@ export function ChatInterface() {
             onKeyDown={handleKeyDown}
             placeholder="Type your legal situation or question in plain language (Shift+Enter for newline)..."
             disabled={isLoading}
-            className="flex-1 bg-transparent text-xs sm:text-sm text-[#202824] placeholder-[#69736D]/60 resize-none outline-none max-h-44 py-1.5 px-2.5 leading-relaxed"
+            className="flex-1 bg-transparent text-xs sm:text-sm text-[#202824] placeholder-[#69736D]/60 resize-none outline-none max-h-40 py-1.5 px-2.5 leading-relaxed"
           />
 
           {/* Action Button: Send or Stop Generating */}
@@ -826,7 +872,7 @@ export function ChatInterface() {
               disabled={!input.trim()}
               className={`p-2.5 rounded-lg font-semibold transition-all shrink-0 ${
                 input.trim()
-                  ? "bg-[#205C43] text-white hover:bg-[#174530] shadow-xs cursor-pointer"
+                  ? "bg-[#205C43] text-white hover:bg-[#174530] shadow-xs cursor-pointer active:scale-95"
                   : "bg-[#D5E5D9]/40 text-[#69736D]/30 cursor-not-allowed"
               }`}
               aria-label="Send inquiry"
@@ -836,13 +882,12 @@ export function ChatInterface() {
           )}
         </div>
 
-        {/* Persistent, Non-Intrusive Sticky Disclaimer Bar */}
+        {/* Persistent, Non-Intrusive Legal Disclaimer Bar */}
         <div className="flex items-center justify-between text-[11px] text-[#69736D] select-none pt-0.5">
           <p className="flex items-center gap-1.5 text-[#69736D]">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#205C43] shrink-0" />
+            <Shield className="w-3.5 h-3.5 text-[#205C43] shrink-0" />
             <span>
-              This is general legal information, not legal advice. For your specific situation,
-              consult a verified advocate.
+              General legal orientation under Indian statutes; not formal legal advice. For actionable court representation, consult an advocate.
             </span>
           </p>
         </div>

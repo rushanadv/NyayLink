@@ -4,32 +4,33 @@ import { ShieldCheck, Lock } from "lucide-react";
 
 export default function IntakePage() {
   return (
-    <div className="max-w-6xl mx-auto px-3 sm:px-6 space-y-2.5 sm:space-y-3">
-      {/* Page Header - Compact & Deliberately Composed */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 pb-1">
-        <div className="space-y-0.5 sm:space-y-1 max-w-2xl">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#EAF3ED] border border-[#D5E5D9] text-[10px] font-mono font-semibold text-[#205C43]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#205C43] animate-pulse" />
-            <span>CONFIDENTIAL AI LEGAL INTAKE</span>
-          </div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-serif text-[#202824] tracking-tight leading-tight">
-            Plain-Language Legal Orientation
-          </h1>
-          <p className="text-xs text-[#69736D] leading-normal line-clamp-2 sm:line-clamp-none">
-            Describe your dispute, notice, or legal question in everyday words for statutory guidance under Indian law.
-          </p>
+    <div className="w-full max-w-5xl mx-auto px-3 sm:px-6 space-y-3 sm:space-y-4">
+      {/* Page Header - Refined, Compact, and Confident */}
+      <div className="max-w-3xl mx-auto text-center space-y-1.5 pt-1 sm:pt-2 pb-1">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#EAF3ED] border border-[#D5E5D9] text-[10.5px] font-mono font-semibold text-[#205C43]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#205C43] animate-pulse" />
+          <span>CONFIDENTIAL LEGAL INTAKE</span>
         </div>
 
-        {/* Compact Trust Guarantees */}
-        <div className="hidden sm:flex flex-wrap items-center gap-2 text-[11px] text-[#69736D] shrink-0">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white border border-[#D5E5D9] shadow-2xs">
+        <h1 className="text-2xl sm:text-3xl lg:text-[34px] font-serif font-semibold text-[#174530] tracking-tight leading-snug">
+          Let&apos;s understand your legal situation
+        </h1>
+
+        <p className="text-xs sm:text-sm text-[#69736D] max-w-2xl mx-auto leading-relaxed">
+          The assistant helps you organise what happened, identify relevant Indian statutes, and understand possible next steps before speaking with an advocate.
+        </p>
+
+        {/* Subtle Trust Indicators */}
+        <div className="flex items-center justify-center gap-4 pt-1 text-[11px] text-[#69736D]">
+          <span className="inline-flex items-center gap-1">
             <Lock className="w-3 h-3 text-[#205C43]" />
-            <span className="text-[#202824] font-medium">Zero Identity Logging</span>
-          </div>
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white border border-[#D5E5D9] shadow-2xs">
+            <span>Private &amp; Non-identifying</span>
+          </span>
+          <span className="text-[#D5E5D9]">•</span>
+          <span className="inline-flex items-center gap-1">
             <ShieldCheck className="w-3 h-3 text-[#205C43]" />
-            <span className="text-[#202824] font-medium">BCI Sec. 36 Compliant</span>
-          </div>
+            <span>Indian Statutory Framework Grounded</span>
+          </span>
         </div>
       </div>
 

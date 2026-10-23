@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useRef, useEffect, useState, memo } from "react";
-import { Sparkles } from "lucide-react";
 import { NyayLinkLogo } from "@/components/ui/nyaylink-logo";
+import { Sparkles } from "lucide-react";
 
 interface PerimeterGlowProps {
   children: React.ReactNode;
@@ -13,13 +13,14 @@ interface PerimeterGlowProps {
 /**
  * Animated Rainbow Perimeter & Pointer-Reactive Edge Glow
  *
- * Implements the color-shifting illuminated edge treatment from the reference recordings:
- * - A continuous rotating rainbow conic spectrum (Forest Green -> Emerald -> Cyan -> Sapphire -> Violet -> Magenta -> Amber -> Green)
- * - Crisp 1.5px masked perimeter stroke without color blocking
- * - Outer soft blurred halo (24px blur) creating ambient luminosity
- * - Pointer-reactive spotlight tracking cursor position with smooth lerp damping and natural lag
- * - Pure CSS animation & variable interpolation for 60fps performance without 3D canvas overhead
- * - Full support for prefers-reduced-motion and touch devices
+ * Faithfully reproduces the iridescent perimeter edge from the reference recording (oryzo.ai):
+ * - Smooth rotating spectral conic gradient (Forest Green -> Emerald -> Cyan -> Indigo -> Violet -> Rose -> Amber -> Lime -> Forest Green)
+ * - Crisp 1.5px masked perimeter stroke hugging rounded container boundaries
+ * - Soft diffuse outer ambient halo (28px blur) casting subtle iridescent luminescence
+ * - Pointer-reactive spotlight tracking cursor position with smooth lerp damping on devices with mouse/hover
+ * - Touch-device optimization: pointer tracking is bypassed on touch screens, preserving battery & 60fps scrolling
+ * - Full support for prefers-reduced-motion (stops rotation and tracking gracefully)
+ * - Solid white interior surface ensuring 100% text legibility and contrast
  */
 export const PerimeterGlowContainer = memo(function PerimeterGlowContainer({
   children,
@@ -46,33 +47,42 @@ export const PerimeterGlowContainer = memo(function PerimeterGlowContainer({
     const container = containerRef.current;
     if (!container) return;
 
+    // Only enable pointer tracking on devices that support hover with fine pointer
+    const supportsHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (!supportsHover || prefersReducedMotion) {
+      container.style.setProperty("--pointer-intensity", "0");
+      return;
+    }
+
     let animFrame: number;
 
     const handlePointerMove = (e: PointerEvent) => {
       const rect = container.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
       const x = ((e.clientX - rect.left) / rect.width) * 100;
       const y = ((e.clientY - rect.top) / rect.height) * 100;
 
       mouseState.current.targetX = Math.max(0, Math.min(100, x));
       mouseState.current.targetY = Math.max(0, Math.min(100, y));
-      mouseState.current.targetIntensity = 1.0;
+      mouseState.current.targetIntensity = 0.95;
 
       if (idleTimer.current) clearTimeout(idleTimer.current);
       idleTimer.current = setTimeout(() => {
         // Settle back to subtle ambient intensity after 2s idle
-        mouseState.current.targetIntensity = 0.35;
-      }, 2200);
+        mouseState.current.targetIntensity = 0.3;
+      }, 2000);
     };
 
     const handlePointerEnter = () => {
       setIsHovered(true);
-      mouseState.current.targetIntensity = 0.9;
+      mouseState.current.targetIntensity = 0.85;
     };
 
     const handlePointerLeave = () => {
       setIsHovered(false);
       mouseState.current.targetIntensity = 0;
-      // Gently return pointer center
       mouseState.current.targetX = 50;
       mouseState.current.targetY = 50;
       if (idleTimer.current) clearTimeout(idleTimer.current);
@@ -80,15 +90,15 @@ export const PerimeterGlowContainer = memo(function PerimeterGlowContainer({
 
     const handleFocusIn = () => {
       setIsFocused(true);
-      mouseState.current.targetIntensity = 0.85;
+      mouseState.current.targetIntensity = 0.8;
     };
 
     const handleFocusOut = () => {
       setIsFocused(false);
-      mouseState.current.targetIntensity = isHovered ? 0.9 : 0;
+      mouseState.current.targetIntensity = isHovered ? 0.85 : 0;
     };
 
-    // RAF Loop for smooth lerp lag (12% lerp per frame = natural silky damping)
+    // 60fps RAF loop with 12% lerp for natural silky damping
     const updateGlow = () => {
       const state = mouseState.current;
       state.currentX += (state.targetX - state.currentX) * 0.12;
@@ -121,13 +131,19 @@ export const PerimeterGlowContainer = memo(function PerimeterGlowContainer({
     };
   }, [isHovered]);
 
-  // Ambient baseline opacity
-  const ambientHaloOpacity = isFocused ? 0.85 : isHovered ? 0.75 : isActive ? 0.65 : 0.48;
+  // Ambient baseline opacity - refined to remain subtle and not overpower text
+  const ambientHaloOpacity = isFocused
+    ? 0.72
+    : isHovered
+    ? 0.62
+    : isActive
+    ? 0.68
+    : 0.42;
 
   return (
     <div
       ref={containerRef}
-      className={`relative rounded-2xl group transition-all duration-500 ${className}`}
+      className={`relative rounded-2xl sm:rounded-3xl group transition-all duration-500 ${className}`}
       style={
         {
           "--pointer-x": "50%",
@@ -136,39 +152,39 @@ export const PerimeterGlowContainer = memo(function PerimeterGlowContainer({
         } as React.CSSProperties
       }
     >
-      {/* LAYER 1: Outer Rainbow Halo Glow (24px blur creates soft radiant luminescence) */}
+      {/* LAYER 1: Outer Rainbow Halo Glow (28px blur creates luminous diffuse halo around container) */}
       <div
-        className="absolute -inset-2 sm:-inset-2.5 rounded-3xl pointer-events-none z-0 blur-[24px] transition-opacity duration-700 animate-rainbow-border motion-reduce:animate-none"
+        className="absolute -inset-2 sm:-inset-2.5 rounded-3xl sm:rounded-[28px] pointer-events-none z-0 blur-[28px] transition-opacity duration-700 animate-rainbow-border motion-reduce:animate-none"
         style={{
           opacity: ambientHaloOpacity,
           background: `conic-gradient(from var(--rainbow-angle, 0deg) at 50% 50%,
             #205C43 0deg,
-            #10B981 40deg,
-            #06B6D4 90deg,
-            #3B82F6 140deg,
-            #8B5CF6 190deg,
-            #EC4899 240deg,
-            #F59E0B 290deg,
-            #10B981 330deg,
+            #10B981 35deg,
+            #06B6D4 80deg,
+            #4F46E5 130deg,
+            #8B5CF6 180deg,
+            #F43F5E 230deg,
+            #F59E0B 280deg,
+            #84CC16 325deg,
             #205C43 360deg
           )`,
         }}
         aria-hidden="true"
       />
 
-      {/* LAYER 2: Crisp Animated Rainbow Perimeter Stroke (Strict 1.5px border via mask) */}
+      {/* LAYER 2: Crisp Animated Rainbow Perimeter Stroke (Strict 1.5px border via mask exclusion) */}
       <div
-        className="absolute -inset-[1.5px] rounded-2xl pointer-events-none z-0 animate-rainbow-border motion-reduce:animate-none transition-opacity duration-500"
+        className="absolute -inset-[1.5px] rounded-2xl sm:rounded-3xl pointer-events-none z-0 animate-rainbow-border motion-reduce:animate-none transition-opacity duration-500"
         style={{
           background: `conic-gradient(from var(--rainbow-angle, 0deg) at 50% 50%,
             #205C43 0deg,
-            #10B981 40deg,
-            #06B6D4 90deg,
-            #3B82F6 140deg,
-            #8B5CF6 190deg,
-            #EC4899 240deg,
-            #F59E0B 290deg,
-            #10B981 330deg,
+            #10B981 35deg,
+            #06B6D4 80deg,
+            #4F46E5 130deg,
+            #8B5CF6 180deg,
+            #F43F5E 230deg,
+            #F59E0B 280deg,
+            #84CC16 325deg,
             #205C43 360deg
           )`,
           mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
@@ -179,16 +195,16 @@ export const PerimeterGlowContainer = memo(function PerimeterGlowContainer({
         aria-hidden="true"
       />
 
-      {/* LAYER 3: Pointer-Reactive Edge Spotlight (Brightens nearest perimeter sector) */}
+      {/* LAYER 3: Pointer-Reactive Edge Spotlight (Brightens the nearest perimeter sector) */}
       <div
-        className="absolute -inset-[1.5px] rounded-2xl pointer-events-none z-0 transition-opacity duration-200"
+        className="absolute -inset-[1.5px] rounded-2xl sm:rounded-3xl pointer-events-none z-0 transition-opacity duration-200"
         style={{
           opacity: "var(--pointer-intensity, 0)",
           background: `radial-gradient(
-            360px circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+            380px circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
             rgba(255, 255, 255, 0.95) 0%,
-            rgba(255, 255, 255, 0.4) 35%,
-            rgba(255, 255, 255, 0.1) 60%,
+            rgba(255, 255, 255, 0.45) 35%,
+            rgba(255, 255, 255, 0.12) 65%,
             transparent 85%
           )`,
           mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
@@ -202,9 +218,9 @@ export const PerimeterGlowContainer = memo(function PerimeterGlowContainer({
 
       {/* LAYER 4: Pointer-Reactive Soft Bloom Flare (Follows cursor smoothly outside edge) */}
       <div
-        className="absolute -inset-2 rounded-3xl pointer-events-none z-0 blur-[18px] transition-opacity duration-300"
+        className="absolute -inset-2 sm:-inset-2.5 rounded-3xl pointer-events-none z-0 blur-[20px] transition-opacity duration-300"
         style={{
-          opacity: "calc(var(--pointer-intensity, 0) * 0.7)",
+          opacity: "calc(var(--pointer-intensity, 0) * 0.65)",
           background: `radial-gradient(
             320px circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
             rgba(16, 185, 129, 0.5) 0%,
@@ -216,8 +232,8 @@ export const PerimeterGlowContainer = memo(function PerimeterGlowContainer({
         aria-hidden="true"
       />
 
-      {/* Solid White Interior Surface (Protects 100% readability of text and inputs) */}
-      <div className="relative z-10 w-full h-full bg-white rounded-2xl overflow-hidden shadow-sm flex flex-col">
+      {/* Solid Interior Surface (Protects 100% legibility of text and controls) */}
+      <div className="relative z-10 w-full h-full bg-[#FFFFFF] rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm flex flex-col border border-[#D5E5D9]/50">
         {children}
       </div>
     </div>
@@ -225,74 +241,32 @@ export const PerimeterGlowContainer = memo(function PerimeterGlowContainer({
 });
 
 /**
- * Interactive NyayLink Legal Compass Motif for the initial empty state.
- * Features the official Lady Justice emblem in an orbital celestial frame,
- * with subtle pointer-proximity 3D tilt.
+ * Refined Initial State Emblem & Prompt Header
+ * Displays the NyayLink Lady Justice emblem with clean editorial typography.
  */
 export const LegalCompassMotif = memo(function LegalCompassMotif() {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
-
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const card = cardRef.current;
-    if (!card) return;
-
-    const rect = card.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-
-    const dx = (e.clientX - cx) / (rect.width / 2);
-    const dy = (e.clientY - cy) / (rect.height / 2);
-
-    // Subtle restrained tilt (-4deg to +4deg)
-    setTilt({
-      x: -dy * 4,
-      y: dx * 4,
-    });
-  };
-
-  const handlePointerLeave = () => {
-    setTilt({ x: 0, y: 0 });
-  };
-
   return (
-    <div
-      ref={cardRef}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
-      className="flex flex-col items-center justify-center text-center py-2 sm:py-2.5 px-4 cursor-default select-none transition-transform duration-300 ease-out"
-      style={{
-        transform: `perspective(800px) rotateX(${tilt.x.toFixed(2)}deg) rotateY(${tilt.y.toFixed(2)}deg)`,
-      }}
-    >
-      {/* Concentric Compass Emblem with Official Lady Justice Logo */}
-      <div className="relative w-12 h-12 sm:w-16 sm:h-16 mb-1.5 sm:mb-2 flex items-center justify-center">
-        {/* Outer orbital ring */}
-        <div className="absolute inset-0 rounded-full border border-[#D5E5D9] animate-[spin_24s_linear_infinite] opacity-60" />
-
-        {/* Middle dashed compass ring */}
-        <div className="absolute inset-1.5 rounded-full border border-dashed border-[#205C43]/40 animate-[spin_18s_linear_infinite_reverse]" />
-
+    <div className="flex flex-col items-center justify-center text-center py-2 sm:py-3 px-4 select-none">
+      {/* Concentric Crest with Official Lady Justice Logo */}
+      <div className="relative w-12 h-12 sm:w-14 sm:h-14 mb-2 flex items-center justify-center">
+        {/* Subtle pulsing background disc */}
+        <div className="absolute inset-0 rounded-full bg-[#EAF3ED]/80 border border-[#D5E5D9]" />
+        {/* Orbital hairline ring */}
+        <div className="absolute -inset-1 rounded-full border border-dashed border-[#205C43]/30 animate-[spin_30s_linear_infinite]" />
         {/* Center node: Official Lady Justice Emblem */}
-        <div className="relative z-10 transition-transform hover:scale-105 duration-200">
-          <NyayLinkLogo variant="symbol" size={26} href={false} />
+        <div className="relative z-10">
+          <NyayLinkLogo variant="symbol" size={24} href={false} />
         </div>
-
-        {/* Cardinal tick dots */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#205C43]" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#205C43]" />
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#205C43]" />
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#205C43]" />
       </div>
 
-      {/* Editorial Title */}
-      <h3 className="text-lg sm:text-xl font-serif font-semibold text-[#174530] tracking-tight mb-1 flex items-center gap-1.5">
-        <span>What would you like help understanding?</span>
-        <Sparkles className="w-4 h-4 text-[#205C43]" />
+      {/* Title */}
+      <h3 className="text-base sm:text-lg font-serif font-semibold text-[#174530] tracking-tight mb-1 flex items-center gap-1.5">
+        <span>What legal situation would you like to explore?</span>
+        <Sparkles className="w-3.5 h-3.5 text-[#205C43]" />
       </h3>
 
-      <p className="text-xs text-[#69736D] max-w-md leading-relaxed">
-        Describe your legal dispute, notice, or question in plain language for statutory guidance.
+      <p className="text-xs text-[#69736D] max-w-lg leading-relaxed">
+        Describe what occurred in everyday language. The assistant will help organise key facts, identify relevant Indian statutes, and outline practical next steps.
       </p>
     </div>
   );

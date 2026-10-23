@@ -5,7 +5,7 @@
 
 - **Production Domain**: [https://nyay.live](https://nyay.live/)
 - **Repository**: [rushanadv/NyayLink](https://github.com/rushanadv/NyayLink)
-- **Tech Stack**: Next.js 15 (App Router), TypeScript, Tailwind CSS, Supabase (Auth, Postgres, RLS), Framer Motion, Lenis, OpenRouter.
+- **Tech Stack**: Next.js 15 (App Router), TypeScript, Tailwind CSS, Supabase (Auth, Postgres, RLS), Framer Motion, Lenis, Groq API.
 
 ---
 
@@ -61,7 +61,8 @@ Create a `.env.local` file with your Supabase credentials:
 NEXT_PUBLIC_SUPABASE_URL=https://<your-project-ref>.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
 SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key> # Server-side only
-OPENROUTER_API_KEY=<your-openrouter-key>
+GROQ_API_KEY=<your-groq-key>
+GROQ_MODEL=openai/gpt-oss-120b
 ```
 
 ### 3. Database Migrations
