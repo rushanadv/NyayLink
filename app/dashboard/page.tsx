@@ -5,50 +5,6 @@ import { ClientShell } from "@/components/client/client-shell";
 import { LegalMatter, ConsultationRequest, UserProfile } from "@/lib/portal/types";
 import { PublicLawyer } from "@/components/lawyers/lawyer-directory-client";
 
-// Realistic fallback demo data if seed.sql has not yet been executed on the target database
-const FALLBACK_DEMO_LAWYERS: PublicLawyer[] = [
-  {
-    id: "a1111111-1111-4111-8111-111111111111",
-    professional_name: "Adv. Rajesh Sharma",
-    bio: "Senior litigator practicing before the Supreme Court of India and Delhi High Court. Specialized in commercial disputes, criminal appeals, and fundamental rights writs.",
-    practice_areas: ["Constitutional Law", "Criminal Defense", "Civil Appeals"],
-    experience_years: 18,
-    city: "New Delhi",
-    state: "Delhi",
-    languages: ["English", "Hindi", "Punjabi"],
-  },
-  {
-    id: "a2222222-2222-4222-8222-222222222222",
-    professional_name: "Adv. Meera Sen",
-    bio: "Chambers lead focusing on cross-border arbitration, NCLT corporate insolvency proceedings, and company law before the Bombay High Court.",
-    practice_areas: ["Corporate & Commercial", "Insolvency & Bankruptcy (NCLT)", "Arbitration"],
-    experience_years: 12,
-    city: "Mumbai",
-    state: "Maharashtra",
-    languages: ["English", "Hindi", "Marathi", "Bengali"],
-  },
-  {
-    id: "a3333333-3333-4333-8333-333333333333",
-    professional_name: "Adv. Arvind Swaminathan",
-    bio: "Advising founders, product engineers, and enterprises on software patent litigation, digital copyright, and technology contract enforcement before Karnataka High Court.",
-    practice_areas: ["Technology & IP", "Cyber Crime", "Contract Disputes"],
-    experience_years: 9,
-    city: "Bengaluru",
-    state: "Karnataka",
-    languages: ["English", "Kannada", "Tamil", "Hindi"],
-  },
-  {
-    id: "a4444444-4444-4444-8444-444444444444",
-    professional_name: "Adv. K. K. Venugopalan",
-    bio: "Trial and appellate practice at Madras High Court and National Consumer Disputes Redressal Commission (NCDRC). Expert in consumer class litigation.",
-    practice_areas: ["Consumer Protection", "Civil Litigation", "Maritime Law"],
-    experience_years: 24,
-    city: "Chennai",
-    state: "Tamil Nadu",
-    languages: ["English", "Tamil", "Malayalam"],
-  },
-];
-
 function ClientDashboardSkeleton() {
   return (
     <div className="min-h-screen bg-[#FDFEFC] text-[#202824] p-6 animate-pulse">
@@ -98,6 +54,7 @@ async function ClientDashboardContent({
   const initialTab = resolvedParams.tab || "overview";
 
   // 4. Fetch real database entities under RLS in parallel
+  // Authenticated client accesses client_lawyer_directory (approved + consented pending advocates)
   const [profileRes, mattersRes, consultationsRes, directoryRes] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
     supabase
@@ -111,8 +68,8 @@ async function ClientDashboardContent({
       .eq("client_id", user.id)
       .order("created_at", { ascending: false }),
     supabase
-      .from("public_lawyer_directory")
-      .select("id, professional_name, bio, practice_areas, experience_years, city, state, languages, created_at")
+      .from("client_lawyer_directory")
+      .select("id, professional_name, bio, practice_areas, experience_years, city, state, languages, verification_status, created_at")
       .order("experience_years", { ascending: false }),
   ]);
 
@@ -122,7 +79,7 @@ async function ClientDashboardContent({
   const advocates: PublicLawyer[] =
     directoryRes.data && directoryRes.data.length > 0
       ? (directoryRes.data as PublicLawyer[])
-      : FALLBACK_DEMO_LAWYERS;
+      : [];
 
   const displayName =
     profile?.full_name ||

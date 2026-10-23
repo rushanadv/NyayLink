@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { toggleLawyerPublicationConsent } from "@/app/actions/portal";
 import {
   Briefcase,
   ShieldCheck,
@@ -14,6 +15,9 @@ import {
   FileCheck2,
   Check,
   Scale,
+  Eye,
+  EyeOff,
+  Lock,
 } from "lucide-react";
 
 
@@ -33,6 +37,7 @@ interface WizardProps {
     experience_years?: number | null;
     bio?: string | null;
     is_profile_completed?: boolean | null;
+    is_published?: boolean | null;
   } | null;
   initialVerification: {
     status?: string | null;
@@ -140,13 +145,40 @@ export function AdvocateOnboardingWizard({
   );
   const [bio, setBio] = useState(initialProfile?.bio || "");
 
-  // Step 3: Confirmation
+  // Step 3: Confirmation & Publication Consent
+  const [isPublishedConsent, setIsPublishedConsent] = useState<boolean>(
+    initialProfile?.is_published ?? true
+  );
+  const [isTogglingVisibility, setIsTogglingVisibility] = useState(false);
   const [confirmedTruthful, setConfirmedTruthful] = useState(false);
 
   // Submission & Save UI States
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saveSuccessNotice, setSaveSuccessNotice] = useState<string | null>(null);
+
+  const handleToggleVisibility = async () => {
+    setIsTogglingVisibility(true);
+    setError(null);
+    try {
+      const nextState = !isPublishedConsent;
+      const res = await toggleLawyerPublicationConsent(nextState);
+      if (res.success) {
+        setIsPublishedConsent(nextState);
+        setSaveSuccessNotice(
+          nextState
+            ? "Your profile is now discoverable to registered clients."
+            : "Your profile is now hidden from client directory discovery."
+        );
+      } else {
+        setError(res.error || "Failed to update publication visibility");
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to toggle visibility");
+    } finally {
+      setIsTogglingVisibility(false);
+    }
+  };
 
   // Auto-dismiss save notice after 3 seconds
   useEffect(() => {
@@ -297,6 +329,7 @@ export function AdvocateOnboardingWizard({
           p_languages: languages,
           p_experience_years: isNaN(Number(parsedExp)) ? 5 : parsedExp,
           p_bio: bio.trim() || null,
+          p_is_published: isPublishedConsent,
         }
       );
 
@@ -347,6 +380,51 @@ export function AdvocateOnboardingWizard({
             </p>
           </div>
 
+          {/* Client Directory Discovery Status */}
+          <div className="p-4 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[#69736D] font-bold block">
+                  CLIENT DIRECTORY DISCOVERY
+                </span>
+                <span className="text-xs font-semibold text-[#202824]">
+                  {isPublishedConsent
+                    ? "Visible to Registered Clients (Newly Joined • Pending)"
+                    : "Hidden from Client Directory"}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleToggleVisibility}
+                disabled={isTogglingVisibility}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium border flex items-center gap-1.5 transition-all ${
+                  isPublishedConsent
+                    ? "bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100"
+                    : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
+                }`}
+              >
+                {isTogglingVisibility ? (
+                  <span>Updating...</span>
+                ) : isPublishedConsent ? (
+                  <>
+                    <Eye className="w-3.5 h-3.5 text-emerald-700" />
+                    <span>Visible</span>
+                  </>
+                ) : (
+                  <>
+                    <EyeOff className="w-3.5 h-3.5 text-gray-600" />
+                    <span>Hidden</span>
+                  </>
+                )}
+              </button>
+            </div>
+            <p className="text-[11px] text-[#69736D] leading-relaxed">
+              {isPublishedConsent
+                ? "Registered NyayLink clients can discover your profile, view practice details, and send preliminary consultation requests. Phone numbers, emails, and credentials remain private."
+                : "Your profile is hidden from registered client searches. Toggle on whenever you wish to accept consultation inquiries."}
+            </p>
+          </div>
+
           <div className="p-4 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] space-y-3 text-xs text-[#404D44]">
             <div className="font-semibold font-mono text-[#202824] uppercase tracking-wide">
               Your Advocate Access Status
@@ -360,13 +438,17 @@ export function AdvocateOnboardingWizard({
                 <Check className="w-4 h-4 text-[#205C43]" />
                 <span>Legal matters & dockets ready</span>
               </div>
-              <div className="flex items-center gap-2 text-[#69736D]">
-                <Clock className="w-4 h-4 text-amber-600" />
-                <span>Public directory publication (Pending)</span>
+              <div className="flex items-center gap-2 text-[#202824]">
+                <Check className="w-4 h-4 text-[#205C43]" />
+                <span>
+                  {isPublishedConsent
+                    ? "Client discovery: Active (Pending badge)"
+                    : "Client discovery: Hidden"}
+                </span>
               </div>
               <div className="flex items-center gap-2 text-[#69736D]">
                 <Clock className="w-4 h-4 text-amber-600" />
-                <span>Verified Badge (Upon review)</span>
+                <span>BCI Verified badge (Upon official review)</span>
               </div>
             </div>
           </div>
@@ -771,6 +853,56 @@ export function AdvocateOnboardingWizard({
                 ))}
               </div>
             </div>
+          </div>
+
+          {/* Client Discovery & Directory Publication Consent (BCI Rule 36 Compliant) */}
+          <div className="p-4 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] space-y-3 text-xs">
+            <div className="flex items-center justify-between">
+              <div className="font-mono text-[#174530] font-semibold flex items-center gap-1.5">
+                <Eye className="w-3.5 h-3.5" />
+                <span>CLIENT DIRECTORY DISCOVERY & PUBLICATION</span>
+              </div>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold">
+                OPTIONAL CONSENT
+              </span>
+            </div>
+
+            <p className="text-[#404D44] leading-relaxed">
+              Allow registered NyayLink clients searching for legal counsel to discover your professional profile while Bar Council verification is in progress.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] pt-1">
+              <div className="p-2.5 rounded-lg bg-white border border-[#D5E5D9] space-y-1">
+                <span className="font-semibold text-[#202824] flex items-center gap-1">
+                  <Eye className="w-3 h-3 text-[#205C43]" />
+                  Visible to Registered Clients:
+                </span>
+                <span className="text-[#69736D] block leading-snug">
+                  Professional Name, District/City, State, Experience, Practice Areas, Languages, Bio snippet, and a distinct &apos;Newly Joined • Verification Pending&apos; badge.
+                </span>
+              </div>
+              <div className="p-2.5 rounded-lg bg-white border border-[#D5E5D9] space-y-1">
+                <span className="font-semibold text-[#202824] flex items-center gap-1">
+                  <Lock className="w-3 h-3 text-amber-700" />
+                  Kept Strictly Confidential:
+                </span>
+                <span className="text-[#69736D] block leading-snug">
+                  Direct phone numbers, emails, Bar enrollment certificates, internal notes, and reviewer records are never shared with clients or the public.
+                </span>
+              </div>
+            </div>
+
+            <label className="flex items-start gap-2.5 text-xs text-[#202824] cursor-pointer select-none pt-1">
+              <input
+                type="checkbox"
+                checked={isPublishedConsent}
+                onChange={(e) => setIsPublishedConsent(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-[#D5E5D9] text-[#205C43] focus:ring-[#205C43] shrink-0"
+              />
+              <span className="leading-snug font-medium">
+                Make my profile discoverable to registered NyayLink clients upon completing onboarding (you can update or withdraw this consent anytime in Chambers settings).
+              </span>
+            </label>
           </div>
 
           {/* BCI Regulatory Compliance Notice */}

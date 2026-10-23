@@ -265,3 +265,37 @@ export async function updateLawyerChamberProfile(formData: {
   revalidatePath("/lawyer/dashboard");
   return { success: true };
 }
+
+export async function toggleLawyerPublicationConsent(published: boolean) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { success: false, error: "Authentication required to update publication consent." };
+  }
+
+  const { data, error } = await supabase.rpc("set_advocate_publication_consent", {
+    p_published: published,
+  });
+
+  if (error) {
+    console.error("[Publication Consent RPC Error]:", error);
+    return { success: false, error: error.message };
+  }
+
+  if (data && typeof data === "object" && "success" in data && !data.success) {
+    return {
+      success: false,
+      error: (data as { error?: string }).error || "Failed to update publication consent.",
+    };
+  }
+
+  revalidatePath("/lawyer/dashboard");
+  revalidatePath("/lawyer/onboarding");
+  revalidatePath("/lawyers");
+  revalidatePath("/dashboard");
+  return { success: true, is_published: published };
+}

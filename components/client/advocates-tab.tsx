@@ -11,6 +11,7 @@ import {
   Send,
   X,
   CheckCircle2,
+  Clock,
 } from "lucide-react";
 
 interface AdvocatesTabProps {
@@ -27,6 +28,8 @@ export function AdvocatesTab({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPracticeArea, setSelectedPracticeArea] = useState<string>("All");
   const [selectedCity, setSelectedCity] = useState<string>("All");
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("All");
+  const [selectedStatus, setSelectedStatus] = useState<string>("All");
 
   // Consultation Modal State
   const [selectedLawyer, setSelectedLawyer] = useState<PublicLawyer | null>(null);
@@ -45,6 +48,9 @@ export function AdvocatesTab({
   const allCities = Array.from(
     new Set(advocates.map((l) => l.city).filter(Boolean))
   );
+  const allLanguages = Array.from(
+    new Set(advocates.flatMap((l) => l.languages || []))
+  );
 
   const filteredAdvocates = advocates.filter((lawyer) => {
     const matchesSearch =
@@ -53,6 +59,9 @@ export function AdvocatesTab({
       lawyer.bio?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       lawyer.practice_areas?.some((pa) =>
         pa.toLowerCase().includes(searchQuery.toLowerCase())
+      ) ||
+      lawyer.languages?.some((lang) =>
+        lang.toLowerCase().includes(searchQuery.toLowerCase())
       );
 
     const matchesArea =
@@ -62,7 +71,15 @@ export function AdvocatesTab({
     const matchesCity =
       selectedCity === "All" || lawyer.city === selectedCity;
 
-    return matchesSearch && matchesArea && matchesCity;
+    const matchesLanguage =
+      selectedLanguage === "All" ||
+      lawyer.languages?.includes(selectedLanguage);
+
+    const lawyerStatus = lawyer.verification_status || "approved";
+    const matchesStatus =
+      selectedStatus === "All" || lawyerStatus === selectedStatus;
+
+    return matchesSearch && matchesArea && matchesCity && matchesLanguage && matchesStatus;
   });
 
   const handleOpenConsultationModal = (lawyer: PublicLawyer) => {
@@ -166,6 +183,29 @@ export function AdvocatesTab({
               </option>
             ))}
           </select>
+
+          <select
+            value={selectedLanguage}
+            onChange={(e) => setSelectedLanguage(e.target.value)}
+            className="h-10 px-3 rounded-xl border border-[#D5E5D9] text-xs text-[#202824] bg-white focus:outline-none focus:border-[#205C43]"
+          >
+            <option value="All">All Languages</option>
+            {allLanguages.map((lang) => (
+              <option key={lang} value={lang}>
+                {lang}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            className="h-10 px-3 rounded-xl border border-[#D5E5D9] text-xs text-[#202824] bg-white focus:outline-none focus:border-[#205C43]"
+          >
+            <option value="All">All Statuses</option>
+            <option value="approved">BCI Verified Only</option>
+            <option value="pending">Newly Joined (Pending)</option>
+          </select>
         </div>
       </div>
 
@@ -174,7 +214,9 @@ export function AdvocatesTab({
         <div className="p-12 rounded-2xl bg-white border border-[#D5E5D9] text-center space-y-2">
           <p className="text-sm font-medium text-[#202824]">No advocates match your criteria</p>
           <p className="text-xs text-[#69736D]">
-            Try adjusting your search terms or clearing the selected filters.
+            {advocates.length === 0
+              ? "No advocate profiles are currently published in this registry view. As independent advocates complete onboarding and grant client discovery consent, they will appear here."
+              : "Try adjusting your search terms or clearing the selected filters to view all available practitioners."}
           </p>
         </div>
       ) : (
@@ -200,6 +242,21 @@ export function AdvocatesTab({
                   </span>
                 </div>
 
+                {/* Verification Status Badge */}
+                <div className="flex items-center gap-1.5">
+                  {advocate.verification_status === "pending" ? (
+                    <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-md bg-amber-50 text-amber-900 border border-amber-200/80 flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-amber-700" />
+                      Newly Joined • Verification Pending
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-md bg-[#EAF3ED] text-[#205C43] border border-[#D5E5D9] flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3 text-[#205C43]" />
+                      BCI Verified Advocate
+                    </span>
+                  )}
+                </div>
+
                 <p className="text-xs text-[#69736D] leading-relaxed line-clamp-3">
                   {advocate.bio || "Practicing counsel before State High Courts and District Benches."}
                 </p>
@@ -221,18 +278,31 @@ export function AdvocatesTab({
                     )}
                   </div>
                 )}
+
+                {/* Pending Verification Notice */}
+                {advocate.verification_status === "pending" && (
+                  <div className="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/60 text-[11px] text-amber-900 leading-snug space-y-0.5">
+                    <div className="font-semibold font-mono text-[10px] uppercase text-amber-950 flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-amber-700" />
+                      <span>Verification In Progress</span>
+                    </div>
+                    <p className="text-amber-800 text-[11px]">
+                      Bar Council credentials submitted. Preliminary chambers consultation inquiries are logged directly in their docket.
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="pt-3 border-t border-[#D5E5D9] flex items-center justify-between gap-2">
                 <span className="text-[11px] font-mono text-[#69736D]">
-                  Bar Council Enrolled
+                  {advocate.verification_status === "pending" ? "Credential Review" : "Bar Council Enrolled"}
                 </span>
                 <button
                   onClick={() => handleOpenConsultationModal(advocate)}
                   className="px-3.5 py-1.5 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs active:scale-[0.99]"
                 >
                   <Calendar className="w-3.5 h-3.5" />
-                  <span>Request Consult</span>
+                  <span>{advocate.verification_status === "pending" ? "Inquire with Chambers" : "Request Consult"}</span>
                 </button>
               </div>
             </div>
@@ -278,6 +348,20 @@ export function AdvocatesTab({
               </div>
             ) : (
               <form onSubmit={handleSubmitConsultation} className="space-y-4">
+                {selectedLawyer.verification_status === "pending" && (
+                  <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-950 flex items-start gap-2.5">
+                    <Clock className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                    <div className="space-y-0.5">
+                      <p className="font-semibold font-mono text-[11px] uppercase text-amber-900">
+                        Advocate Credential Notice
+                      </p>
+                      <p className="text-[11px] text-amber-800 leading-relaxed">
+                        {selectedLawyer.professional_name} is newly registered on NyayLink. Their Bar Council enrollment credentials are currently undergoing registrar review. Preliminary consultation inquiries are logged directly in their chambers inbox.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {modalError && (
                   <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-800">
                     {modalError}

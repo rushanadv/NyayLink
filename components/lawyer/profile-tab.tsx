@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { LawyerProfileData, LawyerVerificationData } from "@/lib/portal/types";
-import { updateLawyerChamberProfile } from "@/app/actions/portal";
+import {
+  updateLawyerChamberProfile,
+  toggleLawyerPublicationConsent,
+} from "@/app/actions/portal";
 import { LogoutButton } from "@/components/logout-button";
 import {
   Scale,
@@ -10,7 +13,9 @@ import {
   Clock,
   Save,
   AlertCircle,
+  Eye,
   EyeOff,
+  Lock,
 } from "lucide-react";
 
 interface ProfileTabProps {
@@ -47,8 +52,40 @@ export function ProfileTab({
     lawyerProfile?.practice_areas || ["Commercial & Corporate Arbitration"]
   );
 
+  const [isPublished, setIsPublished] = useState<boolean>(
+    lawyerProfile?.is_published ?? false
+  );
+  const [isTogglingConsent, setIsTogglingConsent] = useState(false);
+
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const handleToggleConsent = async () => {
+    setIsTogglingConsent(true);
+    setFeedback(null);
+    try {
+      const targetState = !isPublished;
+      const res = await toggleLawyerPublicationConsent(targetState);
+      if (!res.success) {
+        throw new Error(res.error || "Failed to update publication consent.");
+      }
+      setIsPublished(targetState);
+      setFeedback({
+        type: "success",
+        text: targetState
+          ? "Profile is now discoverable to registered NyayLink clients."
+          : "Profile is now hidden from the client directory.",
+      });
+      setTimeout(() => setFeedback(null), 3500);
+    } catch (err: unknown) {
+      setFeedback({
+        type: "error",
+        text: err instanceof Error ? err.message : "Failed to update directory visibility",
+      });
+    } finally {
+      setIsTogglingConsent(false);
+    }
+  };
 
   const togglePracticeArea = (area: string) => {
     if (selectedAreas.includes(area)) {
@@ -158,17 +195,122 @@ export function ProfileTab({
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-gray-50 border border-gray-200 space-y-1">
-            <span className="text-[10px] font-mono text-gray-500 uppercase">4. Directory Listing</span>
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-700">
-              <EyeOff className="w-3.5 h-3.5 text-gray-500" />
-              <span>Unpublished (Demo)</span>
+          <div
+            className={`p-3 rounded-xl border space-y-1 ${
+              isPublished
+                ? "bg-emerald-50/60 border-emerald-200/80"
+                : "bg-gray-50 border-gray-200"
+            }`}
+          >
+            <span
+              className={`text-[10px] font-mono uppercase ${
+                isPublished ? "text-emerald-900" : "text-gray-500"
+              }`}
+            >
+              4. Client Directory
+            </span>
+            <div
+              className={`flex items-center gap-1.5 text-xs font-semibold ${
+                isPublished ? "text-emerald-800" : "text-gray-700"
+              }`}
+            >
+              {isPublished ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Discoverable</span>
+                </>
+              ) : (
+                <>
+                  <EyeOff className="w-3.5 h-3.5 text-gray-500" />
+                  <span>Unpublished</span>
+                </>
+              )}
             </div>
           </div>
         </div>
 
         <div className="p-3.5 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] text-[11px] text-[#69736D] leading-relaxed">
-          <strong className="text-[#202824]">Statutory Notice:</strong> This demonstration advocate account cannot be publicly published or marked as a verified advocate until genuine Bar Council of India enrollment records are authenticated. Client intakes for this account are isolated to designated demonstration workflows.
+          <strong className="text-[#202824]">Statutory Notice (BCI Rule 36):</strong> Profiles published with advocate consent are discoverable exclusively to registered clients on NyayLink. While Bar Council verification is in progress, your card clearly displays a &apos;Newly Joined • Verification Pending&apos; badge. Upon official Bar Council verification, the &apos;BCI Verified Advocate&apos; badge is awarded. Private enrollment records and direct phone numbers remain strictly confidential.
+        </div>
+      </div>
+
+      {/* Client Directory Visibility & Publication Consent Card */}
+      <div className="p-6 rounded-2xl bg-white border border-[#D5E5D9] shadow-xs space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#D5E5D9]">
+          <div>
+            <div className="flex items-center gap-2">
+              <Eye className="w-4 h-4 text-[#205C43]" />
+              <h2 className="text-sm font-serif font-semibold text-[#202824]">
+                Client Directory Discovery & Consent
+              </h2>
+            </div>
+            <p className="text-xs text-[#69736D] mt-0.5">
+              Control whether registered NyayLink clients can discover your profile and send consultation inquiries.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleToggleConsent}
+            disabled={isTogglingConsent}
+            className={`min-h-[40px] px-4 py-2 rounded-xl text-xs font-semibold border flex items-center justify-center gap-2 transition-all shrink-0 ${
+              isPublished
+                ? "bg-[#174530] text-white border-[#174530] hover:bg-[#0E2C1E] shadow-xs"
+                : "bg-white text-[#202824] border-[#D5E5D9] hover:bg-[#F8FAF9]"
+            }`}
+          >
+            {isTogglingConsent ? (
+              <span>Updating...</span>
+            ) : isPublished ? (
+              <>
+                <Eye className="w-3.5 h-3.5" />
+                <span>Visible in Directory</span>
+              </>
+            ) : (
+              <>
+                <EyeOff className="w-3.5 h-3.5 text-gray-500" />
+                <span>Make Profile Discoverable</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div className="p-3.5 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] space-y-1.5">
+            <span className="font-mono text-[10px] text-[#69736D] uppercase block">
+              Current Directory Badging
+            </span>
+            <div className="flex items-center gap-2">
+              {verification?.status === "approved" ? (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  BCI Verified Advocate
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                  <Clock className="w-3.5 h-3.5 text-amber-600" />
+                  Newly Joined • Verification Pending
+                </span>
+              )}
+            </div>
+            <p className="text-[11px] text-[#69736D] leading-relaxed">
+              {verification?.status === "approved"
+                ? "Your Bar Council credentials are authenticated by the registrar."
+                : "Clients are clearly informed that your enrollment verification is awaiting administrative review."}
+            </p>
+          </div>
+
+          <div className="p-3.5 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] space-y-1.5">
+            <span className="font-mono text-[10px] text-[#69736D] uppercase block">
+              Privacy & Regulatory Boundaries
+            </span>
+            <div className="flex items-center gap-1.5 text-[#202824] font-medium">
+              <Lock className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+              <span>Full BCI Rule 36 Compliance</span>
+            </div>
+            <p className="text-[11px] text-[#69736D] leading-relaxed">
+              Phone numbers, email addresses, and enrollment certificate uploads remain confidential and are never shared in the client directory.
+            </p>
+          </div>
         </div>
       </div>
 

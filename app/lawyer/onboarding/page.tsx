@@ -55,6 +55,7 @@ async function LawyerOnboardingContent() {
     experience_years: lawyerRes.data?.experience_years || 5,
     bio: lawyerRes.data?.bio || "",
     is_profile_completed: lawyerRes.data?.is_profile_completed || false,
+    is_published: lawyerRes.data?.is_published || false,
   };
 
   const initialVerification = verifRes.data || null;

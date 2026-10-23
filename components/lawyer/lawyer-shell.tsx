@@ -196,12 +196,20 @@ export function LawyerShell({
           <div className="p-3.5 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] space-y-1.5">
             <div className="flex items-center justify-between text-[11px]">
               <span className="font-mono text-[#69736D] uppercase">Verification</span>
-              <span className="font-mono text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
-                Pending
+              <span
+                className={`font-mono px-1.5 py-0.5 rounded border ${
+                  verification?.status === "approved"
+                    ? "text-emerald-800 bg-emerald-50 border-emerald-200"
+                    : "text-amber-800 bg-amber-50 border-amber-200"
+                }`}
+              >
+                {verification?.status === "approved" ? "BCI Verified" : "Pending"}
               </span>
             </div>
             <p className="text-[10px] text-[#69736D] leading-tight">
-              Demonstration profile. Not listed on public registry.
+              {lawyerProfile?.is_published
+                ? "Discoverable to registered clients."
+                : "Hidden from client directory."}
             </p>
           </div>
 

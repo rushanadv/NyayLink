@@ -31,6 +31,8 @@ export interface PublicLawyer {
   state: string;
   languages: string[];
   created_at?: string;
+  verification_status?: "approved" | "pending" | "changes_requested" | "rejected" | string;
+  is_published?: boolean;
 }
 
 interface LawyerDirectoryClientProps {
@@ -63,6 +65,7 @@ export function LawyerDirectoryClient({
   const [selectedPracticeArea, setSelectedPracticeArea] = useState<string>("all");
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [sortBy, setSortBy] = useState<"exp-desc" | "exp-asc" | "name-asc">("exp-desc");
 
   // Extract all distinct filter options dynamically from data
@@ -134,6 +137,14 @@ export function LawyerDirectoryClient({
           }
         }
 
+        // 5. Verification Status filter
+        if (selectedStatus !== "all") {
+          const status = lawyer.verification_status || "approved";
+          if (status !== selectedStatus) {
+            return false;
+          }
+        }
+
         return true;
       })
       .sort((a, b) => {
@@ -154,6 +165,7 @@ export function LawyerDirectoryClient({
     selectedPracticeArea,
     selectedCity,
     selectedLanguage,
+    selectedStatus,
     sortBy,
   ]);
 
@@ -161,13 +173,15 @@ export function LawyerDirectoryClient({
     searchQuery.trim() !== "" ||
     selectedPracticeArea !== "all" ||
     selectedCity !== "all" ||
-    selectedLanguage !== "all";
+    selectedLanguage !== "all" ||
+    selectedStatus !== "all";
 
   const clearAllFilters = () => {
     setSearchQuery("");
     setSelectedPracticeArea("all");
     setSelectedCity("all");
     setSelectedLanguage("all");
+    setSelectedStatus("all");
     setSortBy("exp-desc");
   };
 
@@ -241,6 +255,30 @@ export function LawyerDirectoryClient({
             </div>
           </div>
         )}
+        {/* Unauthenticated Client Access Prompt */}
+        {!isAuthenticated && (
+          <div className="p-4 sm:p-5 rounded-2xl bg-[#EAF3ED] border border-[#D5E5D9] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs mt-4">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-white border border-[#D5E5D9] flex items-center justify-center text-[#205C43] shrink-0 mt-0.5 shadow-2xs">
+                <ShieldCheck className="w-5 h-5 text-[#205C43]" />
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-xs sm:text-sm font-semibold text-[#202824]">
+                  Registered Client Directory Access
+                </p>
+                <p className="text-xs text-[#69736D] leading-relaxed">
+                  Sign in as a client to discover newly onboarded advocates practicing before your local courts while their Bar Council verification completes.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/auth/login?intent=client&next=/lawyers"
+              className="whitespace-nowrap px-4 py-2 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white text-xs font-semibold shadow-xs transition-all shrink-0"
+            >
+              Sign In to Browse All Advocates
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Search & Filter Toolbar */}
@@ -266,8 +304,8 @@ export function LawyerDirectoryClient({
           )}
         </div>
 
-        {/* Dropdowns Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* Dropdowns Row (5 columns) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           {/* Practice Area Filter */}
           <div className="relative">
             <label className="block text-[11px] font-mono text-[#69736D] uppercase tracking-wider mb-1 font-semibold">
@@ -324,6 +362,23 @@ export function LawyerDirectoryClient({
                   {lang}
                 </option>
               ))}
+            </select>
+            <ChevronDown className="absolute right-3 top-[34px] w-3.5 h-3.5 text-[#69736D] pointer-events-none" />
+          </div>
+
+          {/* Verification Status Filter */}
+          <div className="relative">
+            <label className="block text-[11px] font-mono text-[#69736D] uppercase tracking-wider mb-1 font-semibold">
+              Verification Status
+            </label>
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="w-full h-10 px-3 pr-8 rounded-lg bg-[#F8FAF9] border border-[#D5E5D9] text-xs text-[#202824] focus:border-[#205C43] outline-none appearance-none cursor-pointer"
+            >
+              <option value="all">All Advocates</option>
+              <option value="approved">BCI Verified Only</option>
+              <option value="pending">Newly Joined (Pending)</option>
             </select>
             <ChevronDown className="absolute right-3 top-[34px] w-3.5 h-3.5 text-[#69736D] pointer-events-none" />
           </div>
@@ -459,10 +514,23 @@ export function LawyerDirectoryClient({
                           {lawyer.professional_name}
                         </h3>
                         <div className="flex items-center gap-1.5 mt-1">
-                          <span className="text-[10px] font-mono text-[#205C43] bg-[#EAF3ED] px-2 py-0.5 rounded-md border border-[#D5E5D9] flex items-center gap-1 font-semibold">
-                            <CheckCircle2 className="w-3 h-3 text-[#205C43]" />
-                            BCI Verified
-                          </span>
+                          {lawyer.verification_status === "pending" ? (
+                            <span
+                              className="text-[10px] font-mono text-amber-900 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/80 flex items-center gap-1 font-semibold"
+                              title="Bar Council credentials submitted; registrar verification in progress"
+                            >
+                              <Clock className="w-3 h-3 text-amber-700" />
+                              Newly Joined • Verification Pending
+                            </span>
+                          ) : (
+                            <span
+                              className="text-[10px] font-mono text-[#205C43] bg-[#EAF3ED] px-2 py-0.5 rounded-md border border-[#D5E5D9] flex items-center gap-1 font-semibold"
+                              title="Bar Council of India credentials authenticated"
+                            >
+                              <CheckCircle2 className="w-3 h-3 text-[#205C43]" />
+                              BCI Verified Advocate
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -511,6 +579,19 @@ export function LawyerDirectoryClient({
                       {lawyer.languages.join(", ")}
                     </span>
                   </div>
+
+                  {/* Pending Verification Notice */}
+                  {lawyer.verification_status === "pending" && (
+                    <div className="mt-3.5 p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/60 text-[11px] text-amber-900 leading-snug space-y-0.5">
+                      <div className="font-semibold font-mono text-[10px] uppercase text-amber-950 flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-amber-700" />
+                        <span>Verification Pending</span>
+                      </div>
+                      <p className="text-amber-800 text-[11px]">
+                        Profile visible to registered clients. Direct consultation booking is enabled for preliminary chambers inquiry while Bar Council verification completes.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Card Action */}
@@ -520,7 +601,11 @@ export function LawyerDirectoryClient({
                       href={consultationHref}
                       className="w-full py-2.5 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white font-semibold text-xs transition-colors shadow-xs flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#205C43] block text-center"
                     >
-                      <span>Request Consultation</span>
+                      <span>
+                        {lawyer.verification_status === "pending"
+                          ? "Preliminary Inquiry"
+                          : "Request Consultation"}
+                      </span>
                       <ArrowRight className="w-3.5 h-3.5 inline ml-1" />
                     </Link>
                   </MagneticWrapper>
