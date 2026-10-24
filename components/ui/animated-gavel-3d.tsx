@@ -93,22 +93,25 @@ export function AnimatedGavel3D({
     const cameraTarget = new THREE.Vector3(-1.3, -0.65, 0);
     camera.lookAt(cameraTarget);
 
-    // Lighting Setup
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.1);
+    // Lighting Setup: Multi-directional studio dome and directional rim highlights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
     scene.add(ambientLight);
 
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0xd5e5d9, 0.75);
+    scene.add(hemiLight);
+
     // Key Light (warm studio spotlight from top-right-front)
-    const keyLight = new THREE.DirectionalLight(0xfffbf2, 2.4);
+    const keyLight = new THREE.DirectionalLight(0xfffbf2, 2.2);
     keyLight.position.set(4.5, 7.0, 5.0);
     scene.add(keyLight);
 
     // Fill Light (soft cool mint bounce from left)
-    const fillLight = new THREE.DirectionalLight(0xe8f2ec, 1.3);
+    const fillLight = new THREE.DirectionalLight(0xe8f2ec, 1.2);
     fillLight.position.set(-5.0, 3.5, 2.0);
     scene.add(fillLight);
 
     // Back / Rim Light (crisp specular highlights on wooden contours and brass rings)
-    const rimLight = new THREE.DirectionalLight(0xffffff, 1.8);
+    const rimLight = new THREE.DirectionalLight(0xffffff, 1.6);
     rimLight.position.set(1.0, 4.0, -5.0);
     scene.add(rimLight);
 
@@ -142,22 +145,22 @@ export function AnimatedGavel3D({
     // 1. Rich Forest-Green Lacquered Wood for Gavel Head & Handle
     const woodMaterial = new THREE.MeshStandardMaterial({
       color: 0x1f543d,
-      roughness: 0.36,
-      metalness: 0.05,
+      roughness: 0.34,
+      metalness: 0.04,
     });
 
     // 2. Refined Polished Brass for Bands, Rings, and Ferrule Socket
     const brassMaterial = new THREE.MeshStandardMaterial({
-      color: 0xd4af37,
-      roughness: 0.22,
-      metalness: 0.88,
+      color: 0xd8b26e,
+      roughness: 0.18,
+      metalness: 0.90,
     });
 
     // 3. Deep Ceremonial Sound Block Material (Dark Forest Ebony)
     const blockMaterial = new THREE.MeshStandardMaterial({
-      color: 0x163f2d,
-      roughness: 0.38,
-      metalness: 0.1,
+      color: 0x17402e,
+      roughness: 0.36,
+      metalness: 0.08,
     });
 
     // 4. Concentric Shockwave Ring for Impact Visuals
@@ -263,7 +266,6 @@ export function AnimatedGavel3D({
             const progress = elapsed / CYCLE_DURATION_MS;
 
             let angleRad = 0;
-            let blockCompression = 1.0;
             let shockwaveScale = 0.2;
             let shockwaveOpacity = 0.0;
 
@@ -285,8 +287,6 @@ export function AnimatedGavel3D({
               const t = (progress - 0.53) / 0.05;
               const recoil = Math.sin(Math.PI * t) * 0.061;
               angleRad = recoil;
-              // Anvil micro-compression
-              blockCompression = 1.0 - Math.sin(Math.PI * t) * 0.035;
 
               // Expanding shockwave ring
               shockwaveScale = 0.3 + t * 1.5;
@@ -295,17 +295,16 @@ export function AnimatedGavel3D({
               // 58% - 65%: Settle to rest
               const t = (progress - 0.58) / 0.07;
               angleRad = (1 - t) * 0.01;
-              blockCompression = 0.99 + t * 0.01;
             } else {
               // 65% - 100%: Dignified rest hold on the sound block
               angleRad = 0;
-              blockCompression = 1.0;
             }
 
             pivotGroup.rotation.z = angleRad;
 
+            // Sound block remains completely stationary and grounded
             if (soundBlockMesh) {
-              soundBlockMesh.scale.set(1.0, blockCompression, 1.0);
+              soundBlockMesh.scale.set(1.0, 1.0, 1.0);
             }
 
             if (shockwaveMesh) {

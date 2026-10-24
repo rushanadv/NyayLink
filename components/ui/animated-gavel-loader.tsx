@@ -46,6 +46,10 @@ export interface AnimatedGavelLoaderProps {
    * Whether to display the subtle BNS compliance micro-badge (default: true for fullscreen)
    */
   showStatutoryBadge?: boolean;
+  /**
+   * Controlled exit flag: fades and lifts out the foreground content while keeping the solid white backdrop opaque
+   */
+  isExitingContent?: boolean;
 }
 
 export function AnimatedGavelLoader({
@@ -57,6 +61,7 @@ export function AnimatedGavelLoader({
   gavelSize,
   className = "",
   showStatutoryBadge = variant === "fullscreen",
+  isExitingContent = false,
 }: AnimatedGavelLoaderProps) {
   const { isHindi } = useLanguage();
 
@@ -188,8 +193,14 @@ export function AnimatedGavelLoader({
       {/* Subtle Circular Radial Glow behind the Gavel */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 sm:w-96 sm:h-96 rounded-full bg-gradient-to-tr from-[#EAF3ED]/80 via-[#D5E5D9]/40 to-transparent blur-3xl pointer-events-none" />
 
-      {/* Main Centered Content Container */}
-      <div className="relative z-10 flex flex-col items-center text-center space-y-6 sm:space-y-7 max-w-md mx-auto">
+      {/* Main Centered Content Container — animates out cleanly against opaque background */}
+      <div
+        className={`relative z-10 flex flex-col items-center text-center space-y-6 sm:space-y-7 max-w-md mx-auto transition-all duration-300 ease-in-out ${
+          isExitingContent
+            ? "opacity-0 -translate-y-4 scale-[0.98] pointer-events-none"
+            : "opacity-100 translate-y-0 scale-100"
+        }`}
+      >
         {/* Official NyayLink Logo & Wordmark */}
         {showLogo && (
           <div className="transform transition-transform hover:scale-102">

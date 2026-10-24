@@ -142,9 +142,9 @@ it("Provides authentic Devanagari Hindi legal workspace message", () => {
 });
 
 // --------------------------------------------------------------------------
-// TEST 5: AppSplashProvider Lifecycle, Timing & Safety
+// TEST 5: AppSplashProvider Lifecycle, Timing & Anti-Ghosting Guarantees
 // --------------------------------------------------------------------------
-console.log("\n[Test 5/6] Verifying AppSplashProvider Session & Safety Guarantees...");
+console.log("\n[Test 5/8] Verifying AppSplashProvider Session & Anti-Ghosting Safety...");
 const splashPath = path.join(__dirname, "../components/ui/app-splash-provider.tsx");
 const splashContent = fs.readFileSync(splashPath, "utf8");
 
@@ -160,12 +160,13 @@ it("Target splash duration allows 1 full strike cycle (1.4s) before smooth exit"
 
 it("Enforces hard safety timeout to guarantee user is never trapped", () => {
   assert.ok(splashContent.includes("MAX_SAFETY_TIMEOUT_MS"), "Max safety timeout constant defined");
-  assert.ok(splashContent.includes("clearTimeout(safetyTimer)"), "Cleans up safety timer");
+  assert.ok(splashContent.includes("clearTimeout(tSafety)"), "Cleans up safety timer");
 });
 
-it("Uses smooth Framer Motion AnimatePresence fade-out transition", () => {
-  assert.ok(splashContent.includes("AnimatePresence"), "Uses AnimatePresence");
-  assert.ok(splashContent.includes("opacity: 0"), "Fades out opacity on exit");
+it("Implements anti-ghosting two-phase exit: content exits against solid white backdrop before curtain opens", () => {
+  assert.ok(splashContent.includes("exiting-content"), "Includes exiting-content stage");
+  assert.ok(splashContent.includes("revealing-page"), "Includes revealing-page stage");
+  assert.ok(splashContent.includes("isExitingContent"), "Passes isExitingContent to loader");
 });
 
 // --------------------------------------------------------------------------
