@@ -35,6 +35,7 @@ import { LanguageProvider } from "@/lib/i18n/context";
 import { Locale } from "@/lib/i18n/types";
 import { CursorSpotlight } from "@/components/marketing/cursor-spotlight";
 import { FilmGrain } from "@/components/marketing/film-grain";
+import { AppSplashProvider } from "@/components/ui/app-splash-provider";
 
 export const instant = false;
 
@@ -62,7 +63,9 @@ export default async function RootLayout({
             <CursorSpotlight />
             <FilmGrain />
 
-            {children}
+            <AppSplashProvider>
+              {children}
+            </AppSplashProvider>
           </LanguageProvider>
         </ThemeProvider>
       </body>

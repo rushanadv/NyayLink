@@ -7,7 +7,7 @@ import {
   ProfileCompletionProps,
 } from "./profile-completion-experience";
 import { getAdvocateFullProfile } from "@/app/actions/advocate-profile";
-import { RefreshCw } from "lucide-react";
+import { AnimatedGavelLoader } from "@/components/ui/animated-gavel-loader";
 
 interface ProfileTabProps {
   userEmail: string;
@@ -49,12 +49,11 @@ export function ProfileTab({
 
   if (isLoading || !data) {
     return (
-      <div className="p-12 rounded-2xl bg-white border border-[#D5E5D9] text-center space-y-3">
-        <RefreshCw className="w-6 h-6 text-[#205C43] animate-spin mx-auto" />
-        <p className="text-xs text-[#69736D]">
-          Loading advocate profile and credential records...
-        </p>
-      </div>
+      <AnimatedGavelLoader
+        variant="section"
+        message="Loading advocate profile and credential records..."
+        submessage="Synchronizing Bar Council enrollment and verification status"
+      />
     );
   }
 
