@@ -14,7 +14,7 @@ import { FEATURES } from "@/lib/marketing/features-data";
 import { FeaturePreview } from "./feature-preview";
 import { CaseStatusWidget } from "./case-status-widget";
 import { MagneticWrapper } from "@/components/ui/magnetic-wrapper";
-import { ParticleText } from "@/components/effects/particle-text";
+import { HeroHeadlineReveal } from "./hero-headline-reveal";
 
 export function HeroSplit() {
   const [activeFeature, setActiveFeature] = useState<number>(0);
@@ -81,11 +81,9 @@ export function HeroSplit() {
           {/* Large Serif 2-Line Headline — Expanded Typographic Scale */}
           <div className="space-y-2">
             <h1 className="tracking-tight text-white leading-[1.04]">
-              <ParticleText
+              <HeroHeadlineReveal
                 text="Justice without intermediaries."
                 className="font-serif text-4xl sm:text-5xl lg:text-6xl xl:text-[64px] font-normal tracking-tight text-white block text-balance"
-                highlightColor="#C5A059"
-                textColor="#F5F4FA"
               />
               <span className="block text-white/75 font-sans text-xl sm:text-2xl lg:text-[26px] mt-3 font-light tracking-tight text-balance leading-snug">
                 State Bar Council–verified advocates. Milestone escrow protection. Vernacular intake.
