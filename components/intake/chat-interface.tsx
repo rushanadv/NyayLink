@@ -27,6 +27,14 @@ import { MagneticWrapper } from "@/components/ui/magnetic-wrapper";
 import { FormattedMarkdown, markdownToPlainText } from "@/components/intake/formatted-markdown";
 import { PerimeterGlowContainer, LegalCompassMotif } from "@/components/intake/perimeter-glow";
 import { NyayLinkLogo } from "@/components/ui/nyaylink-logo";
+import { useLanguage } from "@/lib/i18n/context";
+import { useSpeechRecognition } from "@/lib/intake/use-speech-recognition";
+import { useSpeechSynthesis } from "@/lib/intake/use-speech-synthesis";
+import {
+  VoiceComposerRibbon,
+  VoiceComposerMicButton,
+} from "@/components/intake/voice-composer-mic";
+import { VoicePlaybackControl } from "@/components/intake/voice-playback-control";
 
 export interface ChatMessage {
   id: string;
@@ -86,11 +94,34 @@ const SUGGESTED_INQUIRIES = [
 ];
 
 export function ChatInterface() {
+  const { isHindi } = useLanguage();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [selectedState, setSelectedState] = useState("All India (General)");
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Browser-native Voice Speech Recognition (Speech-to-Text)
+  const voiceInput = useSpeechRecognition({
+    isHindi,
+    onTranscriptUpdate: (newCombinedText) => {
+      setInput(newCombinedText);
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "auto";
+        textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 160)}px`;
+      }
+    },
+    onSessionComplete: () => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+      }
+    },
+  });
+
+  // Browser-native Voice Speech Synthesis (Text-to-Speech)
+  const voiceOutput = useSpeechSynthesis({ isHindi });
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [failedPrompt, setFailedPrompt] = useState<string | null>(null);
@@ -100,7 +131,6 @@ export function ChatInterface() {
   const abortControllerRef = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Monitor scroll position to avoid forcefully snapping user down if they deliberately scrolled up
   const handleScroll = () => {
@@ -136,17 +166,25 @@ export function ChatInterface() {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
+    voiceOutput.stop();
     setIsLoading(false);
     setMessages((prev) =>
       prev.map((msg) =>
         msg.isStreaming ? { ...msg, isStreaming: false, isInterrupted: true } : msg
       )
     );
-  }, []);
+  }, [voiceOutput]);
 
   // Send Message Handler
   const handleSendMessage = async (textToSend?: string, isRetry = false) => {
     if (isLoading) return;
+
+    // Finish any ongoing microphone recognition session cleanly
+    if (voiceInput.isListening) {
+      voiceInput.finishListening();
+    }
+    // Stop any existing speech synthesis playback
+    voiceOutput.stop();
 
     let text = "";
 
@@ -462,6 +500,8 @@ export function ChatInterface() {
   // Reset Consultation (New Chat)
   const handleResetChat = () => {
     if (isLoading) handleStopGeneration();
+    voiceOutput.stop();
+    voiceInput.cancelListening();
     setMessages([]);
     setInput("");
     setApiError(null);
@@ -651,7 +691,23 @@ export function ChatInterface() {
                 {/* Assistant Completed Actions Toolbar */}
                 {!isUser && !message.isStreaming && message.content.length > 0 && (
                   <div className="mt-4 pt-3 border-t border-[#D5E5D9] flex flex-wrap items-center justify-between gap-2 text-xs">
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {/* Free Browser Voice Read-Aloud */}
+                      <VoicePlaybackControl
+                        messageId={message.id}
+                        content={message.content}
+                        isHindi={isHindi}
+                        isSupported={voiceOutput.isSupported}
+                        playbackState={voiceOutput.playbackState}
+                        availableVoices={voiceOutput.availableVoices}
+                        selectedVoiceURI={voiceOutput.selectedVoiceURI}
+                        onPlay={voiceOutput.play}
+                        onPause={voiceOutput.pause}
+                        onResume={voiceOutput.resume}
+                        onStop={voiceOutput.stop}
+                        onSelectVoice={voiceOutput.setVoiceURI}
+                      />
+
                       {/* Copy Answer Button */}
                       <button
                         type="button"
@@ -842,6 +898,22 @@ export function ChatInterface() {
 
       {/* Multiline Modern Message Composer */}
       <div className="shrink-0 p-3 sm:p-4 border-t border-[#D5E5D9] bg-white space-y-2">
+        {/* Voice Recognition Ribbon (Privacy notice, error banner, or active recording bar) */}
+        <VoiceComposerRibbon
+          isHindi={isHindi}
+          status={voiceInput.status}
+          error={voiceInput.error}
+          speechLanguage={voiceInput.speechLanguage}
+          recordingDuration={voiceInput.recordingDuration}
+          interimPreview={voiceInput.interimPreview}
+          showPrivacyNotice={voiceInput.showPrivacyNotice}
+          onFinish={voiceInput.finishListening}
+          onCancel={voiceInput.cancelListening}
+          onToggleLanguage={voiceInput.setLanguageOverride}
+          onClearError={voiceInput.clearError}
+          onDismissPrivacy={voiceInput.dismissPrivacyNotice}
+        />
+
         <div className="relative flex items-end gap-2 p-2 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] focus-within:border-[#205C43] focus-within:ring-2 focus-within:ring-[#205C43]/15 transition-all shadow-xs">
           <textarea
             ref={textareaRef}
@@ -849,37 +921,53 @@ export function ChatInterface() {
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder="Type your legal situation or question in plain language (Shift+Enter for newline)..."
+            placeholder={
+              isHindi
+                ? "अपनी कानूनी स्थिति या प्रश्न लिखें या माइक से बोलें (Shift+Enter से नई पंक्ति)..."
+                : "Type your legal situation or question in plain language or use mic to dictate (Shift+Enter for newline)..."
+            }
             disabled={isLoading}
             className="flex-1 bg-transparent text-xs sm:text-sm text-[#202824] placeholder-[#69736D]/60 resize-none outline-none max-h-40 py-1.5 px-2.5 leading-relaxed"
           />
 
-          {/* Action Button: Send or Stop Generating */}
-          {isLoading ? (
-            <button
-              type="button"
-              onClick={handleStopGeneration}
-              className="px-3 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-medium text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs shrink-0"
-              title="Stop generating response"
-            >
-              <Square className="w-3.5 h-3.5 fill-current" />
-              <span className="hidden sm:inline">Stop</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => handleSendMessage()}
-              disabled={!input.trim()}
-              className={`p-2.5 rounded-lg font-semibold transition-all shrink-0 ${
-                input.trim()
-                  ? "bg-[#205C43] text-white hover:bg-[#174530] shadow-xs cursor-pointer active:scale-95"
-                  : "bg-[#D5E5D9]/40 text-[#69736D]/30 cursor-not-allowed"
-              }`}
-              aria-label="Send inquiry"
-            >
-              <Send className="w-4 h-4" />
-            </button>
-          )}
+          {/* Action Buttons: Voice Mic Button, Send, or Stop Generating */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {/* Integrated Accessible Microphone Button */}
+            <VoiceComposerMicButton
+              isHindi={isHindi}
+              isSupported={voiceInput.isSupported}
+              status={voiceInput.status}
+              disabled={isLoading}
+              onStart={() => voiceInput.startListening(input)}
+              onFinish={voiceInput.finishListening}
+            />
+
+            {isLoading ? (
+              <button
+                type="button"
+                onClick={handleStopGeneration}
+                className="px-3 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-medium text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs shrink-0"
+                title="Stop generating response"
+              >
+                <Square className="w-3.5 h-3.5 fill-current" />
+                <span className="hidden sm:inline">Stop</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => handleSendMessage()}
+                disabled={!input.trim()}
+                className={`p-2.5 rounded-lg font-semibold transition-all shrink-0 ${
+                  input.trim()
+                    ? "bg-[#205C43] text-white hover:bg-[#174530] shadow-xs cursor-pointer active:scale-95"
+                    : "bg-[#D5E5D9]/40 text-[#69736D]/30 cursor-not-allowed"
+                }`}
+                aria-label="Send inquiry"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Persistent, Non-Intrusive Legal Disclaimer Bar */}
@@ -887,7 +975,9 @@ export function ChatInterface() {
           <p className="flex items-center gap-1.5 text-[#69736D]">
             <Shield className="w-3.5 h-3.5 text-[#205C43] shrink-0" />
             <span>
-              General legal orientation under Indian statutes; not formal legal advice. For actionable court representation, consult an advocate.
+              {isHindi
+                ? "भारतीय कानूनों के अंतर्गत सामान्य कानूनी मार्गदर्शन; औपचारिक वकालत सलाह नहीं। न्यायालयीन कार्य के लिए अधिवक्ता से संपर्क करें।"
+                : "General legal orientation under Indian statutes; not formal legal advice. For actionable court representation, consult an advocate."}
             </span>
           </p>
         </div>
