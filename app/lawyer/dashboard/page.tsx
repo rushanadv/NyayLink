@@ -92,8 +92,8 @@ async function LawyerDashboardContent({
   const lawyerProfile = (profileRes.data as LawyerProfileData | null) || null;
   const verification = (verifRes.data as LawyerVerificationData | null) || null;
 
-  // If the advocate has not completed their onboarding profile, redirect to onboarding wizard
-  if (!lawyerProfile || !lawyerProfile.is_profile_completed) {
+  // Only redirect to onboarding if no lawyer profile record exists at all
+  if (!lawyerProfile) {
     redirect("/lawyer/onboarding");
   }
 

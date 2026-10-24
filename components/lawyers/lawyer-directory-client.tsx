@@ -30,6 +30,9 @@ export interface PublicLawyer {
   city: string;
   state: string;
   languages: string[];
+  courts_of_practice?: string[];
+  consultation_modes?: string[];
+  consultation_fee?: number | null;
   created_at?: string;
   verification_status?: "approved" | "pending" | "changes_requested" | "rejected" | string;
   is_published?: boolean;
@@ -110,8 +113,11 @@ export function LawyerDirectoryClient({
           const langMatch = lawyer.languages.some((lang) =>
             lang.toLowerCase().includes(q)
           );
+          const courtsMatch = lawyer.courts_of_practice?.some((c) =>
+            c.toLowerCase().includes(q)
+          ) ?? false;
 
-          if (!nameMatch && !bioMatch && !cityMatch && !stateMatch && !paMatch && !langMatch) {
+          if (!nameMatch && !bioMatch && !cityMatch && !stateMatch && !paMatch && !langMatch && !courtsMatch) {
             return false;
           }
         }
@@ -506,13 +512,18 @@ export function LawyerDirectoryClient({
                   {/* Card Header */}
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-3.5">
-                      <div className="w-12 h-12 rounded-full bg-[#EAF3ED] flex items-center justify-center font-serif text-sm font-semibold text-[#205C43] border border-[#D5E5D9] shrink-0 shadow-2xs">
+                      <Link
+                        href={`/lawyers/${lawyer.id}`}
+                        className="w-12 h-12 rounded-full bg-[#EAF3ED] hover:bg-[#D5E5D9] flex items-center justify-center font-serif text-sm font-semibold text-[#205C43] border border-[#D5E5D9] shrink-0 shadow-2xs transition-colors"
+                      >
                         {initials}
-                      </div>
+                      </Link>
                       <div>
-                        <h3 className="font-semibold text-[#202824] text-base group-hover:text-[#205C43] transition-colors leading-tight">
-                          {lawyer.professional_name}
-                        </h3>
+                        <Link href={`/lawyers/${lawyer.id}`} className="block">
+                          <h3 className="font-semibold text-[#202824] text-base group-hover:text-[#205C43] transition-colors leading-tight">
+                            {lawyer.professional_name}
+                          </h3>
+                        </Link>
                         <div className="flex items-center gap-1.5 mt-1">
                           {lawyer.verification_status === "pending" ? (
                             <span
@@ -548,9 +559,17 @@ export function LawyerDirectoryClient({
                     </div>
                   </div>
 
+                  {/* Courts of practice if available */}
+                  {lawyer.courts_of_practice && lawyer.courts_of_practice.length > 0 && (
+                    <div className="mt-3 flex items-center gap-1.5 text-[11px] text-[#4A544F]">
+                      <Scale className="w-3.5 h-3.5 text-[#205C43] shrink-0" />
+                      <span className="truncate">{lawyer.courts_of_practice.slice(0, 2).join(" • ")}</span>
+                    </div>
+                  )}
+
                   {/* Bio */}
                   {lawyer.bio && (
-                    <p className="text-xs text-[#69736D] leading-relaxed line-clamp-3 mt-3.5">
+                    <p className="text-xs text-[#69736D] leading-relaxed line-clamp-3 mt-3">
                       {lawyer.bio}
                     </p>
                   )}
@@ -594,19 +613,25 @@ export function LawyerDirectoryClient({
                   )}
                 </div>
 
-                {/* Card Action */}
-                <div className="pt-5 mt-5 border-t border-[#D5E5D9]">
-                  <MagneticWrapper className="w-full" maxDisplacement={6}>
+                {/* Card Actions */}
+                <div className="pt-5 mt-5 border-t border-[#D5E5D9] grid grid-cols-2 gap-2">
+                  <Link
+                    href={`/lawyers/${lawyer.id}`}
+                    className="py-2.5 px-3 rounded-xl bg-white hover:bg-[#EAF3ED] text-[#205C43] border border-[#D5E5D9] font-semibold text-xs transition-colors shadow-2xs flex items-center justify-center text-center"
+                  >
+                    View Profile
+                  </Link>
+                  <MagneticWrapper className="w-full" maxDisplacement={4}>
                     <Link
-                      href={consultationHref}
-                      className="w-full py-2.5 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white font-semibold text-xs transition-colors shadow-xs flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#205C43] block text-center"
+                      href={`/lawyers/${lawyer.id}#consultation`}
+                      className="w-full py-2.5 px-3 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white font-semibold text-xs transition-colors shadow-xs flex items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#205C43] block text-center"
                     >
                       <span>
                         {lawyer.verification_status === "pending"
-                          ? "Preliminary Inquiry"
-                          : "Request Consultation"}
+                          ? "Preliminary"
+                          : "Consultation"}
                       </span>
-                      <ArrowRight className="w-3.5 h-3.5 inline ml-1" />
+                      <ArrowRight className="w-3.5 h-3.5 inline ml-0.5" />
                     </Link>
                   </MagneticWrapper>
                 </div>

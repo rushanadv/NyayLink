@@ -1,7 +1,8 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { AdvocateOnboardingWizard } from "@/components/lawyer/onboarding-wizard";
+import { ProfileCompletionExperience } from "@/components/lawyer/profile-completion-experience";
+import { getAdvocateFullProfile } from "@/app/actions/advocate-profile";
 import { ShieldCheck } from "lucide-react";
 import { NyayLinkLogo } from "@/components/ui/nyaylink-logo";
 
@@ -35,37 +36,12 @@ async function LawyerOnboardingContent() {
   // Ensure user has lawyer role assigned via secure RPC
   await supabase.rpc("claim_lawyer_onboarding_role");
 
-  // Fetch existing draft profile and verification status
-  const [profileRes, lawyerRes, verifRes] = await Promise.all([
-    supabase.from("profiles").select("full_name, phone").eq("id", user.id).maybeSingle(),
-    supabase.from("lawyer_profiles").select("*").eq("id", user.id).maybeSingle(),
-    supabase.from("lawyer_verifications").select("status, submitted_at").eq("lawyer_id", user.id).maybeSingle(),
-  ]);
-
-  const initialProfile = {
-    professional_name: lawyerRes.data?.professional_name || profileRes.data?.full_name || "",
-    phone: lawyerRes.data?.phone || profileRes.data?.phone || "",
-    bar_council_number: lawyerRes.data?.bar_council_number || "",
-    bar_council_state: lawyerRes.data?.bar_council_state || "Bar Council of Delhi",
-    bar_council_enrollment_year: lawyerRes.data?.bar_council_enrollment_year || null,
-    city: lawyerRes.data?.city || "",
-    state: lawyerRes.data?.state || "",
-    practice_areas: lawyerRes.data?.practice_areas || ["Civil Litigation", "Criminal Law"],
-    languages: lawyerRes.data?.languages || ["English", "Hindi"],
-    experience_years: lawyerRes.data?.experience_years || 5,
-    bio: lawyerRes.data?.bio || "",
-    is_profile_completed: lawyerRes.data?.is_profile_completed || false,
-    is_published: lawyerRes.data?.is_published || false,
-  };
-
-  const initialVerification = verifRes.data || null;
+  const fullProfile = await getAdvocateFullProfile();
 
   return (
-    <AdvocateOnboardingWizard
-      userId={user.id}
-      userEmail={user.email || ""}
-      initialProfile={initialProfile}
-      initialVerification={initialVerification}
+    <ProfileCompletionExperience
+      initialData={fullProfile}
+      onCompleteRedirect="/lawyer/dashboard"
     />
   );
 }

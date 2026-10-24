@@ -56,7 +56,7 @@ async function LawyersDirectoryContent() {
     const { data: dbLawyers, error } = await supabase
       .from(targetTable)
       .select(
-        "id, professional_name, bio, practice_areas, experience_years, city, state, languages, verification_status, created_at"
+        "id, professional_name, bio, practice_areas, experience_years, city, state, languages, courts_of_practice, consultation_modes, consultation_fee, verification_status, created_at"
       )
       .order("experience_years", { ascending: false });
 
