@@ -275,6 +275,38 @@ it("AnimatedGavelLoader integrates AnimatedGavel3D with renderMode support", () 
   assert.ok(loaderContent.includes("renderMode"), "AnimatedGavelLoader supports renderMode prop");
 });
 
+// --------------------------------------------------------------------------
+// TEST 9: STL Preloader, Single Model Guarantee & 3-4s Duration Calibration
+// --------------------------------------------------------------------------
+console.log("\n[Test 9/9] Verifying STL Preloader, Single Model Guarantee & 3-4s Lifecycle...");
+
+it("lib/3d/gavel-preloader.ts implements modular geometry preloading and caching", () => {
+  const preloaderPath = path.join(__dirname, "../lib/3d/gavel-preloader.ts");
+  assert.ok(fs.existsSync(preloaderPath), "gavel-preloader.ts must exist");
+  const preloaderContent = fs.readFileSync(preloaderPath, "utf8");
+  assert.ok(preloaderContent.includes("preloadGavelGeometries"), "Exports preloadGavelGeometries");
+  assert.ok(preloaderContent.includes("cachedGeometries"), "Maintains in-memory geometry cache");
+});
+
+it("AnimatedGavel3D contains NO competing 2D animated gavel or spinner placeholders", () => {
+  assert.ok(!threeGavelContent.includes("<AnimatedGavel"), "Must NOT render AnimatedGavel placeholder inside 3D component");
+  assert.ok(threeGavelContent.includes("preloadGavelGeometries"), "Uses preloaded STL geometries");
+});
+
+it("AppSplashProvider calibrates 3D strike duration to ~2.8s for ~3.5s total branded experience", () => {
+  assert.ok(splashContent.includes("ACTIVE_STRIKE_DURATION_MS = 2800"), "Active strike duration set to 2800ms");
+  assert.ok(splashContent.includes("handleModelReady"), "Synchronizes timer with 3D model readiness");
+  assert.ok(splashContent.includes("onModelReady"), "Passes onModelReady to loader");
+});
+
+it("RootLayout and globals.css prevent initial homepage flash and repeat white flash", () => {
+  assert.ok(layoutContent.includes("nyaylink_splash_seen"), "Root layout checks splash seen cookie");
+  assert.ok(layoutContent.includes("splash-already-seen"), "Root layout includes synchronous suppression script");
+  const cssPath = path.join(__dirname, "../app/globals.css");
+  const cssContent = fs.readFileSync(cssPath, "utf8");
+  assert.ok(cssContent.includes("html.splash-already-seen #nyaylink-splash-curtain"), "globals.css suppresses curtain for returning visitors");
+});
+
 console.log("\n======================================================================");
 console.log(`TEST SUITE RESULTS: ${passed} PASSED, ${failed} FAILED`);
 console.log("======================================================================");

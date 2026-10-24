@@ -19,7 +19,7 @@ export interface AnimatedGavelLoaderProps {
    * Rendering engine:
    * - "auto": Uses 3D Three.js STL meshes for fullscreen & section, with automatic vector fallback
    * - "3d": Explicitly uses 3D Three.js STL assets
-   * - "vector": Uses lightweight 2D vector SVG animation
+   * - "vector": Uses lightweight 2D vector SVG animation (used for previews / explicit low-power mode)
    */
   renderMode?: "auto" | "3d" | "vector";
   /**
@@ -50,6 +50,10 @@ export interface AnimatedGavelLoaderProps {
    * Controlled exit flag: fades and lifts out the foreground content while keeping the solid white backdrop opaque
    */
   isExitingContent?: boolean;
+  /**
+   * Optional callback when the 3D model is loaded, assembled, and rendered
+   */
+  onModelReady?: () => void;
 }
 
 export function AnimatedGavelLoader({
@@ -62,6 +66,7 @@ export function AnimatedGavelLoader({
   className = "",
   showStatutoryBadge = variant === "fullscreen",
   isExitingContent = false,
+  onModelReady,
 }: AnimatedGavelLoaderProps) {
   const { isHindi } = useLanguage();
 
@@ -135,6 +140,7 @@ export function AnimatedGavelLoader({
               width={220}
               height={150}
               ariaLabel={activeMessage}
+              onLoaded={onModelReady}
             />
           )}
         </div>
@@ -214,8 +220,8 @@ export function AnimatedGavelLoader({
           </div>
         )}
 
-        {/* Central 3D / Vector Gavel Animation */}
-        <div className="relative py-2 sm:py-3 flex items-center justify-center">
+        {/* Central 3D / Vector Gavel Animation (sole animated gavel throughout experience) */}
+        <div className="relative py-2 sm:py-3 flex items-center justify-center min-h-[195px]">
           <div className="absolute -inset-4 bg-gradient-to-b from-white/40 via-[#EAF3ED]/50 to-transparent rounded-full blur-lg pointer-events-none" />
           {renderMode === "vector" ? (
             <AnimatedGavel
@@ -228,6 +234,7 @@ export function AnimatedGavelLoader({
               width={280}
               height={195}
               ariaLabel={activeMessage}
+              onLoaded={onModelReady}
             />
           )}
         </div>

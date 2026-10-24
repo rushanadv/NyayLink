@@ -47,9 +47,18 @@ export default async function RootLayout({
   const cookieStore = await cookies();
   const rawLocale = cookieStore.get("nyaylink_locale")?.value;
   const initialLocale: Locale = rawLocale === "hi" ? "hi" : "en";
+  const hasSeenSplash = cookieStore.get("nyaylink_splash_seen")?.value === "true";
 
   return (
     <html lang={initialLocale} suppressHydrationWarning>
+      <head>
+        {/* Synchronously prevent white flash on reload/navigation for sessions that have already completed splash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(sessionStorage.getItem('nyaylink_initial_splash_shown')||document.cookie.indexOf('nyaylink_splash_seen=true')!==-1){document.documentElement.classList.add('splash-already-seen');}}catch(e){}`,
+          }}
+        />
+      </head>
       <body className={`${geistSans.className} antialiased bg-[#090B10] text-[#F5F4FA]`}>
         <ThemeProvider
           attribute="class"
@@ -63,7 +72,7 @@ export default async function RootLayout({
             <CursorSpotlight />
             <FilmGrain />
 
-            <AppSplashProvider>
+            <AppSplashProvider initialSplashSeen={hasSeenSplash}>
               {children}
             </AppSplashProvider>
           </LanguageProvider>

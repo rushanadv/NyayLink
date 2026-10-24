@@ -199,3 +199,8 @@ body.modal-open {
   }
 }
 
+/* Immediate suppression for returning visitors to eliminate white flash */
+html.splash-already-seen #nyaylink-splash-curtain {
+  display: none !important;
+}
+

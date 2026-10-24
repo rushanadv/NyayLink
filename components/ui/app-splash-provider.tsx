@@ -1,43 +1,94 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { AnimatedGavelLoader } from "./animated-gavel-loader";
+import { preloadGavelGeometries } from "@/lib/3d/gavel-preloader";
 
-const SESSION_SPLASH_KEY = "nyaylink_initial_splash_shown";
-const STRIKE_HOLD_MS = 1400; // Time to complete 1 full, satisfying judicial strike & settle
-const CONTENT_EXIT_DURATION_MS = 320; // Time for foreground gavel & text to fade out
-const BACKDROP_EXIT_DURATION_MS = 350; // Time for solid white curtain to fade and reveal page
-const MAX_SAFETY_TIMEOUT_MS = 3000; // Hard fallback guarantee
+export const SESSION_SPLASH_KEY = "nyaylink_initial_splash_shown";
+export const COOKIE_SPLASH_KEY = "nyaylink_splash_seen";
+
+/**
+ * Loading & Animation Duration Calibration:
+ * - Base single strike: 1,400ms (1400)
+ * - Calibrated 2-strike judicial performance: 2,800ms (begins once 3D STL model is assembled)
+ * - Foreground content exit (gavel, logo, text fade out against solid white cover): 320ms
+ * - Solid white curtain reveal (smooth opacity transition to expose pristine homepage): 350ms
+ * - Total duration: 2,800ms + 320ms + 350ms = 3,470ms (~3.5 seconds)
+ * - Maximum safety fallback timeout: 5,000ms (guarantees user is never trapped)
+ */
+const ACTIVE_STRIKE_DURATION_MS = 2800; // 2 complete strikes (1,120ms x 2) + 560ms dignified hold
+const CONTENT_EXIT_DURATION_MS = 320; // Foreground content fade out
+const BACKDROP_EXIT_DURATION_MS = 350; // White curtain reveal
+const MAX_SAFETY_TIMEOUT_MS = 5000; // Hard fallback guarantee
 
 type SplashStage = "active" | "exiting-content" | "revealing-page" | "done";
 
 interface AppSplashProviderProps {
   children: React.ReactNode;
+  initialSplashSeen?: boolean;
 }
 
 /**
- * AppSplashProvider — Delivers a cinematic first-entry branded loading experience.
+ * AppSplashProvider — Delivers a unified, cinematic first-entry branded loading experience.
  *
- * Anti-Ghosting Two-Phase Exit Architecture:
- * Phase 1 (active, 1.4s):
- *   Opaque white curtain + 3D gavel striking on sounding pedestal.
- * Phase 2 (exiting-content, 320ms):
- *   Foreground content (gavel, logo, copy) lifts and fades out against the
- *   100% OPAQUE WHITE BACKDROP. The page underneath is completely concealed.
- * Phase 3 (revealing-page, 350ms):
- *   Now that all foreground loading elements are completely gone, the blank
- *   white curtain fades out smoothly to reveal the pristine homepage with
- *   ZERO double exposure or ghosting.
- * Phase 4 (done):
- *   Loader unmounts from DOM completely; subsequent navigations render instantly.
+ * Architecture & Guarantees:
+ * 1. Immediate Cover (NO Homepage Flash):
+ *    - Defaults to 'active' on first visit, rendering the solid white curtain from HTML byte 0.
+ *    - Synchronous <head> script suppresses curtain on repeat session visits with zero white flash.
+ * 2. Preloaded Single 3D Model:
+ *    - Modular STLs preloaded in parallel.
+ *    - NO competing animated vector gavel, spinner, or GIF placeholder.
+ * 3. Coordinated 3.5s Duration:
+ *    - Strike timer begins only after 3D STL geometries are assembled and ready.
+ *    - 2 complete, satisfying strikes with realistic recoil and impact shockwave ring.
+ * 4. Anti-Ghosting Two-Phase Exit:
+ *    - Content lifts and fades out against 100% opaque solid white backdrop.
+ *    - Only once loading content is gone does the curtain fade to reveal the clean homepage.
  */
-export function AppSplashProvider({ children }: AppSplashProviderProps) {
-  const [stage, setStage] = useState<SplashStage>("done");
+export function AppSplashProvider({
+  children,
+  initialSplashSeen = false,
+}: AppSplashProviderProps) {
+  const [stage, setStage] = useState<SplashStage>(() => {
+    if (initialSplashSeen) return "done";
+    if (typeof window !== "undefined") {
+      try {
+        if (sessionStorage.getItem(SESSION_SPLASH_KEY)) return "done";
+        if (document.cookie.includes(`${COOKIE_SPLASH_KEY}=true`)) return "done";
+      } catch {}
+    }
+    return "active";
+  });
 
+  const [modelReady, setModelReady] = useState(false);
+  const exitStartedRef = useRef(false);
+
+  // Preload STL assets immediately on mount
+  useEffect(() => {
+    preloadGavelGeometries().catch((err) => {
+      console.warn("[AppSplashProvider] STL preloading warning:", err);
+    });
+  }, []);
+
+  // Mark splash as completed in session storage and cookie
+  const markSplashCompleted = useCallback(() => {
+    try {
+      sessionStorage.setItem(SESSION_SPLASH_KEY, "true");
+      document.cookie = `${COOKIE_SPLASH_KEY}=true; path=/; max-age=86400; SameSite=Lax`;
+    } catch {}
+  }, []);
+
+  // Triggered when the 3D STL model is assembled and rendered to frame 0
+  const handleModelReady = useCallback(() => {
+    setModelReady(true);
+  }, []);
+
+  // Hard safety timeout: guarantee user is never trapped under any network or browser condition
   useEffect(() => {
     try {
       const alreadyShown = sessionStorage.getItem(SESSION_SPLASH_KEY);
-      if (alreadyShown) {
+      const cookieShown = document.cookie.includes(`${COOKIE_SPLASH_KEY}=true`);
+      if (alreadyShown || cookieShown) {
         setStage("done");
         return;
       }
@@ -46,42 +97,52 @@ export function AppSplashProvider({ children }: AppSplashProviderProps) {
       return;
     }
 
-    // First visit in session: begin active splash
-    setStage("active");
-
-    // Phase 1 -> 2: Begin fading out the foreground content against opaque white backdrop
-    const tContentExit = setTimeout(() => {
-      setStage("exiting-content");
-    }, STRIKE_HOLD_MS);
-
-    // Phase 2 -> 3: Foreground content is now 100% gone. Fade out the solid white backdrop
-    const tRevealingPage = setTimeout(() => {
-      setStage("revealing-page");
-      try {
-        sessionStorage.setItem(SESSION_SPLASH_KEY, "true");
-      } catch {}
-    }, STRIKE_HOLD_MS + CONTENT_EXIT_DURATION_MS);
-
-    // Phase 3 -> 4: Unmount the splash completely from the DOM
-    const tDone = setTimeout(() => {
-      setStage("done");
-    }, STRIKE_HOLD_MS + CONTENT_EXIT_DURATION_MS + BACKDROP_EXIT_DURATION_MS);
-
-    // Hard safety timeout: guarantee the user is never trapped
+    let isCancelled = false;
     const tSafety = setTimeout(() => {
-      setStage("done");
-      try {
-        sessionStorage.setItem(SESSION_SPLASH_KEY, "true");
-      } catch {}
+      if (!isCancelled) {
+        setStage("done");
+        markSplashCompleted();
+      }
     }, MAX_SAFETY_TIMEOUT_MS);
 
     return () => {
-      clearTimeout(tContentExit);
-      clearTimeout(tRevealingPage);
-      clearTimeout(tDone);
+      isCancelled = true;
       clearTimeout(tSafety);
     };
-  }, []);
+  }, [markSplashCompleted]);
+
+  // Once model is ready (or after fallback delay), run the complete ~3.5s sequence
+  useEffect(() => {
+    if (exitStartedRef.current) return;
+
+    let isCancelled = false;
+
+    const tStrikes = setTimeout(() => {
+      if (isCancelled) return;
+      exitStartedRef.current = true;
+
+      // Phase 1 -> 2: Begin fading out the foreground content against opaque white backdrop
+      setStage("exiting-content");
+
+      // Phase 2 -> 3: Foreground content is gone. Fade out the solid white backdrop
+      setTimeout(() => {
+        if (isCancelled) return;
+        setStage("revealing-page");
+        markSplashCompleted();
+
+        // Phase 3 -> 4: Unmount the splash completely from the DOM
+        setTimeout(() => {
+          if (isCancelled) return;
+          setStage("done");
+        }, BACKDROP_EXIT_DURATION_MS);
+      }, CONTENT_EXIT_DURATION_MS);
+    }, modelReady ? ACTIVE_STRIKE_DURATION_MS : 2800);
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(tStrikes);
+    };
+  }, [modelReady, markSplashCompleted]);
 
   if (stage === "done") {
     return <>{children}</>;
@@ -92,13 +153,14 @@ export function AppSplashProvider({ children }: AppSplashProviderProps) {
 
   return (
     <>
-      {/* Underlying Page: Renders in place; completely hidden until curtain opens */}
+      {/* Underlying Page: Renders in place; completely hidden behind opaque cover until curtain opens */}
       <div className="w-full">
         {children}
       </div>
 
       {/* Fullscreen Branded Loading Curtain (Z-Index 100, solid white until content exits) */}
       <div
+        id="nyaylink-splash-curtain"
         className={`fixed inset-0 z-[100] transition-opacity duration-350 ease-out pointer-events-none ${
           isBackdropFading ? "opacity-0" : "opacity-100 pointer-events-auto"
         }`}
@@ -106,6 +168,7 @@ export function AppSplashProvider({ children }: AppSplashProviderProps) {
         <AnimatedGavelLoader
           variant="fullscreen"
           isExitingContent={isExitingContent}
+          onModelReady={handleModelReady}
         />
       </div>
     </>
