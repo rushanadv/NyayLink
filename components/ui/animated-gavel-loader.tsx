@@ -2,6 +2,7 @@
 
 import React from "react";
 import { AnimatedGavel } from "./animated-gavel";
+import { AnimatedGavel3D } from "./animated-gavel-3d";
 import { NyayLinkLogo } from "./nyaylink-logo";
 import { useLanguage } from "@/lib/i18n/context";
 import { Scale } from "lucide-react";
@@ -14,6 +15,13 @@ export interface AnimatedGavelLoaderProps {
    * - "inline": Compact horizontal/vertical badge for lightweight operations
    */
   variant?: "fullscreen" | "section" | "inline";
+  /**
+   * Rendering engine:
+   * - "auto": Uses 3D Three.js STL meshes for fullscreen & section, with automatic vector fallback
+   * - "3d": Explicitly uses 3D Three.js STL assets
+   * - "vector": Uses lightweight 2D vector SVG animation
+   */
+  renderMode?: "auto" | "3d" | "vector";
   /**
    * Optional custom primary loading message (defaults to bilingual legal workspace message)
    */
@@ -42,6 +50,7 @@ export interface AnimatedGavelLoaderProps {
 
 export function AnimatedGavelLoader({
   variant = "fullscreen",
+  renderMode = "auto",
   message,
   submessage,
   showLogo = variant === "fullscreen",
@@ -106,15 +115,23 @@ export function AnimatedGavelLoader({
         aria-live="polite"
         className={`w-full p-8 sm:p-12 min-h-[280px] rounded-2xl bg-gradient-to-b from-white via-[#FAFDFB] to-[#F2F7F4] border border-[#D5E5D9] shadow-sm flex flex-col items-center justify-center text-center space-y-4 select-none ${className}`}
       >
-        {/* Animated Vector Gavel */}
-        <div className="relative py-2">
+        {/* Animated Gavel Presentation */}
+        <div className="relative py-2 flex items-center justify-center">
           {/* Subtle Ambient Glow */}
           <div className="absolute inset-0 bg-[#EAF3ED] rounded-full blur-xl opacity-60 scale-125 pointer-events-none" />
-          <AnimatedGavel
-            size={resolvedGavelSize}
-            showPedestal={true}
-            ariaLabel={activeMessage}
-          />
+          {renderMode === "vector" ? (
+            <AnimatedGavel
+              size={resolvedGavelSize}
+              showPedestal={true}
+              ariaLabel={activeMessage}
+            />
+          ) : (
+            <AnimatedGavel3D
+              width={220}
+              height={150}
+              ariaLabel={activeMessage}
+            />
+          )}
         </div>
 
         {/* Messaging */}
@@ -186,14 +203,22 @@ export function AnimatedGavelLoader({
           </div>
         )}
 
-        {/* Central Vector Gavel Animation */}
-        <div className="relative py-3 sm:py-4">
+        {/* Central 3D / Vector Gavel Animation */}
+        <div className="relative py-2 sm:py-3 flex items-center justify-center">
           <div className="absolute -inset-4 bg-gradient-to-b from-white/40 via-[#EAF3ED]/50 to-transparent rounded-full blur-lg pointer-events-none" />
-          <AnimatedGavel
-            size={resolvedGavelSize}
-            showPedestal={true}
-            ariaLabel={activeMessage}
-          />
+          {renderMode === "vector" ? (
+            <AnimatedGavel
+              size={resolvedGavelSize}
+              showPedestal={true}
+              ariaLabel={activeMessage}
+            />
+          ) : (
+            <AnimatedGavel3D
+              width={280}
+              height={195}
+              ariaLabel={activeMessage}
+            />
+          )}
         </div>
 
         {/* Professional Status Messaging */}

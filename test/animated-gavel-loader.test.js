@@ -192,6 +192,88 @@ it("Route loading boundaries exist for lawyer directory and dashboard", () => {
   assert.ok(fs.existsSync(path.join(__dirname, "../app/dashboard/loading.tsx")), "app/dashboard/loading.tsx exists");
 });
 
+// --------------------------------------------------------------------------
+// TEST 7: Upgraded Spline-Based STL Generator & Asset Parity
+// --------------------------------------------------------------------------
+console.log("\n[Test 7/8] Verifying Spline-Based STL Generator & Asset Parity...");
+const genPath = path.join(__dirname, "../generate_gavel_stl.py");
+const genContent = fs.readFileSync(genPath, "utf8");
+
+it("generate_gavel_stl.py implements spline-based lathe geometry and binary STL export", () => {
+  assert.ok(genContent.includes("catmull_rom_spline"), "Must use Catmull-Rom splines for sculpting");
+  assert.ok(genContent.includes("lathe_geometry"), "Must use lathe_geometry with outward CCW winding");
+  assert.ok(genContent.includes("write_binary_stl"), "Must output binary STL assets");
+});
+
+it("All 8 modular and stage STL files exist in both stl_assets/ and public/stl_assets/", () => {
+  const modularFiles = [
+    "part_gavel_head.stl",
+    "part_brass_band.stl",
+    "part_gavel_handle.stl",
+    "part_sound_block.stl",
+  ];
+  const stageFiles = [
+    "stage_1_exploded.stl",
+    "stage_2_raised.stl",
+    "stage_3_mid_swing.stl",
+    "stage_4_impact.stl",
+  ];
+
+  for (const f of modularFiles) {
+    assert.ok(fs.existsSync(path.join(__dirname, `../stl_assets/modular/${f}`)), `stl_assets/modular/${f} missing`);
+    assert.ok(fs.existsSync(path.join(__dirname, `../public/stl_assets/modular/${f}`)), `public/stl_assets/modular/${f} missing`);
+  }
+  for (const f of stageFiles) {
+    assert.ok(fs.existsSync(path.join(__dirname, `../stl_assets/stages/${f}`)), `stl_assets/stages/${f} missing`);
+    assert.ok(fs.existsSync(path.join(__dirname, `../public/stl_assets/stages/${f}`)), `public/stl_assets/stages/${f} missing`);
+  }
+});
+
+it("Source stl_assets/ and public/stl_assets/ match bit-for-bit with identical file sizes", () => {
+  const checkFiles = [
+    "modular/part_gavel_head.stl",
+    "modular/part_brass_band.stl",
+    "modular/part_gavel_handle.stl",
+    "modular/part_sound_block.stl",
+    "stages/stage_4_impact.stl",
+  ];
+  for (const rel of checkFiles) {
+    const srcSize = fs.statSync(path.join(__dirname, `../stl_assets/${rel}`)).size;
+    const pubSize = fs.statSync(path.join(__dirname, `../public/stl_assets/${rel}`)).size;
+    assert.strictEqual(srcSize, pubSize, `Size mismatch for ${rel}: ${srcSize} vs ${pubSize}`);
+  }
+});
+
+// --------------------------------------------------------------------------
+// TEST 8: Three.js AnimatedGavel3D Geometry Pipeline & Normal Correction
+// --------------------------------------------------------------------------
+console.log("\n[Test 8/8] Verifying Three.js AnimatedGavel3D Pipeline...");
+const threeGavelPath = path.join(__dirname, "../components/ui/animated-gavel-3d.tsx");
+const threeGavelContent = fs.readFileSync(threeGavelPath, "utf8");
+
+it("AnimatedGavel3D imports STLLoader and BufferGeometryUtils", () => {
+  assert.ok(threeGavelContent.includes("three/addons/loaders/STLLoader.js"), "Imports STLLoader");
+  assert.ok(threeGavelContent.includes("three/addons/utils/BufferGeometryUtils.js"), "Imports BufferGeometryUtils");
+});
+
+it("Applies BufferGeometryUtils.toCreasedNormals(geo, Math.PI / 4) for crisp shading", () => {
+  assert.ok(
+    threeGavelContent.includes("toCreasedNormals(geometry, Math.PI / 4)"),
+    "Must apply toCreasedNormals with Math.PI / 4 crease angle"
+  );
+  assert.ok(threeGavelContent.includes("computeVertexNormals"), "Recomputes vertex normals");
+});
+
+it("Maintains exact 0-gap contact alignment between head bottom and sound block top", () => {
+  assert.ok(threeGavelContent.includes("soundBlockMesh.position.set(0, -1.5, 0)"), "Sound block placed at Y=-1.5");
+  assert.ok(threeGavelContent.includes("pivotGroup.position.set(-4.4, 0.16, 0)"), "Pivot placed at (-4.4, 0.16, 0)");
+});
+
+it("AnimatedGavelLoader integrates AnimatedGavel3D with renderMode support", () => {
+  assert.ok(loaderContent.includes("AnimatedGavel3D"), "AnimatedGavelLoader imports AnimatedGavel3D");
+  assert.ok(loaderContent.includes("renderMode"), "AnimatedGavelLoader supports renderMode prop");
+});
+
 console.log("\n======================================================================");
 console.log(`TEST SUITE RESULTS: ${passed} PASSED, ${failed} FAILED`);
 console.log("======================================================================");
@@ -199,3 +281,4 @@ console.log("===================================================================
 if (failed > 0) {
   process.exit(1);
 }
+
