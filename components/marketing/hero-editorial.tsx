@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { ArrowRight, Briefcase, UserCheck, Sparkles } from "lucide-react";
 import { HeroHeadlineReveal } from "./hero-headline-reveal";
-import { HeroDocket } from "./hero-docket";
+import { UnfoldingBrief } from "./unfolding-brief";
 import { MagneticWrapper } from "@/components/ui/magnetic-wrapper";
 import { motion, useReducedMotion } from "framer-motion";
 import { useLanguage } from "@/lib/i18n/context";
@@ -105,9 +105,9 @@ export function HeroEditorial() {
           </motion.div>
         </div>
 
-        {/* RIGHT COLUMN: Illustrative Guided Legal Analysis Panel (6 cols) */}
+        {/* RIGHT COLUMN: The Unfolding Brief Interactive Legal Folio (6 cols) */}
         <div className="lg:col-span-6 w-full lg:pt-1">
-          <HeroDocket />
+          <UnfoldingBrief />
         </div>
       </div>
     </div>

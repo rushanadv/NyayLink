@@ -29,7 +29,11 @@ function LawyersDirectorySkeleton() {
   );
 }
 
-async function LawyersDirectoryContent() {
+async function LawyersDirectoryContent({
+  initialPracticeArea,
+}: {
+  initialPracticeArea?: string;
+} = {}) {
   let directoryState: "live" | "empty" | "error" = "empty";
   let lawyers: PublicLawyer[] = [];
   let isAuthenticated = false;
@@ -104,14 +108,18 @@ async function LawyersDirectoryContent() {
       isAuthenticated={isAuthenticated}
       directoryState={directoryState}
       errorMessage={errorMessage}
+      initialPracticeArea={initialPracticeArea}
     />
   );
 }
 
-export default function LawyersPage() {
+export default async function LawyersPage(props: {
+  searchParams?: Promise<{ practiceArea?: string }>;
+}) {
+  const searchParams = props.searchParams ? await props.searchParams : undefined;
   return (
     <Suspense fallback={<LawyersDirectorySkeleton />}>
-      <LawyersDirectoryContent />
+      <LawyersDirectoryContent initialPracticeArea={searchParams?.practiceArea} />
     </Suspense>
   );
 }

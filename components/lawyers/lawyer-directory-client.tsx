@@ -44,6 +44,7 @@ interface LawyerDirectoryClientProps {
   loadWarning?: string;
   directoryState?: "live" | "empty" | "error" | "dev_demo";
   errorMessage?: string;
+  initialPracticeArea?: string;
 }
 
 // Helper to get initials from professional name (e.g. "Adv. Rajesh Sharma" -> "RS")
@@ -62,10 +63,19 @@ export function LawyerDirectoryClient({
   loadWarning,
   directoryState = "live",
   errorMessage,
+  initialPracticeArea,
 }: LawyerDirectoryClientProps) {
   const shouldReduceMotion = useReducedMotion();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedPracticeArea, setSelectedPracticeArea] = useState<string>("all");
+  const [selectedPracticeArea, setSelectedPracticeArea] = useState<string>(() => {
+    if (initialPracticeArea) return initialPracticeArea;
+    if (typeof window !== "undefined") {
+      const sp = new URLSearchParams(window.location.search);
+      const pa = sp.get("practiceArea");
+      if (pa) return pa;
+    }
+    return "all";
+  });
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
@@ -124,7 +134,12 @@ export function LawyerDirectoryClient({
 
         // 2. Practice Area filter
         if (selectedPracticeArea !== "all") {
-          if (!lawyer.practice_areas.includes(selectedPracticeArea)) {
+          const match = lawyer.practice_areas.some((pa) => {
+            const paL = pa.toLowerCase().trim();
+            const selL = selectedPracticeArea.toLowerCase().trim();
+            return paL === selL || paL.includes(selL) || selL.includes(paL);
+          });
+          if (!match) {
             return false;
           }
         }
@@ -323,6 +338,9 @@ export function LawyerDirectoryClient({
               className="w-full h-10 px-3 pr-8 rounded-lg bg-[#F8FAF9] border border-[#D5E5D9] text-xs text-[#202824] focus:border-[#205C43] outline-none appearance-none cursor-pointer"
             >
               <option value="all">All Practice Areas ({practiceAreasList.length})</option>
+              {selectedPracticeArea !== "all" && !practiceAreasList.includes(selectedPracticeArea) && (
+                <option value={selectedPracticeArea}>{selectedPracticeArea}</option>
+              )}
               {practiceAreasList.map((pa) => (
                 <option key={pa} value={pa}>
                   {pa}

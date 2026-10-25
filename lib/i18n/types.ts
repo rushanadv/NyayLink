@@ -238,6 +238,57 @@ export interface Dictionary {
       milestoneEscrow: string;
       digitalVakalatnama: string;
     };
+    brief: {
+      eyebrow: string;
+      title: string;
+      subtitle: string;
+      refold: string;
+      hint: string;
+      initialStateLabel: string;
+      exploreAdvocates: string;
+      getGuidance: string;
+      verifiedBadge: string;
+      pathwayUnfolded: string;
+      stampLabel: string;
+      tabs: {
+        property: {
+          id: string;
+          tab: string;
+          tabShort: string;
+          title: string;
+          desc: string;
+          statute: string;
+          canonicalArea: string;
+        };
+        family: {
+          id: string;
+          tab: string;
+          tabShort: string;
+          title: string;
+          desc: string;
+          statute: string;
+          canonicalArea: string;
+        };
+        criminal: {
+          id: string;
+          tab: string;
+          tabShort: string;
+          title: string;
+          desc: string;
+          statute: string;
+          canonicalArea: string;
+        };
+        consumer: {
+          id: string;
+          tab: string;
+          tabShort: string;
+          title: string;
+          desc: string;
+          statute: string;
+          canonicalArea: string;
+        };
+      };
+    };
     docket: {
       tag: string;
       jurisdictionLabel: string;
