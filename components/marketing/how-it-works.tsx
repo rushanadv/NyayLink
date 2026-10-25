@@ -10,7 +10,6 @@ import {
   ArrowRight,
   CheckCircle2,
 } from "lucide-react";
-
 import { useLanguage } from "@/lib/i18n/context";
 
 export function HowItWorks() {
@@ -53,7 +52,7 @@ export function HowItWorks() {
       <div className="max-w-3xl mb-14 space-y-3">
         <div className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em]">
           <span className="w-4 h-px bg-[#205C43]" />
-          <span className="text-[#205C43] font-bold">03</span>
+          <span className="text-[#205C43] font-bold">02</span>
           <span className="text-[#D5E5D9]">{"//"}</span>
           <span className="text-[#69736D] font-semibold">{t.home.howItWorks.eyebrow}</span>
         </div>
@@ -78,7 +77,7 @@ export function HowItWorks() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "0px 0px -40px 0px" }}
               transition={{ duration: 0.5, delay: idx * 0.12 }}
-              className="rounded-2xl bg-white border border-[#D5E5D9] hover:border-[#205C43]/50 p-7 flex flex-col justify-between shadow-xs transition-all relative group"
+              className="rounded-2xl bg-white border border-[#D5E5D9] hover:border-[#205C43]/50 p-7 sm:p-8 flex flex-col justify-between shadow-xs transition-all relative group"
             >
               <div className="space-y-5">
                 {/* Step Number & Icon */}
@@ -120,13 +119,13 @@ export function HowItWorks() {
         })}
       </div>
 
-      {/* Workflow Navigation Action */}
+      {/* Contextual Link */}
       <div className="mt-12 text-center">
         <Link
-          href="/auth/login?intent=client"
+          href="/intake"
           className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white font-semibold text-xs transition-all shadow-md shadow-[#205C43]/15"
         >
-          <span>Begin with Structured Intake</span>
+          <span>{t.home.hero.needHelp}</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>

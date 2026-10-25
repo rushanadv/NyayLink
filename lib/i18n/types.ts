@@ -357,6 +357,33 @@ export interface Dictionary {
       lawyerCta: string;
       learnAdvocatePortal: string;
     };
+    capabilities: {
+      eyebrow: string;
+      title: string;
+      subtitle: string;
+      cat1Badge: string;
+      cat1Title: string;
+      cat1Desc: string;
+      cat1Item1: string;
+      cat1Item2: string;
+      cat1Item3: string;
+      cat1Cta: string;
+      cat2Badge: string;
+      cat2Title: string;
+      cat2Desc: string;
+      cat2Item1: string;
+      cat2Item2: string;
+      cat2Item3: string;
+      cat2Cta: string;
+      cat3Badge: string;
+      cat3Title: string;
+      cat3Desc: string;
+      cat3Item1: string;
+      cat3Item2: string;
+      cat3Item3: string;
+      cat3Cta: string;
+      courtQrButton: string;
+    };
     trust: {
       eyebrow: string;
       title: string;

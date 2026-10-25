@@ -1,31 +1,27 @@
 import { HeroEditorial } from "@/components/marketing/hero-editorial";
-import { AudienceGateways } from "@/components/marketing/audience-gateways";
 import { HowItWorks } from "@/components/marketing/how-it-works";
-import { TwoAudiences } from "@/components/marketing/two-audiences";
+import { CoreCapabilities } from "@/components/marketing/core-capabilities";
 import { TrustCompliance } from "@/components/marketing/trust-compliance";
 import { ClosingCta } from "@/components/marketing/closing-cta";
 
 export default function MarketingHomePage() {
   return (
     <div className="w-full flex flex-col items-center">
-      {/* 01: Bespoke Asymmetric Hero Section */}
+      {/* 01: Clear Asymmetric Hero Section */}
       <section id="hero" className="w-full scroll-mt-24">
         <HeroEditorial />
       </section>
 
-      {/* 02: Prominent Client & Advocate Entry Gateways */}
-      <AudienceGateways />
-
-      {/* 03: How NyayLink Works (3 Meaningful Stages) */}
+      {/* 02: How NyayLink Works (3 Meaningful Stages) */}
       <HowItWorks />
 
-      {/* 04: Two Audiences, One Platform */}
-      <TwoAudiences />
+      {/* 03: Core Capabilities (Organized into 3 Coherent Categories) */}
+      <CoreCapabilities />
 
-      {/* 05: Legal Ethics, BCI Rule 36 & Momentum Ring */}
+      {/* 04: Legal Ethics & Bar Council Rule 36 Compliance */}
       <TrustCompliance />
 
-      {/* 06: Decisive Closing Action */}
+      {/* 05: Decisive Closing Action */}
       <ClosingCta />
     </div>
   );

@@ -20,13 +20,13 @@ export function HeroDocket() {
   const [activeTab, setActiveTab] = useState<number>(0);
   const [isPaused, setIsPaused] = useState<boolean>(false);
 
-  // Auto-advance tabs every 5.5 seconds unless user hovers/interacts
+  // Auto-advance tabs every 6 seconds unless user hovers or interacts
   useEffect(() => {
     if (isPaused) return;
 
     const timer = setInterval(() => {
       setActiveTab((prev) => (prev + 1) % 3);
-    }, 5500);
+    }, 6000);
 
     return () => clearInterval(timer);
   }, [isPaused]);
@@ -36,9 +36,11 @@ export function HeroDocket() {
       className="w-full rounded-2xl bg-white border border-[#D5E5D9] shadow-xl shadow-[#202824]/5 overflow-hidden select-none"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      role="region"
+      aria-label="Guided Legal Workflow Demonstration"
     >
       {/* Top Architectural Docket Bar */}
-      <div className="px-4 sm:px-5 py-3 sm:py-3.5 bg-[#EAF3ED]/50 border-b border-[#D5E5D9] flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 text-xs">
+      <div className="px-4 sm:px-5 py-3 sm:py-3.5 bg-[#EAF3ED]/60 border-b border-[#D5E5D9] flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 text-xs">
         <div className="flex items-center gap-2.5 shrink-0">
           <span className="w-2 h-2 rounded-full bg-[#205C43] animate-pulse" />
           <span className="font-mono text-[11px] uppercase tracking-wider text-[#202824] font-semibold whitespace-nowrap">
@@ -53,18 +55,20 @@ export function HeroDocket() {
         </div>
       </div>
 
-      {/* 3 Step Procedure Stepper Tabs with stable border sizing */}
-      <div className="grid grid-cols-3 border-b border-[#D5E5D9] bg-white text-xs font-mono">
+      {/* 3 Step Procedure Stepper Tabs */}
+      <div role="tablist" className="grid grid-cols-3 border-b border-[#D5E5D9] bg-white text-xs font-mono">
         <button
+          role="tab"
           onClick={() => setActiveTab(0)}
-          className={`py-3 px-2 sm:px-3 text-left transition-colors relative flex items-center gap-1.5 sm:gap-2 focus-visible:outline-none border-b-2 ${
+          className={`py-3 px-2 sm:px-4 text-left transition-colors relative flex items-center gap-1.5 sm:gap-2.5 focus-visible:outline-none border-b-2 ${
             activeTab === 0
-              ? "bg-[#EAF3ED]/50 text-[#202824] font-semibold border-[#205C43]"
+              ? "bg-[#EAF3ED]/40 text-[#202824] font-semibold border-[#205C43]"
               : "text-[#69736D] hover:text-[#202824] border-transparent"
           }`}
+          aria-selected={activeTab === 0}
         >
           <span
-            className={`w-4 h-4 rounded-full text-[10px] flex items-center justify-center font-bold shrink-0 ${
+            className={`w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold shrink-0 ${
               activeTab === 0
                 ? "bg-[#205C43] text-white"
                 : "bg-[#EAF3ED] text-[#69736D]"
@@ -72,19 +76,21 @@ export function HeroDocket() {
           >
             1
           </span>
-          <span className="truncate text-[11px]">{t.home.docket.tabGrievance}</span>
+          <span className="truncate text-xs">{t.home.docket.tabGrievance}</span>
         </button>
 
         <button
+          role="tab"
           onClick={() => setActiveTab(1)}
-          className={`py-3 px-2 sm:px-3 text-left transition-colors relative flex items-center gap-1.5 sm:gap-2 focus-visible:outline-none border-b-2 ${
+          className={`py-3 px-2 sm:px-4 text-left transition-colors relative flex items-center gap-1.5 sm:gap-2.5 focus-visible:outline-none border-b-2 ${
             activeTab === 1
-              ? "bg-[#EAF3ED]/50 text-[#202824] font-semibold border-[#205C43]"
+              ? "bg-[#EAF3ED]/40 text-[#202824] font-semibold border-[#205C43]"
               : "text-[#69736D] hover:text-[#202824] border-transparent"
           }`}
+          aria-selected={activeTab === 1}
         >
           <span
-            className={`w-4 h-4 rounded-full text-[10px] flex items-center justify-center font-bold shrink-0 ${
+            className={`w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold shrink-0 ${
               activeTab === 1
                 ? "bg-[#205C43] text-white"
                 : "bg-[#EAF3ED] text-[#69736D]"
@@ -92,19 +98,21 @@ export function HeroDocket() {
           >
             2
           </span>
-          <span className="truncate text-[11px]">{t.home.docket.tabAnalysis}</span>
+          <span className="truncate text-xs">{t.home.docket.tabAnalysis}</span>
         </button>
 
         <button
+          role="tab"
           onClick={() => setActiveTab(2)}
-          className={`py-3 px-2 sm:px-3 text-left transition-colors relative flex items-center gap-1.5 sm:gap-2 focus-visible:outline-none border-b-2 ${
+          className={`py-3 px-2 sm:px-4 text-left transition-colors relative flex items-center gap-1.5 sm:gap-2.5 focus-visible:outline-none border-b-2 ${
             activeTab === 2
-              ? "bg-[#EAF3ED]/50 text-[#202824] font-semibold border-[#205C43]"
+              ? "bg-[#EAF3ED]/40 text-[#202824] font-semibold border-[#205C43]"
               : "text-[#69736D] hover:text-[#202824] border-transparent"
           }`}
+          aria-selected={activeTab === 2}
         >
           <span
-            className={`w-4 h-4 rounded-full text-[10px] flex items-center justify-center font-bold shrink-0 ${
+            className={`w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold shrink-0 ${
               activeTab === 2
                 ? "bg-[#205C43] text-white"
                 : "bg-[#EAF3ED] text-[#69736D]"
@@ -112,13 +120,13 @@ export function HeroDocket() {
           >
             3
           </span>
-          <span className="truncate text-[11px]">{t.home.docket.tabCounsel}</span>
+          <span className="truncate text-xs">{t.home.docket.tabCounsel}</span>
         </button>
       </div>
 
-      {/* Main Procedural Stage Display with Anchored Bottom Progression Bar */}
+      {/* Main Procedural Stage Display */}
       <div className="p-5 sm:p-7 flex flex-col justify-between">
-        <div className="min-h-[260px] sm:min-h-[240px] relative">
+        <div className="min-h-[250px] relative">
           <AnimatePresence mode="wait">
             {activeTab === 0 && (
               <motion.div
@@ -130,15 +138,15 @@ export function HeroDocket() {
                 className="space-y-4"
               >
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#205C43] font-bold">
+                  <span className="font-mono text-[11px] uppercase tracking-wider text-[#205C43] font-bold">
                     {t.home.docket.stage1Title}
                   </span>
                   <span className="text-[11px] text-[#69736D] flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-[#205C43]" /> {t.home.docket.stage1Logged}
+                    <Clock className="w-3.5 h-3.5 text-[#205C43]" /> {t.home.docket.stage1Logged}
                   </span>
                 </div>
 
-                {/* Citizen Dispute Excerpt */}
+                {/* Dispute Summary Excerpt */}
                 <div className="p-4 rounded-xl bg-[#EAF3ED]/30 border border-[#D5E5D9] text-xs space-y-2">
                   <div className="flex items-center gap-2 text-[#69736D] text-[11px] font-mono">
                     <FileText className="w-3.5 h-3.5 text-[#202824]" />
@@ -149,7 +157,7 @@ export function HeroDocket() {
                   </p>
                 </div>
 
-                {/* Extracted Metadata Grid */}
+                {/* 2 Concise Supporting Signals */}
                 <div className="grid grid-cols-2 gap-3 pt-1 text-xs">
                   <div className="p-3 rounded-lg border border-[#D5E5D9] bg-white">
                     <span className="text-[10px] font-mono uppercase tracking-wider text-[#69736D] block">
@@ -181,16 +189,16 @@ export function HeroDocket() {
                 className="space-y-4"
               >
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#205C43] font-bold">
+                  <span className="font-mono text-[11px] uppercase tracking-wider text-[#205C43] font-bold">
                     {t.home.docket.stage2Title}
                   </span>
                   <span className="text-[11px] text-[#69736D] flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-[#205C43]" /> {t.home.docket.stage2RealStatutes}
+                    <Sparkles className="w-3.5 h-3.5 text-[#205C43]" /> {t.home.docket.stage2RealStatutes}
                   </span>
                 </div>
 
-                {/* Legal Roadmap Card */}
-                <div className="p-4 rounded-xl bg-[#EAF3ED]/30 border border-[#D5E5D9] space-y-3">
+                {/* Legal Provisions Card */}
+                <div className="p-4 rounded-xl bg-[#EAF3ED]/30 border border-[#D5E5D9] space-y-2.5">
                   <div className="flex items-center gap-2">
                     <Scale className="w-4 h-4 text-[#205C43] shrink-0" />
                     <span className="text-xs font-semibold text-[#202824] leading-snug">
@@ -207,7 +215,7 @@ export function HeroDocket() {
                   </div>
                 </div>
 
-                {/* Procedural Checklist Preview */}
+                {/* 2 Key Evidentiary Requirements */}
                 <div className="space-y-1.5 text-xs text-[#69736D]">
                   <span className="text-[10px] font-mono uppercase tracking-wider text-[#202824] font-semibold block">
                     {t.home.docket.checklistTitle}
@@ -234,7 +242,7 @@ export function HeroDocket() {
                 className="space-y-4"
               >
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#205C43] font-bold">
+                  <span className="font-mono text-[11px] uppercase tracking-wider text-[#205C43] font-bold">
                     {t.home.docket.stage3Title}
                   </span>
                   <span className="text-[11px] text-[#69736D] flex items-center gap-1 font-mono">
@@ -242,11 +250,11 @@ export function HeroDocket() {
                   </span>
                 </div>
 
-                {/* Advocate Profile Highlight */}
+                {/* Verified Advocate Profile Highlight */}
                 <div className="p-3.5 sm:p-4 rounded-xl bg-white border border-[#D5E5D9] shadow-xs flex items-start justify-between gap-3 sm:gap-4">
                   <div className="flex items-start gap-3 min-w-0">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#EAF3ED] border border-[#D5E5D9] flex items-center justify-center font-serif text-sm font-semibold text-[#205C43] shrink-0">
-                      RS
+                    <div className="w-10 h-10 rounded-xl bg-[#EAF3ED] border border-[#D5E5D9] flex items-center justify-center font-serif text-sm font-semibold text-[#205C43] shrink-0">
+                      NL
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
@@ -258,7 +266,7 @@ export function HeroDocket() {
                       <p className="text-xs text-[#69736D] mt-0.5 truncate">
                         {t.home.docket.advocateRoll}
                       </p>
-                      <div className="mt-1.5 flex items-center gap-2 text-[11px] font-mono text-[#69736D] flex-wrap">
+                      <div className="mt-1 flex items-center gap-2 text-[11px] font-mono text-[#69736D]">
                         <span>{t.home.docket.advocateLanguages}</span>
                         <span>·</span>
                         <span className="text-[#205C43] font-semibold">{t.home.docket.advocateStat}</span>
@@ -272,6 +280,7 @@ export function HeroDocket() {
                   </div>
                 </div>
 
+                {/* 2 Supporting Terms */}
                 <div className="p-3 rounded-lg bg-[#EAF3ED]/40 border border-[#D5E5D9] text-xs flex items-center justify-between">
                   <div className="flex items-center gap-2 text-[11px] text-[#69736D]">
                     <ShieldCheck className="w-4 h-4 text-[#205C43] shrink-0" />
@@ -293,8 +302,8 @@ export function HeroDocket() {
           </div>
 
           <Link
-            href="/auth/login?intent=client"
-            className="inline-flex items-center gap-1.5 font-semibold text-xs text-[#202824] hover:text-[#205C43] transition-colors"
+            href="/lawyers"
+            className="inline-flex items-center gap-1.5 font-semibold text-xs text-[#205C43] hover:text-[#174530] transition-colors"
           >
             <span>{t.home.docket.proceedClient}</span>
             <ArrowRight className="w-3.5 h-3.5" />

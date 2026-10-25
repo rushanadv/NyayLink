@@ -26,7 +26,7 @@ export function ClosingCta() {
         <div className="max-w-3xl mx-auto space-y-4 relative z-10">
           <div className="flex items-center justify-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em]">
             <span className="w-4 h-px bg-[#205C43]" />
-            <span className="text-[#205C43] font-bold">06</span>
+            <span className="text-[#205C43] font-bold">05</span>
             <span className="text-[#D5E5D9]">{"//"}</span>
             <span className="text-[#69736D] font-semibold">{t.home.closingCta.eyebrow}</span>
             <span className="w-4 h-px bg-[#205C43]" />

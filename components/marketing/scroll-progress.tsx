@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { SECTIONS, SectionItem } from "@/lib/marketing/sections-data";
+import { SECTIONS } from "@/lib/marketing/sections-data";
 import { useSmoothScroll } from "./smooth-scroll-provider";
 import {
   motion,

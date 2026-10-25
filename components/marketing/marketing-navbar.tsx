@@ -84,16 +84,10 @@ export function MarketingNavbar() {
             {t.nav.howItWorks}
           </button>
           <button
-            onClick={() => handleNavClick("for-clients")}
+            onClick={() => handleNavClick("capabilities")}
             className="transition-colors focus-visible:outline-none hover:text-[#202824]"
           >
-            {isHindi ? "मुवक्किलों के लिए" : "For clients"}
-          </button>
-          <button
-            onClick={() => handleNavClick("for-advocates")}
-            className="transition-colors focus-visible:outline-none hover:text-[#202824]"
-          >
-            {t.nav.forLawyers}
+            {isHindi ? "क्षमताएं" : "Capabilities"}
           </button>
           <button
             onClick={() => handleNavClick("trust")}
@@ -260,16 +254,10 @@ export function MarketingNavbar() {
               {t.nav.howItWorks}
             </button>
             <button
-              onClick={() => handleNavClick("for-clients")}
+              onClick={() => handleNavClick("capabilities")}
               className="text-left py-1 hover:text-[#205C43]"
             >
-              {isHindi ? "मुवक्किलों के लिए" : "For clients"}
-            </button>
-            <button
-              onClick={() => handleNavClick("for-advocates")}
-              className="text-left py-1 hover:text-[#205C43]"
-            >
-              {t.nav.forLawyers}
+              {isHindi ? "क्षमताएं" : "Capabilities"}
             </button>
             <button
               onClick={() => handleNavClick("trust")}

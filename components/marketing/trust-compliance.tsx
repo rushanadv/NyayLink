@@ -25,7 +25,7 @@ export function TrustCompliance() {
           <div className="lg:col-span-8 space-y-4">
             <div className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em]">
               <span className="w-4 h-px bg-[#205C43]" />
-              <span className="text-[#205C43] font-bold">05</span>
+              <span className="text-[#205C43] font-bold">04</span>
               <span className="text-[#D5E5D9]">{"//"}</span>
               <span className="text-[#69736D] font-semibold">{t.home.trust.eyebrow}</span>
             </div>
