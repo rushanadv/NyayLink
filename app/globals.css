@@ -158,9 +158,11 @@ html.lenis, html.lenis body {
 }
 
 .lenis.lenis-smooth [data-lenis-prevent],
-[data-lenis-prevent] {
+[data-lenis-prevent],
+.data-lenis-prevent {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 .lenis.lenis-stopped,
@@ -169,9 +171,18 @@ body.modal-open {
   touch-action: none;
 }
 
+/* Allow nested touch/wheel scrolling inside open modal dialogs */
+body.modal-open [data-lenis-prevent],
+body.modal-open .data-lenis-prevent,
+body.modal-open [role="dialog"],
+body.modal-open .overflow-y-auto {
+  touch-action: pan-y !important;
+}
+
 .lenis.lenis-scrolling iframe {
   pointer-events: none;
 }
+
 
 /* NyayLink Animated Rainbow Perimeter & Edge Glow */
 @property --rainbow-angle {

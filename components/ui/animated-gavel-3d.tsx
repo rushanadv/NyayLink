@@ -256,49 +256,61 @@ export function AnimatedGavel3D({
         onLoaded?.();
 
         // Animation Loop: 1,120ms complete judicial strike cycle
+        // In ~3.5 seconds (3,500ms), 3 complete strikes execute (3 x 1,120ms = 3,360ms)
+        // followed by a clean, dignified resting hold on the sound block (angle = 0)
         const CYCLE_DURATION_MS = 1120;
+        const TOTAL_CYCLES = 3;
+        const MAX_ANIM_DURATION_MS = CYCLE_DURATION_MS * TOTAL_CYCLES; // 3,360ms
         const startTime = performance.now();
 
         const renderLoop = (now: number) => {
           if (isDisposed || !renderer) return;
 
           if (!prefersReducedMotion) {
-            const elapsed = (now - startTime) % CYCLE_DURATION_MS;
-            const progress = elapsed / CYCLE_DURATION_MS;
+            const totalElapsed = now - startTime;
 
             let angleRad = 0;
             let shockwaveScale = 0.2;
             let shockwaveOpacity = 0.0;
 
-            if (progress < 0.12) {
-              // 0% - 12%: Ready hold at resting contact
+            if (totalElapsed >= MAX_ANIM_DURATION_MS) {
+              // Once all complete strikes finish, hold cleanly at resting impact contact (angle = 0)
               angleRad = 0;
-            } else if (progress < 0.40) {
-              // 12% - 40%: Backswing anticipation lift up to 34 degrees (0.593 rad)
-              const t = (progress - 0.12) / 0.28;
-              const ease = 0.5 - 0.5 * Math.cos(Math.PI * t);
-              angleRad = ease * 0.593;
-            } else if (progress < 0.53) {
-              // 40% - 53%: Decisive accelerated strike
-              const t = (progress - 0.40) / 0.13;
-              const gravityEase = t * t * t;
-              angleRad = (1 - gravityEase) * 0.593;
-            } else if (progress < 0.58) {
-              // 53% - 58%: Impact & subtle recoil bounce (3.5 deg = 0.061 rad)
-              const t = (progress - 0.53) / 0.05;
-              const recoil = Math.sin(Math.PI * t) * 0.061;
-              angleRad = recoil;
-
-              // Expanding shockwave ring
-              shockwaveScale = 0.3 + t * 1.5;
-              shockwaveOpacity = (1 - t) * 0.85;
-            } else if (progress < 0.65) {
-              // 58% - 65%: Settle to rest
-              const t = (progress - 0.58) / 0.07;
-              angleRad = (1 - t) * 0.01;
+              shockwaveOpacity = 0;
             } else {
-              // 65% - 100%: Dignified rest hold on the sound block
-              angleRad = 0;
+              const cycleElapsed = totalElapsed % CYCLE_DURATION_MS;
+              const progress = cycleElapsed / CYCLE_DURATION_MS;
+
+              if (progress < 0.12) {
+                // 0% - 12%: Ready hold at resting contact
+                angleRad = 0;
+              } else if (progress < 0.40) {
+                // 12% - 40%: Backswing anticipation lift up to 34 degrees (0.593 rad)
+                const t = (progress - 0.12) / 0.28;
+                const ease = 0.5 - 0.5 * Math.cos(Math.PI * t);
+                angleRad = ease * 0.593;
+              } else if (progress < 0.53) {
+                // 40% - 53%: Decisive accelerated strike
+                const t = (progress - 0.40) / 0.13;
+                const gravityEase = t * t * t;
+                angleRad = (1 - gravityEase) * 0.593;
+              } else if (progress < 0.58) {
+                // 53% - 58%: Impact & subtle recoil bounce (3.5 deg = 0.061 rad)
+                const t = (progress - 0.53) / 0.05;
+                const recoil = Math.sin(Math.PI * t) * 0.061;
+                angleRad = recoil;
+
+                // Expanding shockwave ring
+                shockwaveScale = 0.3 + t * 1.5;
+                shockwaveOpacity = (1 - t) * 0.85;
+              } else if (progress < 0.65) {
+                // 58% - 65%: Settle to rest
+                const t = (progress - 0.58) / 0.07;
+                angleRad = (1 - t) * 0.01;
+              } else {
+                // 65% - 100%: Dignified rest hold on the sound block
+                angleRad = 0;
+              }
             }
 
             pivotGroup.rotation.z = angleRad;
@@ -323,6 +335,7 @@ export function AnimatedGavel3D({
         };
 
         animFrameId = requestAnimationFrame(renderLoop);
+
       })
       .catch((err) => {
         console.error("[AnimatedGavel3D] Failed to load STL assets:", err);

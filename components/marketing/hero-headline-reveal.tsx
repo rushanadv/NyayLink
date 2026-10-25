@@ -15,11 +15,14 @@ interface HeroHeadlineRevealProps {
  * Eliminates canvas rasterization, noise particles, font metric shifts, and visual jitter.
  * Each line acts as an intentional typographic unit with luxury editorial easing.
  */
+import { useSplash } from "@/components/ui/app-splash-provider";
+
 export function HeroHeadlineReveal({
   text,
   className = "",
 }: HeroHeadlineRevealProps) {
   const shouldReduceMotion = useReducedMotion();
+  const { isSplashComplete } = useSplash();
 
   // Split text by explicit newline breaks (preserved from i18n dictionaries)
   const lines = useMemo(() => {
@@ -43,10 +46,14 @@ export function HeroHeadlineReveal({
           <motion.span
             className="block transform-gpu will-change-transform"
             initial={shouldReduceMotion ? false : { y: 18, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
+            animate={
+              isSplashComplete
+                ? { y: 0, opacity: 1 }
+                : { y: 18, opacity: 0 }
+            }
             transition={{
               duration: 0.82,
-              delay: 0.08 + idx * 0.14,
+              delay: (isSplashComplete ? 0.12 : 0) + idx * 0.14,
               ease: editorialEase,
             }}
           >
@@ -57,3 +64,4 @@ export function HeroHeadlineReveal({
     </span>
   );
 }
+

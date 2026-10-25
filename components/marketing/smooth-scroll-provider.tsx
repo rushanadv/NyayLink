@@ -78,18 +78,50 @@ export function SmoothScrollProvider({
     }
 
     // 3. Initialize responsive, lightweight Lenis smooth scroll
+    // Using lerp: 0.1 rather than duration: 0.9 provides immediate, frame-rate
+    // independent damping that seamlessly tracks Mac trackpad momentum and mouse wheel
+    // without sluggish lag, artificial overshooting, or fighting native gestures.
     const lenis = new Lenis({
-      duration: 0.9,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      lerp: 0.1,
       orientation: "vertical",
       gestureOrientation: "vertical",
       smoothWheel: true,
       wheelMultiplier: 1.0,
       touchMultiplier: 1.0,
-      // Protect any element or ancestor with [data-lenis-prevent] from scroll hijacking
-      prevent: (node: HTMLElement) =>
-        node.hasAttribute("data-lenis-prevent") ||
-        Boolean(node.closest("[data-lenis-prevent]")),
+      syncTouch: false, // Preserves 1:1 native touch physics on mobile
+      autoResize: true,
+      stopInertiaOnNavigate: true, // Prevents rogue inertia on route transitions
+      // Protect any element or ancestor with [data-lenis-prevent] or nested scrollable containers
+      prevent: (node: HTMLElement) => {
+        if (!node) return false;
+        if (
+          node.hasAttribute("data-lenis-prevent") ||
+          Boolean(node.closest("[data-lenis-prevent]"))
+        ) {
+          return true;
+        }
+        // Protect native inputs, textareas, selects, and nested scrollable containers
+        let current: HTMLElement | null = node;
+        while (current && current !== document.body && current !== document.documentElement) {
+          const tag = current.tagName.toLowerCase();
+          if (tag === "textarea" || tag === "select" || current.isContentEditable) {
+            return true;
+          }
+          if (current.hasAttribute("data-lenis-prevent")) {
+            return true;
+          }
+          const style = window.getComputedStyle(current);
+          const overflowY = style.overflowY;
+          if (
+            (overflowY === "auto" || overflowY === "scroll") &&
+            current.scrollHeight > current.clientHeight
+          ) {
+            return true;
+          }
+          current = current.parentElement;
+        }
+        return false;
+      },
     });
 
     lenisRef.current = lenis;
@@ -109,7 +141,15 @@ export function SmoothScrollProvider({
     }
     rafId = requestAnimationFrame(raf);
 
+    // Keep dimensions updated on content or window changes
+    const handleResize = () => {
+      lenis.resize();
+      measureScroll();
+    };
+    window.addEventListener("resize", handleResize, { passive: true });
+
     return () => {
+      window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(rafId);
       lenis.destroy();
       lenisRef.current = null;
@@ -119,19 +159,21 @@ export function SmoothScrollProvider({
 
   const scrollTo = (
     target: string | HTMLElement,
-    options?: { offset?: number; duration?: number }
+    options?: { offset?: number; duration?: number; immediate?: boolean }
   ) => {
     if (lenisRef.current) {
       lenisRef.current.scrollTo(target, {
-        offset: options?.offset ?? -80,
-        duration: options?.duration ?? 0.9,
+        offset: options?.offset ?? -70,
+        immediate: options?.immediate ?? false,
+        duration: options?.immediate ? 0 : (options?.duration ?? 0.95),
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       });
     } else {
       if (typeof target === "string") {
         const el = document.querySelector(target);
-        el?.scrollIntoView({ behavior: "smooth" });
+        el?.scrollIntoView({ behavior: options?.immediate ? "auto" : "smooth" });
       } else if (target instanceof HTMLElement) {
-        target.scrollIntoView({ behavior: "smooth" });
+        target.scrollIntoView({ behavior: options?.immediate ? "auto" : "smooth" });
       }
     }
   };
@@ -156,3 +198,4 @@ export function SmoothScrollProvider({
     </SmoothScrollContext.Provider>
   );
 }
+

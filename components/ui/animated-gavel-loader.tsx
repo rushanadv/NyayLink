@@ -252,10 +252,8 @@ export function AnimatedGavelLoader({
           )}
         </div>
 
-        {/* Decisive Animated Progress Bar Accent */}
-        <div className="w-36 sm:w-44 h-1.5 rounded-full bg-[#EAF3ED] overflow-hidden border border-[#D5E5D9] shadow-2xs">
-          <div className="h-full bg-gradient-to-r from-[#205C43] via-[#2F855E] to-[#205C43] rounded-full animate-indeterminate-pulse" />
-        </div>
+        {/* Serene Static Branded Hairline Divider (No competing animation before or during 3D model) */}
+        <div className="w-24 sm:w-28 h-0.5 rounded-full bg-[#EAF3ED] border-b border-[#D5E5D9]/60 my-1" />
 
         {/* Statutory Compliance Footer Badge */}
         {showStatutoryBadge && (
@@ -265,6 +263,7 @@ export function AnimatedGavelLoader({
           </div>
         )}
       </div>
+
 
       <style jsx>{`
         @keyframes indeterminate {
