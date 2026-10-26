@@ -62,6 +62,7 @@ export interface Dictionary {
     legalServices: string;
     chambersPortal: string;
     clientPortal: string;
+    installApp: string;
   };
   auth: {
     signInTitle: string;
@@ -479,9 +480,26 @@ export interface Dictionary {
       termsService: string;
       supportContact: string;
       accountDeletion: string;
+      installApp: string;
       rule36Disclaimer: string;
       disclaimerNotice: string;
       copyright: string;
     };
+  };
+  pwa: {
+    installApp: string;
+    installNyayLink: string;
+    installed: string;
+    iosInstallTitle: string;
+    iosInstallSubtitle: string;
+    iosStep1: string;
+    iosStep2: string;
+    iosStep3: string;
+    iosStep4: string;
+    gotIt: string;
+    dismiss: string;
+    offlineBadge: string;
+    offlineTitle: string;
+    offlineDesc: string;
   };
 }

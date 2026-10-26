@@ -62,6 +62,7 @@ export const en: Dictionary = {
     legalServices: "Legal Services",
     chambersPortal: "Advocate Chambers Portal",
     clientPortal: "Client Legal Portal",
+    installApp: "Install App",
   },
   auth: {
     signInTitle: "Sign in to NyayLink",
@@ -534,11 +535,28 @@ export const en: Dictionary = {
       termsService: "Terms of Service",
       supportContact: "Support & Contact",
       accountDeletion: "Account Deletion",
+      installApp: "Install App",
       rule36Disclaimer: "BCI Rule 36 Statement",
       disclaimerNotice:
         "NyayLink is an informational and technology platform, not a law firm, and does not provide legal advice or solicit briefs. All advocate engagements are governed directly between client and certified counsel under the Advocates Act, 1961.",
       copyright: "© 2026 NyayLink. All rights reserved. Made for Indian Jurisprudence.",
     },
+  },
+  pwa: {
+    installApp: "Install App",
+    installNyayLink: "Install NyayLink",
+    installed: "App Installed",
+    iosInstallTitle: "Install NyayLink on iOS",
+    iosInstallSubtitle: "Add NyayLink to your Home Screen for a fast, standalone legal experience.",
+    iosStep1: "Open this site in Safari",
+    iosStep2: "Tap the Share button at the bottom of the screen",
+    iosStep3: "Scroll down and select 'Add to Home Screen'",
+    iosStep4: "Tap 'Add' in the top right corner",
+    gotIt: "Got It",
+    dismiss: "Dismiss",
+    offlineBadge: "Offline Mode",
+    offlineTitle: "You Are Currently Offline",
+    offlineDesc: "Live legal preconsultation and authenticated case dossiers require an active connection to ensure privacy.",
   },
 };
 

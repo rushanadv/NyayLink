@@ -69,6 +69,11 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith("/support") &&
     !request.nextUrl.pathname.startsWith("/contact") &&
     !request.nextUrl.pathname.startsWith("/reviewer") &&
+    !request.nextUrl.pathname.startsWith("/manifest") &&
+    !request.nextUrl.pathname.startsWith("/sw.js") &&
+    !request.nextUrl.pathname.startsWith("/offline") &&
+    !request.nextUrl.pathname.startsWith("/icons") &&
+    !request.nextUrl.pathname.startsWith("/brand") &&
     !request.nextUrl.pathname.startsWith("/api/intake") &&
     !request.nextUrl.pathname.startsWith("/api/calendar") &&
     !request.nextUrl.pathname.startsWith("/api/auth") &&

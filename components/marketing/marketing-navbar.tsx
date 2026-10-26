@@ -9,6 +9,7 @@ import { MagneticWrapper } from "@/components/ui/magnetic-wrapper";
 import { NyayLinkLogo } from "@/components/ui/nyaylink-logo";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { useLanguage } from "@/lib/i18n/context";
+import { PWAInstallButton } from "@/components/pwa/pwa-install-button";
 
 export function MarketingNavbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -118,8 +119,11 @@ export function MarketingNavbar() {
           </Link>
         </nav>
 
-        {/* Right Action Controls: Language Switcher, Sign In & Account Type Selector */}
-        <div className="hidden sm:flex items-center gap-3">
+        {/* Right Action Controls: PWA Install, Language Switcher, Sign In & Account Type Selector */}
+        <div className="hidden sm:flex items-center gap-2.5">
+          {/* PWA Install Action */}
+          <PWAInstallButton variant="navbar" />
+
           {/* Global Compact Language Switcher */}
           <LanguageSwitcher variant="compact" />
 
@@ -283,6 +287,12 @@ export function MarketingNavbar() {
           </nav>
 
           <div className="pt-3 border-t flex flex-col gap-2.5 border-[#D5E5D9]">
+            {/* PWA Mobile Installation Trigger */}
+            <PWAInstallButton
+              variant="mobile-menu"
+              onInstalledClick={() => setMobileMenuOpen(false)}
+            />
+
             <Link
               href="/onboarding"
               onClick={() => setMobileMenuOpen(false)}

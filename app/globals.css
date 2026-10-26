@@ -215,3 +215,29 @@ html.splash-already-seen #nyaylink-splash-curtain {
   display: none !important;
 }
 
+/* PWA Standalone Mode & Mobile Safe Area Inset Support */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+}
+
+@media (display-mode: standalone) {
+  /* Clean standalone overscroll and touch handling */
+  html {
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Safe area handling for fixed and sticky app bars */
+  header.sticky {
+    padding-top: max(0.25rem, env(safe-area-inset-top));
+  }
+
+  /* Provide safe-area padding at bottom of mobile viewports */
+  .pwa-bottom-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+

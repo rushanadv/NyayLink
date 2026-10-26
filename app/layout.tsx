@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
@@ -8,20 +8,37 @@ const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : "http://localhost:3000";
 
+export const viewport: Viewport = {
+  themeColor: "#205C43",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
   title: "NyayLink — Access to Justice, Simplified",
   description: "India's Verified Legal Services Marketplace, Client Workspaces, and Advocate Practice Infrastructure",
+  applicationName: "NyayLink",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "NyayLink",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   icons: {
     icon: [
-      { url: "/brand/nyaylink-logo.png", sizes: "32x32", type: "image/png" },
-      { url: "/brand/nyaylink-logo.png", sizes: "64x64", type: "image/png" },
-      { url: "/brand/nyaylink-logo.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
     apple: [
-      { url: "/brand/nyaylink-logo.png", sizes: "180x180", type: "image/png" },
+      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
-    shortcut: "/brand/nyaylink-logo.png",
+    shortcut: "/icons/icon-192.png",
   },
 };
 
@@ -37,6 +54,7 @@ import { Locale } from "@/lib/i18n/types";
 import { CursorSpotlight } from "@/components/marketing/cursor-spotlight";
 import { FilmGrain } from "@/components/marketing/film-grain";
 import { AppSplashProvider } from "@/components/ui/app-splash-provider";
+import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 
 export const instant = false;
 
@@ -69,6 +87,7 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <LanguageProvider initialLocale={initialLocale}>
+            <ServiceWorkerRegister />
             {/* Subtle Global Ambient Layers */}
             <CursorSpotlight />
             <FilmGrain />

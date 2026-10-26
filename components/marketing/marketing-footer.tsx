@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { NyayLinkLogo } from "@/components/ui/nyaylink-logo";
 import { useLanguage } from "@/lib/i18n/context";
+import { PWAInstallButton } from "@/components/pwa/pwa-install-button";
 
 export function MarketingFooter() {
   const { t, isHindi } = useLanguage();
@@ -86,6 +87,16 @@ export function MarketingFooter() {
                   >
                     {t.home.footer.bciVerification}
                   </Link>
+                </li>
+                <li>
+                  <PWAInstallButton
+                    variant="footer"
+                    className={
+                      isDarkSubpage
+                        ? "text-[#A5A3B2] hover:text-white"
+                        : "text-[#69736D] hover:text-[#205C43]"
+                    }
+                  />
                 </li>
               </ul>
             </div>
