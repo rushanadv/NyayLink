@@ -105,7 +105,12 @@ export function usePWAInstall() {
     }
 
     // iOS Safari fallback: open instructional guide
-    if (isIOS) {
+    const ua = typeof window !== "undefined" ? window.navigator.userAgent : "";
+    const isIOSDevice =
+      /iPad|iPhone|iPod/.test(ua) &&
+      !(window as unknown as { MSStream?: unknown }).MSStream;
+
+    if (isIOS || isIOSDevice) {
       setIsIOSModalOpen(true);
       return "ios";
     }
