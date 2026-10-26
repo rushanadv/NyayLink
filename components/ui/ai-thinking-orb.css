@@ -1,0 +1,380 @@
+/* ==========================================================================
+   AI Thinking Orb & Morphing Input Styles (.mo-*)
+   NyayLink Visual Identity: White & Forest Green System
+   Palette:
+     White:         #FFFFFF
+     Forest Green:  #205C43
+     Deep Green:    #174530
+     Pale Mint:     #EAF3ED
+     Primary Text:  #202824
+     Secondary:     #69736D
+     Border:        #D5E5D9
+   ========================================================================== */
+
+/* Main Component Container */
+.mo-wrapper {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+  perspective: 1200px;
+}
+
+.mo-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ==========================================================================
+   Phase 1: Morphing Idle Input Pill
+   ========================================================================== */
+
+.mo-input-pill {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  background: #FFFFFF;
+  border: 1.5px solid #D5E5D9;
+  border-radius: 28px;
+  box-shadow:
+    0 4px 20px -2px rgba(32, 92, 67, 0.08),
+    0 2px 6px -1px rgba(0, 0, 0, 0.04);
+  transition:
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease,
+    opacity 0.4s ease;
+  overflow: hidden;
+}
+
+.mo-input-pill:hover {
+  border-color: #205C43;
+  box-shadow:
+    0 8px 30px -4px rgba(32, 92, 67, 0.14),
+    0 4px 12px -2px rgba(0, 0, 0, 0.06);
+}
+
+.mo-input-pill:focus-within {
+  border-color: #205C43;
+  box-shadow:
+    0 0 0 3px rgba(32, 92, 67, 0.12),
+    0 8px 32px -4px rgba(32, 92, 67, 0.18);
+}
+
+/* Launching state: Pill compresses and transitions into flight */
+.mo-input-pill.mo-launching {
+  transform: translateY(-24px) scale(0.92);
+  opacity: 0.15;
+  filter: blur(1px);
+  pointer-events: none;
+}
+
+/* Shrunk / Hidden when orb or answer is active */
+.mo-input-pill.mo-hidden {
+  display: none;
+}
+
+/* ==========================================================================
+   Phase 2: Flight Trail Animation
+   ========================================================================== */
+
+.mo-flight-stage {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 500px;
+  height: 220px;
+  pointer-events: none;
+  z-index: 10;
+  overflow: visible;
+}
+
+@keyframes mo-trail-ascent {
+  0% {
+    opacity: 0;
+    transform: translateY(60px) scale(0.6);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(20px) scale(0.9);
+  }
+  80% {
+    opacity: 0.8;
+    transform: translateY(-20px) scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-60px) scale(1.2);
+  }
+}
+
+.mo-trail-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, #205C43 0%, rgba(78, 155, 120, 0.8) 50%, rgba(234, 243, 237, 0) 100%);
+  animation: mo-trail-ascent 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ==========================================================================
+   Phase 3 & 4: 3D Dotted Canvas Orb & Stage
+   ========================================================================== */
+
+.mo-orb-stage {
+  position: relative;
+  width: 320px;
+  height: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 12px auto 20px;
+  transition:
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.4s ease;
+}
+
+@media (max-width: 640px) {
+  .mo-orb-stage {
+    width: 260px;
+    height: 260px;
+  }
+}
+
+/* Ambient Pulse Halo behind Canvas */
+.mo-orb-halo {
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(32, 92, 67, 0.16) 0%,
+    rgba(234, 243, 237, 0.6) 45%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  filter: blur(20px);
+  pointer-events: none;
+  animation: mo-pulse-glow 3.2s ease-in-out infinite alternate;
+}
+
+@keyframes mo-pulse-glow {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(1.08);
+    opacity: 0.85;
+  }
+}
+
+.mo-orb-canvas {
+  position: relative;
+  display: block;
+  width: 320px;
+  height: 320px;
+  z-index: 2;
+  will-change: transform;
+}
+
+@media (max-width: 640px) {
+  .mo-orb-canvas {
+    width: 260px;
+    height: 260px;
+  }
+}
+
+/* Condensing Orb state */
+.mo-orb-stage.mo-condensing {
+  transform: scale(0.15) translateY(60px);
+  opacity: 0;
+  transition:
+    transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.4s ease;
+}
+
+/* ==========================================================================
+   Thinking Status Labels with Shimmer
+   ========================================================================== */
+
+.mo-status-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+  text-align: center;
+  z-index: 5;
+}
+
+.mo-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: #EAF3ED;
+  border: 1px solid #D5E5D9;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: #205C43;
+  letter-spacing: 0.02em;
+}
+
+.mo-status-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #202824;
+  animation: mo-status-fade 0.4s ease-out;
+  min-height: 20px;
+  max-width: 480px;
+}
+
+@keyframes mo-status-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mo-status-shimmer {
+  background: linear-gradient(
+    90deg,
+    #205C43 0%,
+    #4E9B78 25%,
+    #174530 50%,
+    #205C43 75%,
+    #4E9B78 100%
+  );
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: mo-shimmer 2.5s linear infinite;
+}
+
+@keyframes mo-shimmer {
+  to {
+    background-position: 200% center;
+  }
+}
+
+/* ==========================================================================
+   Phase 6 & 7: Unfolding Answer Card
+   ========================================================================== */
+
+.mo-answer-card {
+  position: relative;
+  width: 100%;
+  max-width: 860px;
+  background: #FFFFFF;
+  border: 1.5px solid #D5E5D9;
+  border-radius: 20px;
+  box-shadow:
+    0 10px 35px -5px rgba(32, 92, 67, 0.08),
+    0 4px 12px -2px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+  transform-origin: top center;
+  animation: mo-unfold 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes mo-unfold {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scaleY(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+.mo-card-header {
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid #EAF3ED;
+  background: linear-gradient(180deg, #F8FAF9 0%, #FFFFFF 100%);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mo-card-body {
+  padding: 24px;
+  color: #202824;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+@media (max-width: 640px) {
+  .mo-card-header {
+    padding: 14px 16px;
+  }
+  .mo-card-body {
+    padding: 16px;
+    font-size: 13.5px;
+  }
+}
+
+/* Word-by-word or clause reveal */
+.mo-word-reveal {
+  display: inline;
+  animation: mo-word-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes mo-word-in {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================================
+   Error & Shake Animation
+   ========================================================================== */
+
+.mo-shake {
+  animation: mo-shake-kf 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes mo-shake-kf {
+  10%, 90% { transform: translate3d(-2px, 0, 0); }
+  20%, 80% { transform: translate3d(4px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+  40%, 60% { transform: translate3d(6px, 0, 0); }
+}
+
+/* ==========================================================================
+   Reduced Motion Accessibility
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .mo-input-pill,
+  .mo-orb-stage,
+  .mo-answer-card,
+  .mo-status-label,
+  .mo-status-shimmer,
+  .mo-word-reveal,
+  .mo-orb-halo,
+  .mo-trail-particle,
+  .mo-shake {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}

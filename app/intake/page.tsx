@@ -4,9 +4,9 @@ import { ShieldCheck, Lock } from "lucide-react";
 
 export default function IntakePage() {
   return (
-    <div className="w-full max-w-5xl mx-auto px-3 sm:px-6 space-y-3 sm:space-y-4">
+    <div className="w-full max-w-5xl mx-auto px-3 sm:px-6 pt-6 sm:pt-10 pb-12 space-y-4 sm:space-y-6">
       {/* Page Header - Refined, Compact, and Confident */}
-      <div className="max-w-3xl mx-auto text-center space-y-1.5 pt-1 sm:pt-2 pb-1">
+      <div className="max-w-3xl mx-auto text-center space-y-1.5 pb-1">
         <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#EAF3ED] border border-[#D5E5D9] text-[10.5px] font-mono font-semibold text-[#205C43]">
           <span className="w-1.5 h-1.5 rounded-full bg-[#205C43] animate-pulse" />
           <span>CONFIDENTIAL LEGAL INTAKE</span>
