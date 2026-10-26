@@ -237,10 +237,10 @@ export async function POST(req: NextRequest) {
           const is404 = primaryStatus === 404 || fallbackStatus === 404;
 
           const errorMsg = is429
-            ? "AI legal intake is currently handling high request volume. Please retry in a few moments."
+            ? "AI preconsultation is currently handling high request volume. Please retry in a few moments."
             : is404
             ? "The AI legal model is temporarily undergoing maintenance upstream. Please retry in a few moments."
-            : "AI intake is temporarily unavailable from the upstream provider. Please retry shortly.";
+            : "AI preconsultation is temporarily unavailable from the upstream provider. Please retry shortly.";
 
           return NextResponse.json({ error: errorMsg }, { status: 502 });
         }

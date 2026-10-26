@@ -111,7 +111,7 @@ export function MarketingFooter() {
                 </li>
                 <li>
                   <Link
-                    href="/#for-advocates"
+                    href="/#for-lawyers"
                     className={`transition-colors ${
                       isDarkSubpage ? "hover:text-white" : "hover:text-[#205C43]"
                     }`}
@@ -121,7 +121,7 @@ export function MarketingFooter() {
                 </li>
                 <li>
                   <Link
-                    href="/#for-advocates"
+                    href="/#for-lawyers"
                     className={`transition-colors ${
                       isDarkSubpage ? "hover:text-white" : "hover:text-[#205C43]"
                     }`}
@@ -152,16 +152,54 @@ export function MarketingFooter() {
               </h4>
               <ul className="space-y-2">
                 <li>
-                  <span className="cursor-default">{t.home.footer.rule36Disclaimer}</span>
+                  <Link
+                    href="/privacy"
+                    className={`transition-colors ${
+                      isDarkSubpage ? "hover:text-white" : "hover:text-[#205C43]"
+                    }`}
+                  >
+                    {t.home.footer.privacyPolicy}
+                  </Link>
                 </li>
                 <li>
-                  <span className="cursor-default">{t.home.footer.escrowProtection}</span>
+                  <Link
+                    href="/terms"
+                    className={`transition-colors ${
+                      isDarkSubpage ? "hover:text-white" : "hover:text-[#205C43]"
+                    }`}
+                  >
+                    {t.home.footer.termsService}
+                  </Link>
                 </li>
                 <li>
-                  <span className="cursor-default">{t.home.footer.privacyPolicy}</span>
+                  <Link
+                    href="/support"
+                    className={`transition-colors ${
+                      isDarkSubpage ? "hover:text-white" : "hover:text-[#205C43]"
+                    }`}
+                  >
+                    {t.home.footer.supportContact}
+                  </Link>
                 </li>
                 <li>
-                  <span className="cursor-default">{t.home.footer.termsService}</span>
+                  <Link
+                    href="/support#account-deletion"
+                    className={`transition-colors ${
+                      isDarkSubpage ? "hover:text-white" : "hover:text-[#205C43]"
+                    }`}
+                  >
+                    {t.home.footer.accountDeletion}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/reviewer"
+                    className={`transition-colors font-mono text-[10px] ${
+                      isDarkSubpage ? "text-white/60 hover:text-white" : "text-[#205C43] hover:underline"
+                    }`}
+                  >
+                    {isHindi ? "ऐप रिव्यूअर एक्सेस →" : "App Reviewer Access →"}
+                  </Link>
                 </li>
               </ul>
             </div>

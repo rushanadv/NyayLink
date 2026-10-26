@@ -23,9 +23,9 @@ interface CredentialPanel {
 const CREDENTIAL_PANELS: CredentialPanel[] = [
   {
     id: "bci",
-    title: "BCI Verified",
+    title: "Bar Council Enrolled",
     subtitle: "State Bar Council Roll Authentication",
-    stat: "480+ Enrolled",
+    stat: "Verified Advocates",
     icon: ShieldCheck,
   },
   {
@@ -36,24 +36,24 @@ const CREDENTIAL_PANELS: CredentialPanel[] = [
     icon: Scale,
   },
   {
-    id: "escrow",
-    title: "Milestone Escrow",
-    subtitle: "Triple-Layer Retainer Fund Security",
-    stat: "₹0 Commission",
+    id: "terms",
+    title: "Transparent Terms",
+    subtitle: "Direct Counsel Consultation Terms",
+    stat: "Upfront Fees",
     icon: Lock,
   },
   {
-    id: "ecourts",
-    title: "e-Courts Integrated",
-    subtitle: "Automated Daily Cause List Sync",
-    stat: "28 States & UTs",
+    id: "docket",
+    title: "Docket Tracking",
+    subtitle: "Official eCourts Services Linkage",
+    stat: "Hearing Diary",
     icon: RefreshCw,
   },
   {
     id: "vakalatnama",
     title: "Digital Vakalatnama",
-    subtitle: "Aadhaar e-Sign & Digital Vault",
-    stat: "256-bit Encrypted",
+    subtitle: "Section 30 Drafting & Digital Vault",
+    stat: "TLS Encrypted",
     icon: FileCheck2,
   },
 ];

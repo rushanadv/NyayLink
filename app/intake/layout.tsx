@@ -6,9 +6,9 @@ import { SmoothScrollProvider } from "@/components/marketing/smooth-scroll-provi
 import { CinematicVideoBackground } from "@/components/marketing/cinematic-video-background";
 
 export const metadata: Metadata = {
-  title: "AI Legal Intake Assistant | NyayLink",
+  title: "AI Preconsultation Assistant | NyayLink",
   description:
-    "Confidential, plain-language legal intake powered by Indian legal jurisprudence. Receive preliminary legal clarity, understand remedies, and connect with verified advocates.",
+    "Confidential, plain-language legal preconsultation powered by Indian legal jurisprudence. Receive preliminary informational legal clarity, understand remedies, and connect with verified advocates.",
 };
 
 const fontSerif = Fraunces({

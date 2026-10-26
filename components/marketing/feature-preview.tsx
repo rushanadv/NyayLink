@@ -176,7 +176,7 @@ function PreviewSearchMatch() {
       {/* Stamped Filter Chips */}
       <div className="flex flex-wrap gap-2 text-[11px]">
         <span className="px-2 py-0.5 rounded-lg bg-[#C5A059]/10 text-[#DFBE7E] border border-[#C5A059]/30 text-[10px] font-mono uppercase tracking-wider font-semibold flex items-center gap-1">
-          <ShieldCheck className="w-3 h-3 text-[#C5A059]" /> BCI Verified
+          <ShieldCheck className="w-3 h-3 text-[#C5A059]" /> Bar Enrolled
         </span>
         <span className="px-2.5 py-0.5 rounded-lg bg-surface-raised text-[#A5A3B2] border border-border-default text-[11px]">
           Civil & RERA
@@ -204,7 +204,7 @@ function PreviewSearchMatch() {
                     Adv. Rajesh Sharma
                   </h3>
                   <span className="px-1.5 py-0.5 rounded-lg bg-[#C5A059]/10 border border-[#C5A059]/30 text-[9px] font-mono text-[#DFBE7E] uppercase tracking-wider flex items-center gap-1 font-semibold">
-                    <ShieldCheck className="w-2.5 h-2.5 text-[#C5A059]" /> BCI VERIFIED · D/1429
+                    <ShieldCheck className="w-2.5 h-2.5 text-[#C5A059]" /> BAR ENROLLED · D/1429
                   </span>
                 </div>
                 <p className="text-[11px] text-[#A5A3B2] mt-0.5">
@@ -238,7 +238,7 @@ function PreviewSearchMatch() {
                     Adv. Meera Sen
                   </h3>
                   <span className="px-1.5 py-0.5 rounded-lg bg-[#C5A059]/10 border border-[#C5A059]/30 text-[9px] font-mono text-[#DFBE7E] uppercase tracking-wider flex items-center gap-1 font-semibold">
-                    <ShieldCheck className="w-2.5 h-2.5 text-[#C5A059]" /> BCI VERIFIED · MAH/3120
+                    <ShieldCheck className="w-2.5 h-2.5 text-[#C5A059]" /> BAR ENROLLED · MAH/3120
                   </span>
                 </div>
                 <p className="text-[11px] text-[#A5A3B2] mt-0.5">
@@ -435,7 +435,7 @@ function PreviewLawyerWorkspace() {
             Today&apos;s Cause List
           </span>
           <span className="text-[10px] font-mono text-emerald-400">
-            e-Courts Synced
+            Docket Logged
           </span>
         </div>
 
@@ -484,7 +484,7 @@ function PreviewLawyerWorkspace() {
           <span className="text-base font-bold text-white font-mono">
             e-Signed
           </span>
-          <span className="text-white/40 text-[10px] block">Aadhaar verified</span>
+          <span className="text-white/40 text-[10px] block">Section 30 Draft</span>
         </div>
       </div>
     </div>
@@ -502,7 +502,7 @@ function PreviewVerifiedCompliant() {
         </div>
         <div>
           <h3 className="text-xs font-semibold text-white">
-            Bar Council of India Verification Shield
+            State Bar Council Credentials Authentication
           </h3>
           <p className="text-[11px] text-[#A5A3B2] max-w-sm mx-auto mt-0.5">
             Every enrolled advocate undergoes credential validation against
@@ -524,8 +524,8 @@ function PreviewVerifiedCompliant() {
         <div className="p-2.5 rounded-lg bg-[#121622] border border-border-subtle flex items-center gap-2.5">
           <Lock className="w-4 h-4 text-white/60 shrink-0" />
           <span className="text-white/80 text-[11px]">
-            <strong className="text-white">Privileged Communications:</strong>{" "}
-            End-to-end 256-bit AES encryption protecting all case notes.
+            <strong className="text-white">Confidential Communications:</strong>{" "}
+            TLS transit encryption & authenticated row-level database protection for case notes.
           </span>
         </div>
       </div>

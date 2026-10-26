@@ -477,6 +477,8 @@ export interface Dictionary {
       ethicsGuidelines: string;
       privacyPolicy: string;
       termsService: string;
+      supportContact: string;
+      accountDeletion: string;
       rule36Disclaimer: string;
       disclaimerNotice: string;
       copyright: string;

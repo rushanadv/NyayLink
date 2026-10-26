@@ -17,7 +17,7 @@ export function IntakeTab() {
       {/* Header */}
       <div className="pb-4 border-b border-[#D5E5D9]">
         <h1 className="text-xl sm:text-2xl font-serif font-semibold text-[#202824]">
-          Nyay AI Legal Intake & Triage
+          Nyay AI Preconsultation & Triage
         </h1>
         <p className="text-xs text-[#69736D] mt-1">
           Structure your case facts, analyze Indian statutory provisions, and prepare lawyer-ready dockets.
@@ -45,7 +45,7 @@ export function IntakeTab() {
           </div>
           <div>
             <h2 className="text-lg font-serif font-semibold text-[#202824]">
-              Start an Interactive AI Legal Intake
+              Start an Interactive AI Preconsultation
             </h2>
             <p className="text-xs text-[#69736D]">
               Conversational legal diagnosis powered by Indian statutory legal models
@@ -85,7 +85,7 @@ export function IntakeTab() {
             className="px-5 py-2.5 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white text-xs font-semibold flex items-center gap-2 transition-all shadow-xs active:scale-[0.99]"
           >
             <MessageSquare className="w-3.5 h-3.5" />
-            <span>Launch AI Intake Assistant</span>
+            <span>Launch AI Preconsultation Assistant</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
           <span className="text-xs text-[#69736D]">

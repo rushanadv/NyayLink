@@ -263,7 +263,7 @@ export function SectionStubs() {
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-semibold text-white">Adv. Rajesh Sharma</span>
                         <span className="px-1.5 py-0.5 rounded-lg bg-[#C5A059]/10 border border-[#C5A059]/30 text-[9px] font-mono text-[#DFBE7E] uppercase tracking-wider flex items-center gap-1 font-semibold">
-                          <ShieldCheck className="w-2.5 h-2.5 text-[#C5A059]" /> BCI VERIFIED
+                          <ShieldCheck className="w-2.5 h-2.5 text-[#C5A059]" /> BAR ENROLLED
                         </span>
                       </div>
                       <p className="text-[11px] text-[#A5A3B2] mt-0.5">Delhi High Court & Supreme Court · 18 yrs exp</p>
@@ -284,7 +284,7 @@ export function SectionStubs() {
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-semibold text-white">Adv. Meera Sen</span>
                         <span className="px-1.5 py-0.5 rounded-lg bg-[#C5A059]/10 border border-[#C5A059]/30 text-[9px] font-mono text-[#DFBE7E] uppercase tracking-wider flex items-center gap-1 font-semibold">
-                          <ShieldCheck className="w-2.5 h-2.5 text-[#C5A059]" /> BCI VERIFIED
+                          <ShieldCheck className="w-2.5 h-2.5 text-[#C5A059]" /> BAR ENROLLED
                         </span>
                       </div>
                       <p className="text-[11px] text-[#A5A3B2] mt-0.5">Bombay High Court & NCLT · 12 yrs exp</p>
@@ -426,23 +426,23 @@ export function SectionStubs() {
               Digital litigation infrastructure for independent counsel.
             </h2>
             <p className="text-[13px] sm:text-sm text-[#9491A1] leading-relaxed">
-              Automate daily cause list alerts, client onboarding, digital
-              Vakalatnama signing via Aadhaar OTP, and milestone fee escrow. Built
+              Organize hearing calendar entries, client inquiries, digital
+              Vakalatnama drafting under Section 30, and transparent consultation terms. Built
               from the ground up specifically for Indian litigation chambers.
             </p>
 
             <div className="space-y-2 text-xs text-[#A5A3B2]">
               <div className="flex items-center gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-white/60 shrink-0" />
-                <span>e-Courts daily cause list sync directly to WhatsApp/SMS</span>
+                <span>Hearing diary and case docket tracking with eCourts linkage</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-white/60 shrink-0" />
-                <span>Legally valid digital Vakalatnama e-signing (Aadhaar OTP)</span>
+                <span>Section 30 compliant digital Vakalatnama drafting with SHA-256 fingerprint</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-white/60 shrink-0" />
-                <span>Zero commission — 100% of escrow retainer released directly to counsel</span>
+                <span>Direct client consultation terms agreed upfront with zero intermediary cuts</span>
               </div>
             </div>
 
@@ -467,9 +467,9 @@ export function SectionStubs() {
                   <div className="flex items-center justify-between text-xs mb-1">
                     <span className="font-mono text-[11px] text-emerald-400 font-semibold tracking-wider flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      09:30 AM · CAUSE LIST SYNC
+                      09:30 AM · CHAMBER DOCKET ENTRY
                     </span>
-                    <span className="font-mono text-[10px] text-white/40">e-Courts API</span>
+                    <span className="font-mono text-[10px] text-white/40">Hearing Diary</span>
                   </div>
                   <h4 className="text-sm font-semibold text-white">Court 14, Item #19 — Interim Stay Application</h4>
                   <p className="text-xs text-[#9491A1] mt-0.5">High Court of Delhi · Sharma v. Capital Realty</p>
@@ -477,7 +477,7 @@ export function SectionStubs() {
                     <span className="px-2 py-0.5 rounded-lg bg-emerald-950/60 border border-emerald-500/20 text-[10px] font-mono text-emerald-400">
                       Listed #19 (Urgent)
                     </span>
-                    <span className="text-[10px] text-white/40 font-mono">Synced to WhatsApp & Chamber Calendar</span>
+                    <span className="text-[10px] text-white/40 font-mono">Recorded in Chamber Hearing Diary</span>
                   </div>
                 </div>
               </div>
@@ -490,15 +490,15 @@ export function SectionStubs() {
                     <span className="font-mono text-[11px] text-white font-semibold tracking-wider">
                       11:15 AM · DIGITAL VAKALATNAMA
                     </span>
-                    <span className="font-mono text-[10px] text-white/70">Aadhaar OTP Verified</span>
+                    <span className="font-mono text-[10px] text-white/70">SHA-256 Draft</span>
                   </div>
-                  <h4 className="text-sm font-semibold text-white">Client Authorization & Digital Seal Executed</h4>
-                  <p className="text-xs text-[#9491A1] mt-0.5">Digitally signed under Section 65B of Indian Evidence Act</p>
+                  <h4 className="text-sm font-semibold text-white">Appointment Memo & Authority Terms Formulated</h4>
+                  <p className="text-xs text-[#9491A1] mt-0.5">Prepared under Section 30 of Advocates Act, 1961</p>
                   <div className="mt-2.5 flex items-center gap-2">
                     <span className="px-2 py-0.5 rounded-lg bg-surface-hover border border-border-default text-[10px] font-mono text-white/80">
                       Enforceable Vakalatnama
                     </span>
-                    <span className="text-[10px] text-white/40 font-mono">UIDAI e-Sign Certified</span>
+                    <span className="text-[10px] text-white/40 font-mono">Export Ready for e-Filing / Court</span>
                   </div>
                 </div>
               </div>
@@ -588,7 +588,7 @@ export function SectionStubs() {
                   Advocate-Client Privilege
                 </span>
                 <span className="text-[12px] text-white/80 block mt-0.5 leading-snug">
-                  256-bit AES encryption protecting privileged legal consultations and case brief records.
+                  TLS transmission encryption and authenticated row-level database separation protecting consultations and case brief records.
                 </span>
               </div>
             </div>

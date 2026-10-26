@@ -21,7 +21,6 @@ import {
   RotateCcw,
   Sparkles,
   Video,
-  Building,
 } from "lucide-react";
 import { MagneticWrapper } from "@/components/ui/magnetic-wrapper";
 import {
@@ -152,6 +151,12 @@ export function LawyerDirectoryClient({
   const filteredLawyers = useMemo(() => {
     return initialLawyers
       .filter((lawyer) => {
+        // Exclude synthetic/demo test accounts from public discovery
+        const lowerName = lawyer.professional_name.toLowerCase();
+        if (lowerName.includes("demo") || lowerName.includes("synthetic") || lowerName.includes("reviewer test")) {
+          return false;
+        }
+
         // 1. Text Search query across multiple fields
         if (searchQuery.trim()) {
           const q = searchQuery.toLowerCase().trim();
@@ -631,7 +636,7 @@ export function LawyerDirectoryClient({
           </h2>
           <p className="text-xs sm:text-sm text-[#69736D] leading-relaxed max-w-md mx-auto">
             {errorMessage ||
-              "We are having trouble connecting to our Bar Council verification registry right now. Our technical team has been notified. You can retry the connection or start an AI Legal Intake session."}
+              "We are having trouble connecting to our Bar Council verification registry right now. Our technical team has been notified. You can retry the connection or start an AI Preconsultation session."}
           </p>
           <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
             <button
@@ -646,7 +651,7 @@ export function LawyerDirectoryClient({
               className="px-5 py-2.5 rounded-xl bg-[#EAF3ED] hover:bg-[#D5E5D9] text-xs font-semibold text-[#205C43] border border-[#D5E5D9] transition-colors flex items-center gap-1.5 shadow-xs"
             >
               <Sparkles className="w-3.5 h-3.5 text-[#205C43]" />
-              Start AI Legal Intake
+              Start AI Preconsultation
             </Link>
           </div>
         </div>
@@ -668,7 +673,7 @@ export function LawyerDirectoryClient({
               className="px-5 py-2.5 rounded-xl bg-[#205C43] hover:bg-[#174530] text-xs font-semibold text-white transition-colors flex items-center gap-1.5 shadow-xs"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              Start AI Legal Intake
+              Start AI Preconsultation
             </Link>
             <Link
               href="/auth/sign-up?intent=lawyer"

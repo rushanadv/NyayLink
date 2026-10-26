@@ -31,10 +31,12 @@ async function runTests() {
     }
   }
 
+const BASE_URL = process.env.TEST_BASE_URL || "http://localhost:3000";
+
   // TEST 1: Unauthenticated visitor redirection check
   console.log("\n[Test 1/7] Testing unauthenticated visitor access control...");
   try {
-    const res = await fetch("http://localhost:3001/admin/dashboard", {
+    const res = await fetch(`${BASE_URL}/admin/dashboard`, {
       redirect: "manual",
     });
     const status = res.status;
@@ -176,7 +178,7 @@ async function runTests() {
   // TEST 7: Route structure and Next.js redirect test
   console.log("\n[Test 7/7] Testing /admin root redirect to /admin/dashboard...");
   try {
-    const adminRes = await fetch("http://localhost:3001/admin", {
+    const adminRes = await fetch(`${BASE_URL}/admin`, {
       redirect: "manual",
     });
     const adminLocation = adminRes.headers.get("location");

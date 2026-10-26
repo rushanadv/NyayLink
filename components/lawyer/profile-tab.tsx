@@ -8,6 +8,7 @@ import {
 } from "./profile-completion-experience";
 import { getAdvocateFullProfile } from "@/app/actions/advocate-profile";
 import { AnimatedGavelLoader } from "@/components/ui/animated-gavel-loader";
+import { AccountDeletionCard } from "@/components/account/account-deletion-card";
 
 interface ProfileTabProps {
   userEmail: string;
@@ -18,8 +19,8 @@ interface ProfileTabProps {
 
 export function ProfileTab({
   userEmail,
-  lawyerProfile,
-  verification,
+  lawyerProfile: _lawyerProfile,
+  verification: _verification,
   fullProfileData,
 }: ProfileTabProps) {
   const [data, setData] = useState<ProfileCompletionProps["initialData"] | null>(
@@ -58,9 +59,16 @@ export function ProfileTab({
   }
 
   return (
-    <ProfileCompletionExperience
-      initialData={data}
-      onCompleteRedirect="/lawyer/dashboard"
-    />
+    <div className="space-y-10">
+      <ProfileCompletionExperience
+        initialData={data}
+        onCompleteRedirect="/lawyer/dashboard"
+      />
+
+      {/* DPDP Act 2023 Compliant Advocate Account Deletion */}
+      <div className="max-w-4xl mx-auto pt-6 border-t border-[#D5E5D9]">
+        <AccountDeletionCard userEmail={userEmail} userRole="lawyer" />
+      </div>
+    </div>
   );
 }

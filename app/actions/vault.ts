@@ -332,3 +332,104 @@ export async function renameVaultDocument(documentId: string, newTitle: string) 
   revalidatePath("/dashboard");
   return { success: true };
 }
+
+/**
+ * Replaces an existing vault document with an updated file version,
+ * computing a fresh SHA-256 hash, uploading to storage, updating metadata, and removing the superseded file.
+ */
+export async function replaceVaultDocument(
+  documentId: string,
+  oldStoragePath: string,
+  formData: FormData
+) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { success: false, error: "Authentication required to replace documents." };
+  }
+
+  if (!oldStoragePath.startsWith(`${user.id}/`)) {
+    return { success: false, error: "Unauthorized access to replace this document." };
+  }
+
+  const file = formData.get("file") as File | null;
+  if (!file) {
+    return { success: false, error: "No replacement file provided." };
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    return {
+      success: false,
+      error: `File size exceeds the 15MB limit. (Received ${(file.size / (1024 * 1024)).toFixed(1)}MB)`,
+    };
+  }
+
+  if (!ALLOWED_MIME_TYPES.has(file.type)) {
+    return {
+      success: false,
+      error: `File type '${file.type}' is not supported. Allowed formats: PDF, JPEG, PNG, WebP.`,
+    };
+  }
+
+  try {
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const sha256Hash = crypto.createHash("sha256").update(buffer).digest("hex");
+
+    const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const newStoragePath = `${user.id}/vault/${documentId}_v2_${sanitizedName}`;
+
+    // Upload new version
+    const { error: uploadError } = await supabase.storage
+      .from("advocate-credentials")
+      .upload(newStoragePath, buffer, { contentType: file.type, upsert: true });
+
+    if (uploadError) {
+      return { success: false, error: uploadError.message || "Failed to upload replacement file." };
+    }
+
+    // Update database record
+    const { error: updateError } = await supabase
+      .from("client_vault_documents")
+      .update({
+        file_name: file.name,
+        file_size: file.size,
+        mime_type: file.type,
+        storage_path: newStoragePath,
+        sha256_hash: sha256Hash,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", documentId)
+      .eq("user_id", user.id);
+
+    if (updateError) {
+      return { success: false, error: updateError.message };
+    }
+
+    // Clean up old storage object if path changed
+    if (oldStoragePath !== newStoragePath) {
+      await supabase.storage.from("advocate-credentials").remove([oldStoragePath]);
+    }
+
+    revalidatePath("/dashboard");
+    return {
+      success: true,
+      document: {
+        file_name: file.name,
+        file_size: file.size,
+        mime_type: file.type,
+        storage_path: newStoragePath,
+        sha256_hash: sha256Hash,
+      },
+    };
+  } catch (err: unknown) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Failed to replace document.",
+    };
+  }
+}
+

@@ -23,6 +23,7 @@ import {
   getClientVaultDocuments,
   deleteVaultDocument,
   renameVaultDocument,
+  replaceVaultDocument,
   type VaultDocumentRecord,
 } from "@/app/actions/vault";
 import { useLanguage } from "@/lib/i18n/context";
@@ -72,6 +73,17 @@ export function DocumentsTab({ matters }: DocumentsTabProps) {
   // Rename Dialog State
   const [renamingDoc, setRenamingDoc] = useState<VaultDocumentRecord | null>(null);
   const [newTitle, setNewTitle] = useState("");
+
+  // Deletion Modal State
+  const [deletingDoc, setDeletingDoc] = useState<VaultDocumentRecord | null>(null);
+  const [isDeletingDoc, setIsDeletingDoc] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  // Replacement Modal State
+  const [replacingDoc, setReplacingDoc] = useState<VaultDocumentRecord | null>(null);
+  const [replacementFile, setReplacementFile] = useState<File | null>(null);
+  const [isReplacingDoc, setIsReplacingDoc] = useState(false);
+  const [replaceError, setReplaceError] = useState<string | null>(null);
 
   // Load documents on mount
   useEffect(() => {
@@ -166,22 +178,67 @@ export function DocumentsTab({ matters }: DocumentsTabProps) {
     }
   };
 
-  const handleDelete = async (doc: VaultDocumentRecord) => {
-    const confirmMsg = isHindi
-      ? `क्या आप वास्तव में "${doc.title}" को सुरक्षित वॉल्ट से हटाना चाहते हैं?`
-      : `Are you sure you want to permanently delete "${doc.title}" from your vault?`;
+  const handleDeleteClick = (doc: VaultDocumentRecord) => {
+    setDeleteError(null);
+    setDeletingDoc(doc);
+  };
 
-    if (!window.confirm(confirmMsg)) return;
+  const handleConfirmDelete = async () => {
+    if (!deletingDoc) return;
+    setIsDeletingDoc(true);
+    setDeleteError(null);
 
     try {
-      const res = await deleteVaultDocument(doc.id, doc.storage_path);
+      const res = await deleteVaultDocument(deletingDoc.id, deletingDoc.storage_path);
       if (res.success) {
-        setDocuments((prev) => prev.filter((d) => d.id !== doc.id));
+        setDocuments((prev) => prev.filter((d) => d.id !== deletingDoc.id));
+        setDeletingDoc(null);
       } else {
-        alert(res.error || "Failed to delete document");
+        setDeleteError(res.error || "Failed to delete document from vault.");
       }
-    } catch (err) {
-      console.error("Delete error:", err);
+    } catch (err: unknown) {
+      setDeleteError(err instanceof Error ? err.message : "An error occurred while deleting.");
+    } finally {
+      setIsDeletingDoc(false);
+    }
+  };
+
+  const handleReplaceSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!replacingDoc || !replacementFile) return;
+
+    setIsReplacingDoc(true);
+    setReplaceError(null);
+
+    const formData = new FormData();
+    formData.append("file", replacementFile);
+
+    try {
+      const res = await replaceVaultDocument(replacingDoc.id, replacingDoc.storage_path, formData);
+      if (res.success && res.document) {
+        setDocuments((prev) =>
+          prev.map((d) =>
+            d.id === replacingDoc.id
+              ? {
+                  ...d,
+                  file_name: res.document!.file_name,
+                  file_size: res.document!.file_size,
+                  mime_type: res.document!.mime_type,
+                  storage_path: res.document!.storage_path,
+                  sha256_hash: res.document!.sha256_hash,
+                }
+              : d
+          )
+        );
+        setReplacingDoc(null);
+        setReplacementFile(null);
+      } else {
+        setReplaceError(res.error || "Failed to replace document.");
+      }
+    } catch (err: unknown) {
+      setReplaceError(err instanceof Error ? err.message : "Failed to replace document.");
+    } finally {
+      setIsReplacingDoc(false);
     }
   };
 
@@ -221,7 +278,7 @@ export function DocumentsTab({ matters }: DocumentsTabProps) {
 
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EAF3ED] border border-[#D5E5D9] text-xs font-mono font-semibold text-[#205C43] self-start sm:self-auto">
           <Lock className="w-3.5 h-3.5 text-[#205C43]" />
-          <span>{isHindi ? "256-बिट एंड-टू-एंड पृथक्करण" : "256-Bit Vault Enclave"}</span>
+          <span>{isHindi ? "आरएलएस व टीएलएस संरक्षित वॉल्ट" : "RLS & TLS Protected Vault"}</span>
         </div>
       </div>
 
@@ -498,9 +555,21 @@ export function DocumentsTab({ matters }: DocumentsTabProps) {
                         <Edit2 className="w-3.5 h-3.5" />
                       </button>
                       <button
-                        onClick={() => handleDelete(doc)}
+                        onClick={() => {
+                          setReplacingDoc(doc);
+                          setReplacementFile(null);
+                          setReplaceError(null);
+                        }}
+                        className="p-1.5 rounded-lg hover:bg-[#F8FAF9] text-[#69736D] hover:text-[#205C43] transition-colors"
+                        title={isHindi ? "फ़ाइल बदलें (नया संस्करण)" : "Replace with new version"}
+                        aria-label="Replace document"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(doc)}
                         className="p-1.5 rounded-lg hover:bg-rose-50 text-[#69736D] hover:text-rose-700 transition-colors"
-                        title="Delete from vault"
+                        title={isHindi ? "वॉल्ट से हटाएं" : "Delete from vault"}
                         aria-label="Delete document"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -573,6 +642,159 @@ export function DocumentsTab({ matters }: DocumentsTabProps) {
                   className="px-4 py-2 rounded-lg bg-[#205C43] hover:bg-[#174530] text-white text-xs font-semibold"
                 >
                   Save Title
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Rich Delete Confirmation Modal */}
+      {deletingDoc && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-[#D5E5D9] p-6 max-w-md w-full shadow-2xl space-y-4 text-xs">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-red-50 border border-red-200 flex items-center justify-center text-red-600 shrink-0">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-serif font-bold text-[#202824]">
+                  {isHindi ? "दस्तावेज़ हटाने की पुष्टि" : "Confirm Document Deletion"}
+                </h3>
+                <p className="text-[11px] text-[#69736D] truncate max-w-xs">{deletingDoc.title}</p>
+              </div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] space-y-1.5 text-[11px] text-[#69736D]">
+              <div className="flex justify-between">
+                <span>{isHindi ? "फ़ाइल नाम:" : "File Name:"}</span>
+                <span className="font-mono text-[#202824] truncate max-w-[180px]">{deletingDoc.file_name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>{isHindi ? "आकार:" : "Size:"}</span>
+                <span className="font-mono text-[#202824]">{formatBytes(deletingDoc.file_size)}</span>
+              </div>
+              {deletingDoc.matter_title && (
+                <div className="pt-1 border-t border-[#D5E5D9] text-amber-800">
+                  ⚠️ <strong>{isHindi ? "संबद्ध केस:" : "Associated Matter:"}</strong> {deletingDoc.matter_title}
+                  <p className="text-[10px] text-amber-700 mt-0.5">
+                    {isHindi
+                      ? "यह दस्तावेज़ आपके वॉल्ट से हटा दिया जाएगा। यदि यह केस अदालत में विचाराधीन है, तो अधिवक्ता के पास विधिक रिकॉर्ड सुरक्षित रह सकते हैं।"
+                      : "Removing this file clears your personal vault. If this matter is active in court, assigned counsel may retain statutory proceeding copies."}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <p className="text-[#69736D] leading-relaxed">
+              {isHindi
+                ? "यह फ़ाइल सुपाबेस स्टोरेज बकेट और आपके डेटाबेस से स्थायी रूप से हटा दी जाएगी।"
+                : "This file will be permanently removed from Supabase Storage and your vault index. This action is irreversible."}
+            </p>
+
+            {deleteError && (
+              <div className="p-2.5 rounded-lg bg-red-50 border border-red-200 text-red-700 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+                <span>{deleteError}</span>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-[#D5E5D9]">
+              <button
+                type="button"
+                onClick={() => setDeletingDoc(null)}
+                disabled={isDeletingDoc}
+                className="px-4 py-2 rounded-lg border border-[#D5E5D9] text-xs font-medium text-[#69736D] hover:bg-[#F8FAF9]"
+              >
+                {isHindi ? "रद्द करें" : "Cancel"}
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                disabled={isDeletingDoc}
+                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50"
+              >
+                {isDeletingDoc ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>{isHindi ? "हटाया जा रहा है..." : "Deleting..."}</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>{isHindi ? "स्थायी रूप से हटाएं" : "Permanently Delete"}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Replace Document Modal */}
+      {replacingDoc && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-[#D5E5D9] p-6 max-w-md w-full shadow-2xl space-y-4 text-xs">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#EAF3ED] border border-[#D5E5D9] flex items-center justify-center text-[#205C43] shrink-0">
+                <Upload className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-serif font-bold text-[#202824]">
+                  {isHindi ? "दस्तावेज़ बदलें (नया संस्करण)" : "Replace Document Version"}
+                </h3>
+                <p className="text-[11px] text-[#69736D] truncate max-w-xs">{replacingDoc.title}</p>
+              </div>
+            </div>
+
+            <p className="text-[#69736D]">
+              {isHindi
+                ? "नया प्रारूप (PDF, JPEG, PNG, WebP) चुनें। नई फ़ाइल का SHA-256 हैश तैयार कर पुरानी फ़ाइल बदल दी जाएगी।"
+                : "Select an updated file (PDF, JPEG, PNG, WebP). A fresh cryptographic SHA-256 fingerprint will be computed and the previous version replaced."}
+            </p>
+
+            <form onSubmit={handleReplaceSubmit} className="space-y-4">
+              <input
+                type="file"
+                required
+                accept=".pdf,.jpg,.jpeg,.png,.webp"
+                onChange={(e) => setReplacementFile(e.target.files?.[0] || null)}
+                disabled={isReplacingDoc}
+                className="w-full text-xs text-[#69736D] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#EAF3ED] file:text-[#205C43] hover:file:bg-[#D5E5D9]"
+              />
+
+              {replaceError && (
+                <div className="p-2.5 rounded-lg bg-red-50 border border-red-200 text-red-700 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+                  <span>{replaceError}</span>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-[#D5E5D9]">
+                <button
+                  type="button"
+                  onClick={() => setReplacingDoc(null)}
+                  disabled={isReplacingDoc}
+                  className="px-4 py-2 rounded-lg border border-[#D5E5D9] text-xs font-medium text-[#69736D] hover:bg-[#F8FAF9]"
+                >
+                  {isHindi ? "रद्द करें" : "Cancel"}
+                </button>
+                <button
+                  type="submit"
+                  disabled={isReplacingDoc || !replacementFile}
+                  className="px-4 py-2 rounded-lg bg-[#205C43] hover:bg-[#174530] text-white text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {isReplacingDoc ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>{isHindi ? "अपलोड हो रहा है..." : "Replacing..."}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>{isHindi ? "नया संस्करण सहेजें" : "Upload Replacement"}</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

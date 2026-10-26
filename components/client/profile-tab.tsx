@@ -4,6 +4,7 @@ import { useState } from "react";
 import { UserProfile } from "@/lib/portal/types";
 import { updateClientProfile } from "@/app/actions/portal";
 import { LogoutButton } from "@/components/logout-button";
+import { AccountDeletionCard } from "@/components/account/account-deletion-card";
 import {
   User,
   Phone,
@@ -175,6 +176,9 @@ export function ProfileTab({ userEmail, userId, profile }: ProfileTabProps) {
           <LogoutButton />
         </div>
       </div>
+
+      {/* DPDP Act 2023 Compliant Account Deletion */}
+      <AccountDeletionCard userEmail={userEmail} userRole="client" />
     </div>
   );
 }

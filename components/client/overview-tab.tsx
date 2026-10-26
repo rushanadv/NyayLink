@@ -67,7 +67,7 @@ export function OverviewTab({
               className="px-4 py-2.5 rounded-xl bg-[#EAF3ED] hover:bg-[#D5E5D9] border border-[#D5E5D9] text-[#205C43] text-xs font-semibold flex items-center gap-2 transition-all shadow-xs"
             >
               <Sparkles className="w-3.5 h-3.5 text-[#205C43]" />
-              <span>Start AI Legal Intake</span>
+              <span>Start AI Preconsultation</span>
             </a>
           </div>
         </div>
@@ -333,7 +333,7 @@ export function OverviewTab({
           </div>
           <div>
             <h3 className="text-sm font-semibold text-[#202824]">
-              Nyay AI Legal Intake & Case Assessment
+              Nyay AI Preconsultation & Case Assessment
             </h3>
             <p className="text-xs text-[#69736D] mt-0.5 max-w-xl leading-relaxed">
               Analyze Indian legal provisions, structure your case facts, and generate a lawyer-ready case brief before booking your advocate consultation.
@@ -344,7 +344,7 @@ export function OverviewTab({
           onClick={() => onNavigateTab("intake")}
           className="px-4 py-2 rounded-xl bg-white hover:bg-[#EAF3ED] border border-[#D5E5D9] text-[#205C43] text-xs font-semibold shrink-0 transition-colors shadow-xs"
         >
-          Open AI Intake &rarr;
+          Open AI Preconsultation &rarr;
         </button>
       </div>
     </div>

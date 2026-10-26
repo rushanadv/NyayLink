@@ -5,9 +5,8 @@ import Link from "next/link";
 import {
   Sparkles,
   MapPin,
-  CheckCircle2,
-  Lock,
   Shield,
+  ShieldCheck,
   Users,
   Home,
   Briefcase,
@@ -96,6 +95,7 @@ export function ChatInterface() {
   const [liveStreamText, setLiveStreamText] = useState("");
   const [apiError, setApiError] = useState<string | null>(null);
   const [failedPrompt, setFailedPrompt] = useState<string | null>(null);
+  const [showFullDisclaimer, setShowFullDisclaimer] = useState(false);
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -348,7 +348,7 @@ export function ChatInterface() {
           </div>
           <div>
             <h2 className="text-[#202824] font-semibold text-xs sm:text-sm flex items-center gap-1.5">
-              <span>NyayLink AI Legal Intake</span>
+              <span>{isHindi ? "न्यायलिंक एआई पूर्व-परामर्श" : "NyayLink AI Preconsultation"}</span>
               <span
                 className={`w-1.5 h-1.5 rounded-full ${
                   isLoading ? "bg-amber-500 animate-ping" : "bg-[#205C43]"
@@ -409,19 +409,52 @@ export function ChatInterface() {
         </div>
       </div>
 
-      {/* Escrow & Confidentiality Micro-Banner */}
-      <div className="shrink-0 px-4 sm:px-6 py-1.5 bg-[#EAF3ED]/40 border-b border-[#D5E5D9] flex items-center justify-between text-[11px] text-[#69736D]">
-        <div className="flex items-center gap-2">
-          <Lock className="w-3 h-3 text-[#205C43]" />
-          <span>
-            {isHindi
-              ? "सत्र निजी और गोपनीय है। कोई अनुचित वकालत प्रचार नहीं।"
-              : "Session is private and non-identifying. No advocate touting."}
-          </span>
+      {/* AI Preconsultation Legal Disclaimer & Transparency Banner */}
+      <div className="shrink-0 px-4 sm:px-6 py-2 bg-[#FFFDF7] border-b border-[#E8DCC0] text-[11px] text-[#7A5E1A]">
+        <div className="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#C5A059] shrink-0" />
+            <span className="font-medium">
+              {isHindi
+                ? "सूचनात्मक पूर्व-परामर्श: एआई उत्तर केवल सामान्य कानूनी समझ के लिए हैं, किसी वकील की कानूनी सलाह का विकल्प नहीं।"
+                : "Informational Preconsultation: AI responses are automated informational guidance, not formal legal advice from an advocate."}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowFullDisclaimer(!showFullDisclaimer)}
+            className="text-[10px] font-mono font-semibold text-[#205C43] hover:underline shrink-0 cursor-pointer"
+          >
+            {showFullDisclaimer
+              ? (isHindi ? "संक्षिप्त विवरण" : "Hide Details")
+              : (isHindi ? "विधिक प्रकटीकरण देखें" : "View Legal Disclaimer")}
+          </button>
         </div>
-        <span className="font-mono text-[10px] text-[#205C43] font-semibold hidden sm:inline">
-          Sec 36 Advocates Act Compliant
-        </span>
+
+        {showFullDisclaimer && (
+          <div className="mt-2.5 pt-2 border-t border-[#E8DCC0] text-[10.5px] text-[#665220] space-y-1.5 animate-in fade-in duration-200">
+            <p>
+              {isHindi
+                ? "• यह सहायक किसी नामांकित अधिवक्ता के परामर्श का स्थान नहीं ले सकता। वैधानिक प्रक्रियाओं और समय-सीमाओं का स्वतंत्र सत्यापन आवश्यक है।"
+                : "• AI-generated responses are informational assistance, not a substitute for advice from a qualified advocate admitted under the Advocates Act, 1961."}
+            </p>
+            <p>
+              {isHindi
+                ? "• उत्तर अपूर्ण या पुराने हो सकते हैं। महत्वपूर्ण धाराओं, समय-सीमाओं और अदालती आवश्यकताओं का स्वतंत्र सत्यापन करें।"
+                : "• Responses can be incomplete or inaccurate. Independently verify important statutes, limitation periods, and procedural deadlines."}
+            </p>
+            <p>
+              {isHindi
+                ? "• अत्यधिक गोपनीय व्यक्तिगत विवरण या संवेदनशील वित्तीय जानकारी चैट में साझा न करें।"
+                : "• Avoid sharing sensitive personal identifiers or private secrets you are not comfortable sending to cloud AI providers."}
+            </p>
+            <p>
+              {isHindi
+                ? "• आप स्वयं तय करते हैं कि इस पूर्व-परामर्श सारांश को किसी वकील के साथ साझा करना है या नहीं।"
+                : "• You maintain complete control over whether to export or share your preconsultation summary with an advocate."}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Main Interactive AI Thinking Orb & Morphing Input Experience */}

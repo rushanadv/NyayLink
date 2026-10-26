@@ -69,7 +69,7 @@ export default function AuthLayout({
                 <span>MILESTONE ESCROW</span>
               </div>
               <p className="text-[#69736D] text-[11px] leading-snug">
-                Triple-layer escrow protection with transparent consultation fees.
+                Transparent consultation terms with upfront agreed fees.
               </p>
             </div>
           </div>
@@ -80,7 +80,7 @@ export default function AuthLayout({
           <div className="flex items-center gap-3">
             <span>SECURE GATEWAY v2.4</span>
             <span>•</span>
-            <span>AES-256 PRIVACY ENCRYPTED</span>
+            <span>TLS ENCRYPTED & RLS PROTECTED</span>
           </div>
           <div>
             <span>© 2026 NyayLink</span>

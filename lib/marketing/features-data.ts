@@ -27,7 +27,7 @@ export const FEATURES: FeatureItem[] = [
   {
     id: "ai-intake",
     number: "02",
-    title: "AI Legal Intake",
+    title: "AI Preconsultation",
     subtitle: "Describe your issue, get plain-language guidance",
     category: "Client",
     iconName: "Sparkles",
@@ -49,20 +49,20 @@ export const FEATURES: FeatureItem[] = [
     highlights: [
       "Cryptographically verified timeline updates",
       "Notice dispatch & registry filing timestamps",
-      "Automated e-Courts cause-list tracking",
+      "Case docket and hearing diary tracking",
     ],
   },
   {
     id: "book-pay",
     number: "04",
-    title: "Book & Pay",
+    title: "Book & Consult",
     subtitle: "Transparent fees, no surprise charges",
     category: "Client",
     iconName: "CreditCard",
-    badge: "Escrow Protection",
+    badge: "Direct Engagement",
     highlights: [
       "Flat-fee upfront quotes for legal notices & consultations",
-      "Funds held in milestone escrow until stage completion",
+      "Direct transparent consultation terms agreed upfront",
       "Advocates Act compliant fee documentation",
     ],
   },
@@ -75,8 +75,8 @@ export const FEATURES: FeatureItem[] = [
     iconName: "Briefcase",
     badge: "For Advocates",
     highlights: [
-      "Unified court calendar syncing daily cause lists",
-      "Digital Vakalatnama with Aadhaar e-Sign",
+      "Unified court calendar with hearing diary tracking",
+      "Digital Vakalatnama drafting with Section 30 compliance",
       "Encrypted client case repository with audit trail",
     ],
   },
@@ -91,7 +91,7 @@ export const FEATURES: FeatureItem[] = [
     highlights: [
       "State Bar Council enrollment ID cross-validation",
       "No unlawful solicitation — strictly an informational marketplace",
-      "Strict advocate-client privilege with 256-bit encryption",
+      "Strict advocate-client confidentiality with TLS encryption and RLS",
     ],
   },
   {

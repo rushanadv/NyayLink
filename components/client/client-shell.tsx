@@ -92,7 +92,7 @@ export function ClientShell({
     },
     {
       id: "intake",
-      label: isHindi ? "एआई कानूनी सलाह" : "AI Legal Intake",
+      label: isHindi ? "एआई पूर्व-परामर्श" : "AI Preconsultation",
       icon: <Sparkles className="w-4 h-4" />,
       special: true,
     },
