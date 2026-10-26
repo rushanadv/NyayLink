@@ -24,6 +24,7 @@ import {
   Layers,
 } from "lucide-react";
 import { FormattedMarkdown } from "@/components/intake/formatted-markdown";
+import { FactSummaryCard } from "@/components/intake/fact-summary-card";
 
 export type AnimationPhase =
   | "idle"
@@ -921,6 +922,18 @@ export function AIThinkingOrbAndInput({
                 </div>
               )}
             </div>
+
+            {/* Plain-Language Fact Extraction Summary & Action Bridge */}
+            {finalAnswer && activeQuestion && (
+              <div className="px-5 sm:px-6 py-4 border-t border-[#D5E5D9]/60 bg-[#FDFEFC]">
+                <FactSummaryCard
+                  inquiryText={activeQuestion}
+                  answerText={finalAnswer}
+                  jurisdiction={jurisdictionLabel || "All India"}
+                  isHindi={isHindi ?? false}
+                />
+              </div>
+            )}
 
             {/* Conversation History Drawer (Multi-turn) */}
             {conversationHistory.length > 2 && (

@@ -92,6 +92,7 @@ export function LawyerProfileView({
   );
   const [preferredDate, setPreferredDate] = useState("");
   const [message, setMessage] = useState("");
+  const [termsAcceptedChecked, setTermsAcceptedChecked] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitFeedback, setSubmitFeedback] = useState<{
     type: "success" | "error";
@@ -101,6 +102,7 @@ export function LawyerProfileView({
   const isVerified = lawyer.verification_status === "approved";
   const isPending = lawyer.verification_status === "pending";
   const initials = getInitials(lawyer.professional_name);
+  const consultationFee = lawyer.consultation_fee || 1500;
 
   const handleConsultationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,6 +124,16 @@ export function LawyerProfileView({
       return;
     }
 
+    if (!termsAcceptedChecked) {
+      setSubmitFeedback({
+        type: "error",
+        message: isHindi
+          ? "कृपया परामर्श नियम व शर्तों की पुष्टि करें।"
+          : "Please confirm that you have reviewed and agree to the consultation terms.",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitFeedback(null);
 
@@ -132,6 +144,15 @@ export function LawyerProfileView({
         subject: subject.trim(),
         message: fullDetails,
         preferredDate: preferredDate || null,
+        termsAccepted: {
+          fee: consultationFee,
+          currency: "INR",
+          durationMinutes: 45,
+          format: consultationMode,
+          cancellationPolicy: "Free rescheduling or cancellation up to 4 hours before the session.",
+          inclusions: "45-min legal evaluation, preliminary document review, procedural strategy advice.",
+          acceptedAt: new Date().toISOString(),
+        },
       });
 
       if (!res.success) {
@@ -147,6 +168,7 @@ export function LawyerProfileView({
       setSubject("");
       setMessage("");
       setPreferredDate("");
+      setTermsAcceptedChecked(false);
     } catch (err: unknown) {
       setSubmitFeedback({
         type: "error",
@@ -529,10 +551,54 @@ export function LawyerProfileView({
                     />
                   </div>
 
+                  {/* Transparent Consultation Terms Summary Box */}
+                  <div className="p-3.5 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] text-xs space-y-2">
+                    <div className="flex items-center justify-between pb-2 border-b border-[#D5E5D9]/70 font-semibold text-[#202824]">
+                      <span className="flex items-center gap-1.5">
+                        <Scale className="w-3.5 h-3.5 text-[#205C43]" />
+                        <span>{isHindi ? "पारदर्शी परामर्श शर्तें" : "Transparent Consultation Terms"}</span>
+                      </span>
+                      <span className="text-[#205C43] font-mono font-bold">
+                        ₹{consultationFee.toLocaleString("en-IN")}
+                      </span>
+                    </div>
+
+                    <div className="space-y-1 text-[11px] text-[#4A544F]">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[#69736D]">{isHindi ? "अवधि व प्रारूप:" : "Duration & Format:"}</span>
+                        <span className="font-medium text-[#202824]">45 Mins • {consultationMode}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[#69736D]">{isHindi ? "शामिल सेवाएं:" : "Scope:"}</span>
+                        <span className="font-medium text-[#202824]">Preliminary legal evaluation</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[#69736D]">{isHindi ? "रद्दीकरण नीति:" : "Cancellation:"}</span>
+                        <span className="font-medium text-[#202824]">Free up to 4 hrs prior</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-[#D5E5D9]/70">
+                      <label className="flex items-start gap-2 cursor-pointer text-[11px] text-[#202824] leading-tight select-none">
+                        <input
+                          type="checkbox"
+                          checked={termsAcceptedChecked}
+                          onChange={(e) => setTermsAcceptedChecked(e.target.checked)}
+                          className="mt-0.5 rounded border-[#D5E5D9] text-[#205C43] focus:ring-[#205C43] cursor-pointer"
+                        />
+                        <span>
+                          {isHindi
+                            ? `मैं ₹${consultationFee.toLocaleString("en-IN")} परामर्श शुल्क और चैंबर नियमों की समीक्षा व स्वीकृति देता हूँ।`
+                            : `I review & accept the ₹${consultationFee.toLocaleString("en-IN")} consultation fee and chambers policy before request submission.`}
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+
                   <MagneticWrapper className="w-full" maxDisplacement={4}>
                     <button
                       type="submit"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || !termsAcceptedChecked}
                       className="w-full py-2.5 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white font-semibold text-xs transition-colors shadow-xs flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                       {isSubmitting ? (

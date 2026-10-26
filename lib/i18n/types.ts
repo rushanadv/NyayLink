@@ -244,6 +244,7 @@ export interface Dictionary {
       subtitle: string;
       refold: string;
       hint: string;
+      folioCompliance: string;
       initialStateLabel: string;
       exploreAdvocates: string;
       getGuidance: string;

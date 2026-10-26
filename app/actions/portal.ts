@@ -62,12 +62,23 @@ export async function createLegalMatter(formData: {
   return { success: true, matter };
 }
 
+export interface AcceptedConsultationTerms {
+  fee: number;
+  currency: string;
+  durationMinutes: number;
+  format: string;
+  cancellationPolicy: string;
+  inclusions: string;
+  acceptedAt: string;
+}
+
 export async function createConsultationRequest(formData: {
   lawyerId: string;
   matterId?: string | null;
   subject: string;
   message: string;
   preferredDate?: string | null;
+  termsAccepted?: AcceptedConsultationTerms | null;
 }) {
   const supabase = await createClient();
   const {
@@ -80,13 +91,43 @@ export async function createConsultationRequest(formData: {
   }
 
   const subject = formData.subject.trim();
-  const message = formData.message.trim();
+  let message = formData.message.trim();
 
   if (subject.length < 3) {
     return { success: false, error: "Subject must be at least 3 characters." };
   }
   if (!message) {
     return { success: false, error: "Message cannot be empty." };
+  }
+
+  // 1. Prevent duplicate active pending requests between same client and advocate
+  const { data: existingPending } = await supabase
+    .from("consultation_requests")
+    .select("id, created_at")
+    .eq("client_id", user.id)
+    .eq("lawyer_id", formData.lawyerId)
+    .eq("status", "pending")
+    .maybeSingle();
+
+  if (existingPending) {
+    return {
+      success: false,
+      error: "You already have an active pending consultation request with this advocate. Please check your dashboard or await their response before submitting another request.",
+    };
+  }
+
+  // 2. Persist accepted consultation terms into the auditable request payload
+  if (formData.termsAccepted) {
+    const t = formData.termsAccepted;
+    const termsSnapshot =
+      `[AUDIT: ACCEPTED CONSULTATION TERMS]\n` +
+      `• Fee: ₹${t.fee.toLocaleString("en-IN")} ${t.currency}\n` +
+      `• Duration: ${t.durationMinutes} Minutes (${t.format})\n` +
+      `• Scope: ${t.inclusions}\n` +
+      `• Cancellation: ${t.cancellationPolicy}\n` +
+      `• Timestamp: ${t.acceptedAt}\n` +
+      `[END TERMS AUDIT]\n\n`;
+    message = `${termsSnapshot}${message}`;
   }
 
   const { data: consultation, error: consultationError } = await supabase

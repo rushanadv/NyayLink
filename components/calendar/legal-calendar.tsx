@@ -29,6 +29,7 @@ import {
   Bell,
   RefreshCw,
 } from "lucide-react";
+import { CaseTrackerModal } from "@/components/calendar/case-tracker-modal";
 
 interface LegalCalendarProps {
   role?: "lawyer" | "client";
@@ -136,6 +137,7 @@ export function LegalCalendar({
   // Modal states
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isTrackCaseModalOpen, setIsTrackCaseModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<string | null>(null);
 
@@ -582,6 +584,15 @@ export function LegalCalendar({
             title={isHindi ? "ताज़ा करें" : "Refresh events"}
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin text-[#205C43]" : ""}`} />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsTrackCaseModalOpen(true)}
+            className="px-3.5 py-2.5 rounded-xl border border-[#D5E5D9] bg-[#F8FAF9] hover:bg-[#EAF3ED] text-[#205C43] text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+          >
+            <Scale className="w-4 h-4 text-[#205C43]" />
+            <span>{isHindi ? "केस ट्रैक करें (eCourts)" : "Track Case (eCourts)"}</span>
           </button>
 
           <button
@@ -1663,6 +1674,14 @@ export function LegalCalendar({
           </div>
         )}
       </AnimatePresence>
+
+      {/* Case Tracker Modal for eCourts cause-list tracking */}
+      <CaseTrackerModal
+        isOpen={isTrackCaseModalOpen}
+        onClose={() => setIsTrackCaseModalOpen(false)}
+        onSuccess={fetchEvents}
+        matters={matters.map((m) => ({ id: m.id, title: m.title }))}
+      />
     </div>
   );
 }

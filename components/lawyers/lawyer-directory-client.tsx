@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import {
@@ -14,12 +14,21 @@ import {
   Scale,
   ShieldCheck,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   AlertCircle,
   Users,
   RotateCcw,
   Sparkles,
+  Video,
+  Building,
 } from "lucide-react";
 import { MagneticWrapper } from "@/components/ui/magnetic-wrapper";
+import {
+  matchesPracticeArea,
+  getCanonicalFilterOptions,
+  resolvePracticeAreaCategory,
+} from "@/lib/taxonomy/practice-areas";
 
 export interface PublicLawyer {
   id: string;
@@ -47,15 +56,17 @@ interface LawyerDirectoryClientProps {
   initialPracticeArea?: string;
 }
 
-// Helper to get initials from professional name (e.g. "Adv. Rajesh Sharma" -> "RS")
+// Helper to get initials from professional name
 function getInitials(name: string): string {
-  const clean = name.replace(/^(Adv\.|Dr\.|Mr\.|Ms\.|Mrs\.)\s*/i, "").trim();
+  const clean = name.replace(/^(fake\s+)?(Adv\.|Dr\.|Mr\.|Ms\.|Mrs\.)\s*/i, "").trim();
   const parts = clean.split(/\s+/);
   if (parts.length >= 2) {
     return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
   }
   return clean.slice(0, 2).toUpperCase() || "AD";
 }
+
+const ITEMS_PER_PAGE = 9;
 
 export function LawyerDirectoryClient({
   initialLawyers,
@@ -79,15 +90,46 @@ export function LawyerDirectoryClient({
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<"exp-desc" | "exp-asc" | "name-asc">("exp-desc");
+  const [selectedExperience, setSelectedExperience] = useState<string>("all");
+  const [selectedMode, setSelectedMode] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<"exp-desc" | "exp-asc" | "name-asc" | "fee-asc">("exp-desc");
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
-  // Extract all distinct filter options dynamically from data
-  const practiceAreasList = useMemo(() => {
+  // Sync initialPracticeArea if prop changes
+  useEffect(() => {
+    if (initialPracticeArea) {
+      setSelectedPracticeArea(initialPracticeArea);
+      setCurrentPage(1);
+    }
+  }, [initialPracticeArea]);
+
+  // Reset to page 1 whenever any filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    searchQuery,
+    selectedPracticeArea,
+    selectedCity,
+    selectedLanguage,
+    selectedStatus,
+    selectedExperience,
+    selectedMode,
+    sortBy,
+  ]);
+
+  // Extract all distinct filter options dynamically
+  const practiceAreaOptions = useMemo(() => {
+    const rawOptions = getCanonicalFilterOptions(false);
+    // Also include any unique practice area from data that isn't mapped
     const set = new Set<string>();
     initialLawyers.forEach((l) => {
-      l.practice_areas?.forEach((pa) => set.add(pa));
+      l.practice_areas?.forEach((pa) => {
+        const cat = resolvePracticeAreaCategory(pa);
+        if (!cat) set.add(pa);
+      });
     });
-    return Array.from(set).sort();
+    const extra = Array.from(set).map((val) => ({ value: val, label: val }));
+    return [...rawOptions, ...extra];
   }, [initialLawyers]);
 
   const citiesList = useMemo(() => {
@@ -106,11 +148,11 @@ export function LawyerDirectoryClient({
     return Array.from(set).sort();
   }, [initialLawyers]);
 
-  // Client-side instant filtering
+  // Client-side instant filtering with canonical taxonomy engine
   const filteredLawyers = useMemo(() => {
     return initialLawyers
       .filter((lawyer) => {
-        // 1. Text Search query
+        // 1. Text Search query across multiple fields
         if (searchQuery.trim()) {
           const q = searchQuery.toLowerCase().trim();
           const nameMatch = lawyer.professional_name.toLowerCase().includes(q);
@@ -118,7 +160,7 @@ export function LawyerDirectoryClient({
           const cityMatch = lawyer.city.toLowerCase().includes(q);
           const stateMatch = lawyer.state.toLowerCase().includes(q);
           const paMatch = lawyer.practice_areas.some((pa) =>
-            pa.toLowerCase().includes(q)
+            pa.toLowerCase().includes(q) || matchesPracticeArea([pa], q)
           );
           const langMatch = lawyer.languages.some((lang) =>
             lang.toLowerCase().includes(q)
@@ -132,33 +174,54 @@ export function LawyerDirectoryClient({
           }
         }
 
-        // 2. Practice Area filter
+        // 2. Canonical Practice Area filter
         if (selectedPracticeArea !== "all") {
-          const match = lawyer.practice_areas.some((pa) => {
-            const paL = pa.toLowerCase().trim();
-            const selL = selectedPracticeArea.toLowerCase().trim();
-            return paL === selL || paL.includes(selL) || selL.includes(paL);
-          });
-          if (!match) {
+          if (!matchesPracticeArea(lawyer.practice_areas, selectedPracticeArea)) {
             return false;
           }
         }
 
-        // 3. City filter
+        // 3. Experience filter
+        if (selectedExperience !== "all") {
+          const exp = lawyer.experience_years;
+          if (selectedExperience === "15+" && exp < 15) return false;
+          if (selectedExperience === "10-14" && (exp < 10 || exp > 14)) return false;
+          if (selectedExperience === "5-9" && (exp < 5 || exp > 9)) return false;
+          if (selectedExperience === "under-5" && exp >= 5) return false;
+        }
+
+        // 4. Consultation Mode filter
+        if (selectedMode !== "all") {
+          const modes = lawyer.consultation_modes || ["Online Video Consultation", "In-Chambers Consultation"];
+          if (selectedMode === "online") {
+            const hasOnline = modes.some((m) =>
+              m.toLowerCase().includes("online") || m.toLowerCase().includes("video")
+            );
+            if (!hasOnline) return false;
+          }
+          if (selectedMode === "in_person") {
+            const hasInPerson = modes.some((m) =>
+              m.toLowerCase().includes("chamber") || m.toLowerCase().includes("person")
+            );
+            if (!hasInPerson) return false;
+          }
+        }
+
+        // 5. City filter
         if (selectedCity !== "all") {
           if (lawyer.city !== selectedCity) {
             return false;
           }
         }
 
-        // 4. Language filter
+        // 6. Language filter
         if (selectedLanguage !== "all") {
           if (!lawyer.languages.includes(selectedLanguage)) {
             return false;
           }
         }
 
-        // 5. Verification Status filter
+        // 7. Verification Status filter
         if (selectedStatus !== "all") {
           const status = lawyer.verification_status || "approved";
           if (status !== selectedStatus) {
@@ -178,6 +241,11 @@ export function LawyerDirectoryClient({
         if (sortBy === "name-asc") {
           return a.professional_name.localeCompare(b.professional_name);
         }
+        if (sortBy === "fee-asc") {
+          const feeA = a.consultation_fee ?? 1500;
+          const feeB = b.consultation_fee ?? 1500;
+          return feeA - feeB;
+        }
         return 0;
       });
   }, [
@@ -187,15 +255,28 @@ export function LawyerDirectoryClient({
     selectedCity,
     selectedLanguage,
     selectedStatus,
+    selectedExperience,
+    selectedMode,
     sortBy,
   ]);
+
+  // Pagination calculation
+  const totalItems = filteredLawyers.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (safeCurrentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedLawyers = useMemo(() => {
+    return filteredLawyers.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredLawyers, startIndex]);
 
   const hasActiveFilters =
     searchQuery.trim() !== "" ||
     selectedPracticeArea !== "all" ||
     selectedCity !== "all" ||
     selectedLanguage !== "all" ||
-    selectedStatus !== "all";
+    selectedStatus !== "all" ||
+    selectedExperience !== "all" ||
+    selectedMode !== "all";
 
   const clearAllFilters = () => {
     setSearchQuery("");
@@ -203,12 +284,11 @@ export function LawyerDirectoryClient({
     setSelectedCity("all");
     setSelectedLanguage("all");
     setSelectedStatus("all");
+    setSelectedExperience("all");
+    setSelectedMode("all");
     setSortBy("exp-desc");
+    setCurrentPage(1);
   };
-
-  const consultationHref = isAuthenticated
-    ? "/dashboard"
-    : "/auth/login?intent=client&next=/lawyers";
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10">
@@ -325,9 +405,9 @@ export function LawyerDirectoryClient({
           )}
         </div>
 
-        {/* Dropdowns Row (5 columns) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-          {/* Practice Area Filter */}
+        {/* Dropdowns Row (7 responsive columns) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
+          {/* 1. Practice Area Filter (Canonical Taxonomy) */}
           <div className="relative">
             <label className="block text-[11px] font-mono text-[#69736D] uppercase tracking-wider mb-1 font-semibold">
               Practice Area
@@ -335,25 +415,57 @@ export function LawyerDirectoryClient({
             <select
               value={selectedPracticeArea}
               onChange={(e) => setSelectedPracticeArea(e.target.value)}
-              className="w-full h-10 px-3 pr-8 rounded-lg bg-[#F8FAF9] border border-[#D5E5D9] text-xs text-[#202824] focus:border-[#205C43] outline-none appearance-none cursor-pointer"
+              className="w-full h-10 px-3 pr-8 rounded-lg bg-[#F8FAF9] border border-[#D5E5D9] text-xs text-[#202824] focus:border-[#205C43] outline-none appearance-none cursor-pointer truncate"
             >
-              <option value="all">All Practice Areas ({practiceAreasList.length})</option>
-              {selectedPracticeArea !== "all" && !practiceAreasList.includes(selectedPracticeArea) && (
-                <option value={selectedPracticeArea}>{selectedPracticeArea}</option>
-              )}
-              {practiceAreasList.map((pa) => (
-                <option key={pa} value={pa}>
-                  {pa}
+              {practiceAreaOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
                 </option>
               ))}
             </select>
-            <ChevronDown className="absolute right-3 top-[34px] w-3.5 h-3.5 text-[#69736D] pointer-events-none" />
+            <ChevronDown className="absolute right-2.5 top-[34px] w-3.5 h-3.5 text-[#69736D] pointer-events-none" />
           </div>
 
-          {/* City / State Filter */}
+          {/* 2. Experience Filter */}
           <div className="relative">
             <label className="block text-[11px] font-mono text-[#69736D] uppercase tracking-wider mb-1 font-semibold">
-              Court Jurisdiction / City
+              Experience
+            </label>
+            <select
+              value={selectedExperience}
+              onChange={(e) => setSelectedExperience(e.target.value)}
+              className="w-full h-10 px-3 pr-8 rounded-lg bg-[#F8FAF9] border border-[#D5E5D9] text-xs text-[#202824] focus:border-[#205C43] outline-none appearance-none cursor-pointer"
+            >
+              <option value="all">All Experience</option>
+              <option value="15+">15+ Years (Senior)</option>
+              <option value="10-14">10–14 Years</option>
+              <option value="5-9">5–9 Years</option>
+              <option value="under-5">Under 5 Years</option>
+            </select>
+            <ChevronDown className="absolute right-2.5 top-[34px] w-3.5 h-3.5 text-[#69736D] pointer-events-none" />
+          </div>
+
+          {/* 3. Consultation Mode Filter */}
+          <div className="relative">
+            <label className="block text-[11px] font-mono text-[#69736D] uppercase tracking-wider mb-1 font-semibold">
+              Format / Mode
+            </label>
+            <select
+              value={selectedMode}
+              onChange={(e) => setSelectedMode(e.target.value)}
+              className="w-full h-10 px-3 pr-8 rounded-lg bg-[#F8FAF9] border border-[#D5E5D9] text-xs text-[#202824] focus:border-[#205C43] outline-none appearance-none cursor-pointer"
+            >
+              <option value="all">All Modes</option>
+              <option value="online">Online Video</option>
+              <option value="in_person">In-Chambers</option>
+            </select>
+            <ChevronDown className="absolute right-2.5 top-[34px] w-3.5 h-3.5 text-[#69736D] pointer-events-none" />
+          </div>
+
+          {/* 4. City / State Filter */}
+          <div className="relative">
+            <label className="block text-[11px] font-mono text-[#69736D] uppercase tracking-wider mb-1 font-semibold">
+              Location / City
             </label>
             <select
               value={selectedCity}
@@ -367,13 +479,13 @@ export function LawyerDirectoryClient({
                 </option>
               ))}
             </select>
-            <ChevronDown className="absolute right-3 top-[34px] w-3.5 h-3.5 text-[#69736D] pointer-events-none" />
+            <ChevronDown className="absolute right-2.5 top-[34px] w-3.5 h-3.5 text-[#69736D] pointer-events-none" />
           </div>
 
-          {/* Language Filter */}
+          {/* 5. Language Filter */}
           <div className="relative">
             <label className="block text-[11px] font-mono text-[#69736D] uppercase tracking-wider mb-1 font-semibold">
-              Consultation Language
+              Language
             </label>
             <select
               value={selectedLanguage}
@@ -387,56 +499,110 @@ export function LawyerDirectoryClient({
                 </option>
               ))}
             </select>
-            <ChevronDown className="absolute right-3 top-[34px] w-3.5 h-3.5 text-[#69736D] pointer-events-none" />
+            <ChevronDown className="absolute right-2.5 top-[34px] w-3.5 h-3.5 text-[#69736D] pointer-events-none" />
           </div>
 
-          {/* Verification Status Filter */}
+          {/* 6. Verification Status Filter */}
           <div className="relative">
             <label className="block text-[11px] font-mono text-[#69736D] uppercase tracking-wider mb-1 font-semibold">
-              Verification Status
+              Verification
             </label>
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="w-full h-10 px-3 pr-8 rounded-lg bg-[#F8FAF9] border border-[#D5E5D9] text-xs text-[#202824] focus:border-[#205C43] outline-none appearance-none cursor-pointer"
             >
-              <option value="all">All Advocates</option>
+              <option value="all">All Statuses</option>
               <option value="approved">BCI Verified Only</option>
               <option value="pending">Newly Joined (Pending)</option>
             </select>
-            <ChevronDown className="absolute right-3 top-[34px] w-3.5 h-3.5 text-[#69736D] pointer-events-none" />
+            <ChevronDown className="absolute right-2.5 top-[34px] w-3.5 h-3.5 text-[#69736D] pointer-events-none" />
           </div>
 
-          {/* Sort By Filter */}
+          {/* 7. Sort By Filter */}
           <div className="relative">
             <label className="block text-[11px] font-mono text-[#69736D] uppercase tracking-wider mb-1 font-semibold">
-              Sort Results
+              Sort By
             </label>
             <select
               value={sortBy}
               onChange={(e) =>
-                setSortBy(e.target.value as "exp-desc" | "exp-asc" | "name-asc")
+                setSortBy(e.target.value as "exp-desc" | "exp-asc" | "name-asc" | "fee-asc")
               }
               className="w-full h-10 px-3 pr-8 rounded-lg bg-[#F8FAF9] border border-[#D5E5D9] text-xs text-[#202824] focus:border-[#205C43] outline-none appearance-none cursor-pointer"
             >
-              <option value="exp-desc">Most Experienced (Years)</option>
-              <option value="exp-asc">Earliest Call / Rising Counsel</option>
-              <option value="name-asc">Alphabetical (A to Z)</option>
+              <option value="exp-desc">Most Experienced</option>
+              <option value="exp-asc">Rising Counsel</option>
+              <option value="fee-asc">Fee: Low to High</option>
+              <option value="name-asc">Alphabetical (A-Z)</option>
             </select>
-            <ChevronDown className="absolute right-3 top-[34px] w-3.5 h-3.5 text-[#69736D] pointer-events-none" />
+            <ChevronDown className="absolute right-2.5 top-[34px] w-3.5 h-3.5 text-[#69736D] pointer-events-none" />
           </div>
         </div>
 
-        {/* Results Bar & Active Filter Chips */}
-        <div className="pt-2 flex flex-wrap items-center justify-between gap-3 text-xs border-t border-[#D5E5D9]">
-          <div className="flex items-center gap-2">
+        {/* Results Bar & Active Filter Dismiss Chips */}
+        <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs border-t border-[#D5E5D9]">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-[11px] text-[#69736D]">
-              Showing <strong className="text-[#202824]">{filteredLawyers.length}</strong> of{" "}
-              {initialLawyers.length} verified advocates
+              Showing <strong className="text-[#202824]">{totalItems > 0 ? `${startIndex + 1}–${Math.min(startIndex + ITEMS_PER_PAGE, totalItems)}` : 0}</strong> of{" "}
+              <strong className="text-[#202824]">{totalItems}</strong> matching practitioners
             </span>
-            {hasActiveFilters && (
-              <span className="text-[10px] font-mono text-[#205C43] bg-[#EAF3ED] px-2 py-0.5 rounded border border-[#D5E5D9] font-semibold">
-                Filtered
+
+            {/* Dismissible Chips */}
+            {searchQuery.trim() && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#EAF3ED] border border-[#D5E5D9] text-[11px] text-[#205C43] font-medium">
+                Keyword: &ldquo;{searchQuery}&rdquo;
+                <button onClick={() => setSearchQuery("")} className="hover:text-rose-700 ml-0.5" aria-label="Remove keyword filter">
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
+            {selectedPracticeArea !== "all" && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#EAF3ED] border border-[#D5E5D9] text-[11px] text-[#205C43] font-medium">
+                Practice: {selectedPracticeArea}
+                <button onClick={() => setSelectedPracticeArea("all")} className="hover:text-rose-700 ml-0.5" aria-label="Remove practice area filter">
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
+            {selectedExperience !== "all" && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#EAF3ED] border border-[#D5E5D9] text-[11px] text-[#205C43] font-medium">
+                Exp: {selectedExperience === "15+" ? "15+ Years" : selectedExperience}
+                <button onClick={() => setSelectedExperience("all")} className="hover:text-rose-700 ml-0.5" aria-label="Remove experience filter">
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
+            {selectedMode !== "all" && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#EAF3ED] border border-[#D5E5D9] text-[11px] text-[#205C43] font-medium">
+                Mode: {selectedMode === "online" ? "Online Video" : "In-Chambers"}
+                <button onClick={() => setSelectedMode("all")} className="hover:text-rose-700 ml-0.5" aria-label="Remove mode filter">
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
+            {selectedCity !== "all" && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#EAF3ED] border border-[#D5E5D9] text-[11px] text-[#205C43] font-medium">
+                City: {selectedCity}
+                <button onClick={() => setSelectedCity("all")} className="hover:text-rose-700 ml-0.5" aria-label="Remove city filter">
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
+            {selectedLanguage !== "all" && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#EAF3ED] border border-[#D5E5D9] text-[11px] text-[#205C43] font-medium">
+                Lang: {selectedLanguage}
+                <button onClick={() => setSelectedLanguage("all")} className="hover:text-rose-700 ml-0.5" aria-label="Remove language filter">
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
+            {selectedStatus !== "all" && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#EAF3ED] border border-[#D5E5D9] text-[11px] text-[#205C43] font-medium">
+                Status: {selectedStatus === "approved" ? "Verified" : "Pending"}
+                <button onClick={() => setSelectedStatus("all")} className="hover:text-rose-700 ml-0.5" aria-label="Remove status filter">
+                  <X className="w-3 h-3" />
+                </button>
               </span>
             )}
           </div>
@@ -444,7 +610,7 @@ export function LawyerDirectoryClient({
           {hasActiveFilters && (
             <button
               onClick={clearAllFilters}
-              className="text-xs text-[#205C43] hover:underline flex items-center gap-1 font-semibold"
+              className="text-xs text-[#205C43] hover:text-[#174530] flex items-center gap-1 font-semibold hover:underline shrink-0"
             >
               <X className="w-3.5 h-3.5" />
               Reset all filters
@@ -515,147 +681,211 @@ export function LawyerDirectoryClient({
         </div>
       ) : filteredLawyers.length > 0 ? (
         /* State 1: Live Results Grid */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredLawyers.map((lawyer) => {
-            const initials = getInitials(lawyer.professional_name);
+        <div className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {paginatedLawyers.map((lawyer) => {
+              const initials = getInitials(lawyer.professional_name);
+              const feeDisplay = lawyer.consultation_fee
+                ? `₹${lawyer.consultation_fee.toLocaleString("en-IN")}`
+                : "₹1,500";
 
-            return (
-              <motion.div
-                key={lawyer.id}
-                whileHover={shouldReduceMotion ? undefined : { scale: 1.018 }}
-                transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                className="relative p-6 rounded-2xl bg-white border border-[#D5E5D9] hover:border-[#205C43]/40 transition-all shadow-xs hover:shadow-md flex flex-col justify-between group overflow-hidden"
-              >
-                <div>
-                  {/* Card Header */}
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-center gap-3.5">
-                      <Link
-                        href={`/lawyers/${lawyer.id}`}
-                        className="w-12 h-12 rounded-full bg-[#EAF3ED] hover:bg-[#D5E5D9] flex items-center justify-center font-serif text-sm font-semibold text-[#205C43] border border-[#D5E5D9] shrink-0 shadow-2xs transition-colors"
-                      >
-                        {initials}
-                      </Link>
-                      <div>
-                        <Link href={`/lawyers/${lawyer.id}`} className="block">
-                          <h3 className="font-semibold text-[#202824] text-base group-hover:text-[#205C43] transition-colors leading-tight">
-                            {lawyer.professional_name}
-                          </h3>
+              return (
+                <motion.div
+                  key={lawyer.id}
+                  whileHover={shouldReduceMotion ? undefined : { scale: 1.018 }}
+                  transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                  className="relative p-6 rounded-2xl bg-white border border-[#D5E5D9] hover:border-[#205C43]/40 transition-all shadow-xs hover:shadow-md flex flex-col justify-between group overflow-hidden"
+                >
+                  <div>
+                    {/* Card Header */}
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-center gap-3.5">
+                        <Link
+                          href={`/lawyers/${lawyer.id}`}
+                          className="w-12 h-12 rounded-full bg-[#EAF3ED] hover:bg-[#D5E5D9] flex items-center justify-center font-serif text-sm font-semibold text-[#205C43] border border-[#D5E5D9] shrink-0 shadow-2xs transition-colors"
+                        >
+                          {initials}
                         </Link>
-                        <div className="flex items-center gap-1.5 mt-1">
-                          {lawyer.verification_status === "pending" ? (
-                            <span
-                              className="text-[10px] font-mono text-amber-900 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/80 flex items-center gap-1 font-semibold"
-                              title="Bar Council credentials submitted; registrar verification in progress"
-                            >
-                              <Clock className="w-3 h-3 text-amber-700" />
-                              Newly Joined • Verification Pending
-                            </span>
-                          ) : (
-                            <span
-                              className="text-[10px] font-mono text-[#205C43] bg-[#EAF3ED] px-2 py-0.5 rounded-md border border-[#D5E5D9] flex items-center gap-1 font-semibold"
-                              title="Bar Council of India credentials authenticated"
-                            >
-                              <CheckCircle2 className="w-3 h-3 text-[#205C43]" />
-                              BCI Verified Advocate
-                            </span>
-                          )}
+                        <div>
+                          <Link href={`/lawyers/${lawyer.id}`} className="block">
+                            <h3 className="font-semibold text-[#202824] text-base group-hover:text-[#205C43] transition-colors leading-tight">
+                              {lawyer.professional_name}
+                            </h3>
+                          </Link>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            {lawyer.verification_status === "pending" ? (
+                              <span
+                                className="text-[10px] font-mono text-amber-900 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/80 flex items-center gap-1 font-semibold"
+                                title="Bar Council credentials submitted; registrar verification in progress"
+                              >
+                                <Clock className="w-3 h-3 text-amber-700" />
+                                Newly Joined • Verification Pending
+                              </span>
+                            ) : (
+                              <span
+                                className="text-[10px] font-mono text-[#205C43] bg-[#EAF3ED] px-2 py-0.5 rounded-md border border-[#D5E5D9] flex items-center gap-1 font-semibold"
+                                title="Bar Council of India credentials authenticated"
+                              >
+                                <CheckCircle2 className="w-3 h-3 text-[#205C43]" />
+                                BCI Verified Advocate
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Location & Experience Meta */}
-                  <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-[#D5E5D9] text-xs text-[#69736D]">
-                    <div className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-[#205C43] shrink-0" />
-                      <span className="truncate">{lawyer.city}, {lawyer.state}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-[#205C43] shrink-0" />
-                      <span>{lawyer.experience_years} Years Experience</span>
-                    </div>
-                  </div>
-
-                  {/* Courts of practice if available */}
-                  {lawyer.courts_of_practice && lawyer.courts_of_practice.length > 0 && (
-                    <div className="mt-3 flex items-center gap-1.5 text-[11px] text-[#4A544F]">
-                      <Scale className="w-3.5 h-3.5 text-[#205C43] shrink-0" />
-                      <span className="truncate">{lawyer.courts_of_practice.slice(0, 2).join(" • ")}</span>
-                    </div>
-                  )}
-
-                  {/* Bio */}
-                  {lawyer.bio && (
-                    <p className="text-xs text-[#69736D] leading-relaxed line-clamp-3 mt-3">
-                      {lawyer.bio}
-                    </p>
-                  )}
-
-                  {/* Practice Area Chips */}
-                  <div className="mt-4 space-y-1.5">
-                    <span className="text-[10px] font-mono text-[#69736D] uppercase tracking-wider block font-semibold">
-                      Specializations
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {lawyer.practice_areas.map((pa) => (
-                        <span
-                          key={pa}
-                          className="px-2.5 py-0.5 rounded-md bg-[#F8FAF9] text-[11px] font-medium text-[#202824] border border-[#D5E5D9]"
-                        >
-                          {pa}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Languages Spoken */}
-                  <div className="mt-3.5 flex items-center gap-1.5 text-[11px] text-[#69736D]">
-                    <LanguagesIcon className="w-3.5 h-3.5 text-[#205C43] shrink-0" />
-                    <span className="truncate">
-                      {lawyer.languages.join(", ")}
-                    </span>
-                  </div>
-
-                  {/* Pending Verification Notice */}
-                  {lawyer.verification_status === "pending" && (
-                    <div className="mt-3.5 p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/60 text-[11px] text-amber-900 leading-snug space-y-0.5">
-                      <div className="font-semibold font-mono text-[10px] uppercase text-amber-950 flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-amber-700" />
-                        <span>Verification Pending</span>
+                    {/* Location & Experience Meta */}
+                    <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-[#D5E5D9] text-xs text-[#69736D]">
+                      <div className="flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-[#205C43] shrink-0" />
+                        <span className="truncate">{lawyer.city}, {lawyer.state}</span>
                       </div>
-                      <p className="text-amber-800 text-[11px]">
-                        Profile visible to registered clients. Direct consultation booking is enabled for preliminary chambers inquiry while Bar Council verification completes.
-                      </p>
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-[#205C43] shrink-0" />
+                        <span>{lawyer.experience_years} Years Experience</span>
+                      </div>
                     </div>
-                  )}
-                </div>
 
-                {/* Card Actions */}
-                <div className="pt-5 mt-5 border-t border-[#D5E5D9] grid grid-cols-2 gap-2">
-                  <Link
-                    href={`/lawyers/${lawyer.id}`}
-                    className="py-2.5 px-3 rounded-xl bg-white hover:bg-[#EAF3ED] text-[#205C43] border border-[#D5E5D9] font-semibold text-xs transition-colors shadow-2xs flex items-center justify-center text-center"
-                  >
-                    View Profile
-                  </Link>
-                  <MagneticWrapper className="w-full" maxDisplacement={4}>
-                    <Link
-                      href={`/lawyers/${lawyer.id}#consultation`}
-                      className="w-full py-2.5 px-3 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white font-semibold text-xs transition-colors shadow-xs flex items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#205C43] block text-center"
-                    >
-                      <span>
-                        {lawyer.verification_status === "pending"
-                          ? "Preliminary"
-                          : "Consultation"}
+                    {/* Transparent Consultation Terms Preview */}
+                    <div className="mt-3 px-3 py-2 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1.5 font-medium text-[#202824]">
+                        <Scale className="w-3.5 h-3.5 text-[#205C43]" />
+                        <span>
+                          {feeDisplay}{" "}
+                          <span className="text-[#69736D] font-normal text-[11px]">/ 45m Session</span>
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[11px] text-[#4A544F]">
+                        <Video className="w-3 h-3 text-[#205C43]" />
+                        <span>Online & Chambers</span>
+                      </div>
+                    </div>
+
+                    {/* Courts of practice if available */}
+                    {lawyer.courts_of_practice && lawyer.courts_of_practice.length > 0 && (
+                      <div className="mt-3 flex items-center gap-1.5 text-[11px] text-[#4A544F]">
+                        <Scale className="w-3.5 h-3.5 text-[#205C43] shrink-0" />
+                        <span className="truncate">{lawyer.courts_of_practice.slice(0, 2).join(" • ")}</span>
+                      </div>
+                    )}
+
+                    {/* Bio */}
+                    {lawyer.bio && (
+                      <p className="text-xs text-[#69736D] leading-relaxed line-clamp-3 mt-3">
+                        {lawyer.bio}
+                      </p>
+                    )}
+
+                    {/* Practice Area Chips */}
+                    <div className="mt-4 space-y-1.5">
+                      <span className="text-[10px] font-mono text-[#69736D] uppercase tracking-wider block font-semibold">
+                        Specializations
                       </span>
-                      <ArrowRight className="w-3.5 h-3.5 inline ml-0.5" />
+                      <div className="flex flex-wrap gap-1.5">
+                        {lawyer.practice_areas.map((pa) => (
+                          <span
+                            key={pa}
+                            className="px-2.5 py-0.5 rounded-md bg-[#F8FAF9] text-[11px] font-medium text-[#202824] border border-[#D5E5D9]"
+                          >
+                            {pa}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Languages Spoken */}
+                    <div className="mt-3.5 flex items-center gap-1.5 text-[11px] text-[#69736D]">
+                      <LanguagesIcon className="w-3.5 h-3.5 text-[#205C43] shrink-0" />
+                      <span className="truncate">
+                        {lawyer.languages.join(", ")}
+                      </span>
+                    </div>
+
+                    {/* Pending Verification Notice */}
+                    {lawyer.verification_status === "pending" && (
+                      <div className="mt-3.5 p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/60 text-[11px] text-amber-900 leading-snug space-y-0.5">
+                        <div className="font-semibold font-mono text-[10px] uppercase text-amber-950 flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-amber-700" />
+                          <span>Verification Pending</span>
+                        </div>
+                        <p className="text-amber-800 text-[11px]">
+                          Profile visible to registered clients. Direct consultation booking is enabled for preliminary chambers inquiry while Bar Council verification completes.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Card Actions */}
+                  <div className="pt-5 mt-5 border-t border-[#D5E5D9] grid grid-cols-2 gap-2">
+                    <Link
+                      href={`/lawyers/${lawyer.id}`}
+                      className="py-2.5 px-3 rounded-xl bg-white hover:bg-[#EAF3ED] text-[#205C43] border border-[#D5E5D9] font-semibold text-xs transition-colors shadow-2xs flex items-center justify-center text-center"
+                    >
+                      View Profile
                     </Link>
-                  </MagneticWrapper>
-                </div>
-              </motion.div>
-            );
-          })}
+                    <MagneticWrapper className="w-full" maxDisplacement={4}>
+                      <Link
+                        href={`/lawyers/${lawyer.id}#consultation`}
+                        className="w-full py-2.5 px-3 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white font-semibold text-xs transition-colors shadow-xs flex items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#205C43] block text-center"
+                      >
+                        <span>
+                          {lawyer.verification_status === "pending"
+                            ? "Preliminary"
+                            : "Consultation"}
+                        </span>
+                        <ArrowRight className="w-3.5 h-3.5 inline ml-0.5" />
+                      </Link>
+                    </MagneticWrapper>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-white border border-[#D5E5D9] shadow-2xs">
+              <span className="text-xs font-mono text-[#69736D]">
+                Page <strong className="text-[#202824]">{safeCurrentPage}</strong> of{" "}
+                <strong className="text-[#202824]">{totalPages}</strong>
+              </span>
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={safeCurrentPage === 1}
+                  className="px-3 py-1.5 rounded-lg border border-[#D5E5D9] bg-white hover:bg-[#F8FAF9] text-xs font-medium text-[#202824] disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 transition-colors"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  Previous
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-8 h-8 rounded-lg text-xs font-semibold font-mono transition-colors ${
+                      safeCurrentPage === page
+                        ? "bg-[#205C43] text-white shadow-2xs"
+                        : "bg-white hover:bg-[#EAF3ED] text-[#202824] border border-[#D5E5D9]"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={safeCurrentPage === totalPages}
+                  className="px-3 py-1.5 rounded-lg border border-[#D5E5D9] bg-white hover:bg-[#F8FAF9] text-xs font-medium text-[#202824] disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 transition-colors"
+                >
+                  Next
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         /* Filter Empty State (when user filters match 0 results) */
