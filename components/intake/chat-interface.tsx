@@ -24,6 +24,9 @@ import {
 } from "@/components/intake/voice-composer-mic";
 import { VoicePlaybackControl } from "@/components/intake/voice-playback-control";
 import { AIThinkingOrbAndInput } from "@/components/ui/ai-thinking-orb-and-input";
+import { GuidedIntakeForm } from "@/components/intake/guided-intake-form";
+import { IntakeFacts, GuidedFormData, IntakeIntent } from "@/lib/intake/fact-types";
+import { extractFactsFromText } from "@/lib/intake/fact-extractor";
 
 export interface ChatMessage {
   id: string;
@@ -97,6 +100,11 @@ export function ChatInterface() {
   const [failedPrompt, setFailedPrompt] = useState<string | null>(null);
   const [showFullDisclaimer, setShowFullDisclaimer] = useState(false);
 
+  // Structured Facts and Retrieved Sources State
+  const [currentFacts, setCurrentFacts] = useState<IntakeFacts | null>(null);
+  const [retrievedSources, setRetrievedSources] = useState<any[]>([]);
+  const [activeIntent, setActiveIntent] = useState<IntakeIntent>("understand_position");
+
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Browser-native Voice Speech Recognition (Speech-to-Text)
@@ -150,6 +158,8 @@ export function ChatInterface() {
     setLiveStreamText("");
     setApiError(null);
     setFailedPrompt(null);
+    setCurrentFacts(null);
+    setRetrievedSources([]);
   }, [isLoading, handleStopGeneration, voiceOutput, voiceInput]);
 
   // --------------------------------------------------------------------------
@@ -173,6 +183,12 @@ export function ChatInterface() {
     setApiError(null);
     setLiveStreamText("");
     setFailedPrompt(trimmed);
+
+    // Initial fact extraction if none exists yet
+    if (!currentFacts) {
+      const extracted = extractFactsFromText(trimmed, selectedState);
+      setCurrentFacts(extracted);
+    }
 
     const userMsgId = `user-${Date.now()}`;
     const userMsg: ChatMessage = {
@@ -210,6 +226,8 @@ export function ChatInterface() {
         body: JSON.stringify({
           messages: apiMessages,
           state: selectedState !== "All India (General)" ? selectedState : undefined,
+          intent: activeIntent,
+          confirmedFacts: currentFacts?.hasConfirmed ? currentFacts : undefined,
         }),
         signal: abortController.signal,
       });
@@ -238,7 +256,19 @@ export function ChatInterface() {
         const chunk = decoder.decode(value, { stream: true });
         accumulated += chunk;
 
+        // Parse verified sources chunk if received
+        if (accumulated.includes("__NYAYLINK_SOURCES__:")) {
+          const match = accumulated.match(/__NYAYLINK_SOURCES__:\s*(\[[\s\S]*?\])/);
+          if (match) {
+            try {
+              const parsed = JSON.parse(match[1]);
+              setRetrievedSources(parsed);
+            } catch {}
+          }
+        }
+
         const liveClean = accumulated
+          .replace(/__NYAY(A)?LINK_SOURCES__:\s*\[[\s\S]*?\]/g, "")
           .replace(/__NYAY(A)?LINK_DONE__/g, "")
           .replace(/__NYAY(A)?LINK_TRUNCATED__/g, "")
           .replace(/__NYAY(A)?LINK_FILTERED__/g, "")
@@ -258,6 +288,7 @@ export function ChatInterface() {
       const hasErrorChunk = accumulated.includes("__NYAYLINK_ERROR__:");
 
       const cleanFinal = accumulated
+        .replace(/__NYAY(A)?LINK_SOURCES__:\s*\[[\s\S]*?\]/g, "")
         .replace(/__NYAY(A)?LINK_DONE__/g, "")
         .replace(/__NYAY(A)?LINK_TRUNCATED__/g, "")
         .replace(/__NYAY(A)?LINK_FILTERED__/g, "")
@@ -326,6 +357,61 @@ export function ChatInterface() {
     return executeInquiry(followUpText, messages);
   };
 
+  // Guided Form Submission Handler (Phase 4 Entry Options)
+  const handleGuidedSubmit = async (formData: GuidedFormData): Promise<string> => {
+    setActiveIntent(formData.intent);
+    if (formData.state) {
+      setSelectedState(formData.state);
+    }
+
+    // Build focused inquiry query
+    let fullQuery = formData.description;
+    const metaParts: string[] = [];
+    if (formData.legalTopic && !formData.legalTopic.includes("Other")) {
+      metaParts.push(`Topic: ${formData.legalTopic}`);
+    }
+    if (formData.dateOfIncident) {
+      metaParts.push(`Timeline: ${formData.dateOfIncident}`);
+    }
+    if (formData.userRole) {
+      metaParts.push(`Role: ${formData.userRole}`);
+    }
+    if (formData.desiredOutcome) {
+      metaParts.push(`Desired Outcome: ${formData.desiredOutcome}`);
+    }
+    if (formData.specificQuestions) {
+      metaParts.push(`Questions for Advocate: ${formData.specificQuestions}`);
+    }
+
+    if (metaParts.length > 0) {
+      fullQuery = `[Context: ${metaParts.join(" | ")}]\n\n${fullQuery}`;
+    }
+
+    // Extract facts immediately from user-supplied guided data
+    const initialFacts = extractFactsFromText(
+      formData.description,
+      formData.state,
+      formData.legalTopic,
+      formData.userRole,
+      formData.desiredOutcome
+    );
+    if (formData.dateOfIncident) {
+      initialFacts.dates.push({
+        id: "date-guided-1",
+        originalText: formData.dateOfIncident,
+        needsConfirmation: false,
+        context: "Provided in guided intake form",
+      });
+    }
+    setCurrentFacts(initialFacts);
+
+    return executeInquiry(fullQuery, messages);
+  };
+
+  const handleConfirmFacts = (confirmed: IntakeFacts) => {
+    setCurrentFacts(confirmed);
+  };
+
   const handleRetry = () => {
     if (failedPrompt) {
       executeInquiry(failedPrompt, messages);
@@ -340,7 +426,7 @@ export function ChatInterface() {
       isActive={isLoading}
       className="w-full max-w-4xl mx-auto min-h-[580px] flex flex-col shadow-xl bg-white rounded-2xl overflow-hidden border border-[#D5E5D9]"
     >
-      {/* Top Header: Identity, Jurisdiction, and Trust Status */}
+      {/* Top Header: Identity, Jurisdiction, and Honest Status */}
       <div className="shrink-0 px-4 sm:px-6 py-3 border-b border-[#D5E5D9] bg-white flex flex-wrap items-center justify-between gap-3 text-xs select-none">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-[#EAF3ED] border border-[#D5E5D9] flex items-center justify-center text-[#205C43]">
@@ -356,7 +442,7 @@ export function ChatInterface() {
               />
             </h2>
             <p className="text-[10.5px] text-[#69736D] font-mono">
-              BNS &amp; Indian Jurisprudence Grounded
+              {isHindi ? "सूचनात्मक विधिक पूर्व-परामर्श" : "Informational Preconsultation"}
             </p>
           </div>
         </div>
@@ -380,7 +466,7 @@ export function ChatInterface() {
           </div>
 
           {/* New Query / Reset Action */}
-          {messages.length > 0 && (
+          {(messages.length > 0 || currentFacts !== null) && (
             <button
               type="button"
               onClick={handleReset}
@@ -409,15 +495,15 @@ export function ChatInterface() {
         </div>
       </div>
 
-      {/* AI Preconsultation Legal Disclaimer & Transparency Banner */}
+      {/* AI Preconsultation Legal Disclaimer & Transparency Banner (PHASE 1) */}
       <div className="shrink-0 px-4 sm:px-6 py-2 bg-[#FFFDF7] border-b border-[#E8DCC0] text-[11px] text-[#7A5E1A]">
         <div className="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-3.5 h-3.5 text-[#C5A059] shrink-0" />
             <span className="font-medium">
               {isHindi
-                ? "सूचनात्मक पूर्व-परामर्श: एआई उत्तर केवल सामान्य कानूनी समझ के लिए हैं, किसी वकील की कानूनी सलाह का विकल्प नहीं।"
-                : "Informational Preconsultation: AI responses are automated informational guidance, not formal legal advice from an advocate."}
+                ? "एआई कानूनी जानकारी — विधिक सलाह नहीं। अपने अधिकारों को समझने के लिए पूर्व-परामर्श सहायता।"
+                : "AI legal information — not legal advice. Automated informational orientation before speaking with an advocate."}
             </span>
           </div>
           <button
@@ -440,13 +526,13 @@ export function ChatInterface() {
             </p>
             <p>
               {isHindi
-                ? "• उत्तर अपूर्ण या पुराने हो सकते हैं। महत्वपूर्ण धाराओं, समय-सीमाओं और अदालती आवश्यकताओं का स्वतंत्र सत्यापन करें।"
-                : "• Responses can be incomplete or inaccurate. Independently verify important statutes, limitation periods, and procedural deadlines."}
+                ? "• कृपया नाम, आधार संख्या, फ़ोन नंबर, ओटीपी, पासवर्ड या गोपनीय दस्तावेज़ दर्ज न करें। संदेश Groq द्वारा संसाधित हो सकते हैं।"
+                : "• Please do not enter names, Aadhaar numbers, phone numbers, OTPs, passwords or confidential documents. Messages may be processed by Groq."}
             </p>
             <p>
               {isHindi
-                ? "• अत्यधिक गोपनीय व्यक्तिगत विवरण या संवेदनशील वित्तीय जानकारी चैट में साझा न करें।"
-                : "• Avoid sharing sensitive personal identifiers or private secrets you are not comfortable sending to cloud AI providers."}
+                ? "• बातचीत स्वतः गोपनीय या विशेषाधिकार प्राप्त (Privileged) नहीं है। महत्वपूर्ण वैधानिक धाराओं का स्वतंत्र सत्यापन करें।"
+                : "• Conversations are not automatically privileged or confidential. Independently verify important statutory sections and deadlines."}
             </p>
             <p>
               {isHindi
@@ -474,6 +560,76 @@ export function ChatInterface() {
           jurisdictionLabel={selectedState}
           suggestedInquiries={SUGGESTED_INQUIRIES}
           conversationHistory={messages}
+          factsData={currentFacts}
+          onConfirmFacts={handleConfirmFacts}
+          retrievedSources={retrievedSources}
+          entrySlot={({ onSubmit: triggerOrbSubmit, isLoading: orbLoading }) =>
+            messages.length === 0 ? (
+              <GuidedIntakeForm
+                isHindi={isHindi}
+                selectedState={selectedState}
+                onStateChange={setSelectedState}
+                onSubmit={async (formData) => {
+                  setActiveIntent(formData.intent);
+                  if (formData.state) {
+                    setSelectedState(formData.state);
+                  }
+
+                  let fullQuery = formData.description;
+                  const metaParts: string[] = [];
+                  if (formData.legalTopic && !formData.legalTopic.includes("Other")) {
+                    metaParts.push(`Topic: ${formData.legalTopic}`);
+                  }
+                  if (formData.dateOfIncident) {
+                    metaParts.push(`Timeline: ${formData.dateOfIncident}`);
+                  }
+                  if (formData.userRole) {
+                    metaParts.push(`Role: ${formData.userRole}`);
+                  }
+                  if (formData.desiredOutcome) {
+                    metaParts.push(`Desired Outcome: ${formData.desiredOutcome}`);
+                  }
+                  if (formData.specificQuestions) {
+                    metaParts.push(`Questions for Advocate: ${formData.specificQuestions}`);
+                  }
+
+                  if (metaParts.length > 0) {
+                    fullQuery = `[Context: ${metaParts.join(" | ")}]\n\n${fullQuery}`;
+                  }
+
+                  const initialFacts = extractFactsFromText(
+                    formData.description,
+                    formData.state,
+                    formData.legalTopic,
+                    formData.userRole,
+                    formData.desiredOutcome
+                  );
+                  if (formData.dateOfIncident) {
+                    initialFacts.dates.push({
+                      id: "date-guided-1",
+                      originalText: formData.dateOfIncident,
+                      needsConfirmation: false,
+                      context: "Provided in guided intake form",
+                    });
+                  }
+                  setCurrentFacts(initialFacts);
+
+                  return triggerOrbSubmit(fullQuery);
+                }}
+                isLoading={orbLoading || isLoading}
+                voiceMicSlot={
+                  <VoiceComposerMicButton
+                    isHindi={isHindi}
+                    isSupported={voiceInput.isSupported}
+                    status={voiceInput.status}
+                    disabled={isLoading}
+                    onStart={() => voiceInput.startListening(input)}
+                    onFinish={voiceInput.finishListening}
+                  />
+                }
+              />
+            ) : null
+          }
           voiceMicSlot={
             <VoiceComposerMicButton
               isHindi={isHindi}
@@ -530,7 +686,7 @@ export function ChatInterface() {
           </span>
         </p>
         <span className="font-mono text-[10px] text-[#205C43] font-semibold hidden md:inline">
-          NyayLink AI Triage Engine v2.4
+          NyayLink AI Triage Engine v2.5
         </span>
       </div>
     </PerimeterGlowContainer>

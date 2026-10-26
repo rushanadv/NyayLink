@@ -22,9 +22,12 @@ import {
   MessageSquare,
   Shield,
   Layers,
+  BookOpen,
+  ExternalLink,
 } from "lucide-react";
 import { FormattedMarkdown } from "@/components/intake/formatted-markdown";
-import { FactSummaryCard } from "@/components/intake/fact-summary-card";
+import { WhatIUnderstoodCard } from "@/components/intake/what-i-understood-card";
+import { IntakeFacts } from "@/lib/intake/fact-types";
 
 export type AnimationPhase =
   | "idle"
@@ -89,6 +92,31 @@ export interface AIThinkingOrbAndInputProps {
   onChangeText?: (text: string) => void;
   /** Voice recognition status ribbon slot */
   voiceRibbonSlot?: React.ReactNode;
+  /** Structured facts data if available */
+  factsData?: IntakeFacts | null;
+  /** Callback when user confirms edited facts */
+  onConfirmFacts?: (facts: IntakeFacts) => void;
+  /** Verified statutory sources retrieved from India Code registry */
+  retrievedSources?: Array<{
+    id: string;
+    actName: string;
+    actShortName: string;
+    section: string;
+    provisionTitle: string;
+    officialSourceUrl: string;
+    sourcePublisher?: string;
+    lastCheckedDate?: string;
+    verificationStatus: string;
+    category?: string;
+    plainSummary?: string;
+  }>;
+  /** Entry component slot for guided 3-choice initiation */
+  entrySlot?:
+    | React.ReactNode
+    | ((props: {
+        onSubmit: (query: string) => Promise<string | void>;
+        isLoading: boolean;
+      }) => React.ReactNode);
 }
 
 // Bounded uniform Fibonacci sphere point distribution
@@ -156,6 +184,10 @@ export function AIThinkingOrbAndInput({
   value,
   onChangeText,
   voiceRibbonSlot,
+  factsData,
+  onConfirmFacts,
+  retrievedSources = [],
+  entrySlot,
 }: AIThinkingOrbAndInputProps) {
   // Input text state
   const [inputText, setInputText] = useState(initialQuestion);
@@ -278,6 +310,27 @@ export function AIThinkingOrbAndInput({
       setFinalAnswer(currentStreamText);
     }
   }, [currentStreamText, phase]);
+
+  // Handle streaming lifecycle transitions from external submission
+  useEffect(() => {
+    if (isStreaming && phase === "idle") {
+      setPhase("think");
+    } else if (!isStreaming && phase === "think" && (currentStreamText || finalAnswer)) {
+      setPhase("resolve");
+      phaseTimerRef.current = setTimeout(() => {
+        if (!isMountedRef.current) return;
+        setPhase("condense");
+        phaseTimerRef.current = setTimeout(() => {
+          if (!isMountedRef.current) return;
+          setPhase("unfold");
+          phaseTimerRef.current = setTimeout(() => {
+            if (!isMountedRef.current) return;
+            setPhase("answered");
+          }, 350);
+        }, 400);
+      }, 500);
+    }
+  }, [isStreaming, phase, currentStreamText, finalAnswer]);
 
   // Dynamic Textarea Auto-height
   const adjustHeight = useCallback((el: HTMLTextAreaElement | null) => {
@@ -675,13 +728,25 @@ export function AIThinkingOrbAndInput({
           </div>
         )}
 
+        {/* Guided Entry View (Phase 4: 3 Entry choices & Guided Form) */}
+        {entrySlot && phase === "idle" && (
+          <div className="w-full max-w-[760px] bg-white p-5 sm:p-7 rounded-2xl border border-[#D5E5D9] shadow-md mb-3 z-10">
+            {typeof entrySlot === "function"
+              ? entrySlot({
+                  onSubmit: (q: string) => initiateSubmission(q),
+                  isLoading: isStreaming,
+                })
+              : entrySlot}
+          </div>
+        )}
+
         {/* ====================================================================
             PHASE 1: IDLE MORPHING INPUT PILL
             ==================================================================== */}
         <div
           className={`mo-input-pill ${
             phase === "launch" ? "mo-launching" : ""
-          } ${phase !== "idle" && phase !== "launch" ? "mo-hidden" : ""}`}
+          } ${phase !== "idle" && phase !== "launch" ? "mo-hidden" : ""} ${entrySlot ? "hidden" : ""}`}
         >
           {/* Subtle top jurisdiction / state status banner if present */}
           {(jurisdictionLabel || jurisdictionSelector) && (
@@ -910,6 +975,45 @@ export function AIThinkingOrbAndInput({
               </div>
             )}
 
+            {/* Grounded Statutory Source Registry References */}
+            {retrievedSources && retrievedSources.length > 0 ? (
+              <div className="px-6 py-3 bg-[#F8FAF9] border-b border-[#D5E5D9] space-y-1.5 text-xs">
+                <div className="flex items-center gap-1.5 font-bold text-[#205C43]">
+                  <BookOpen className="w-3.5 h-3.5 text-[#205C43]" />
+                  <span>
+                    {isHindi
+                      ? "सत्यापित संविधिक स्रोत (आधिकारिक India Code संदर्भ):"
+                      : "Verified Statutory References (Official India Code):"}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2 pt-0.5">
+                  {retrievedSources.map((src) => (
+                    <a
+                      key={src.id}
+                      href={src.officialSourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-[#D5E5D9] text-[#205C43] hover:border-[#205C43] hover:bg-[#EAF3ED] font-medium transition-colors shadow-2xs"
+                      title={`${src.provisionTitle} — ${src.sourcePublisher || "Government of India"}`}
+                    >
+                      <span className="font-semibold">{src.actShortName}</span>
+                      <span className="text-[#69736D]">• {src.section}</span>
+                      <ExternalLink className="w-3 h-3 text-[#205C43]/70" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="px-6 py-2 bg-[#FFFDF7] border-b border-[#E8DCC0] flex items-center gap-2 text-xs text-[#7A5E1A]">
+                <HelpCircle className="w-3.5 h-3.5 text-[#C5A059] shrink-0" />
+                <span>
+                  {isHindi
+                    ? "सामान्य भारतीय विधिक मार्गदर्शन। महत्वपूर्ण विवरणों का किसी योग्य अधिवक्ता से सत्यापन अवश्य करें।"
+                    : "General Indian legal orientation. Verify important details with a qualified advocate."}
+                </span>
+              </div>
+            )}
+
             {/* Answer Content Body with Formatted Markdown */}
             <div className="mo-card-body">
               {finalAnswer ? (
@@ -923,14 +1027,16 @@ export function AIThinkingOrbAndInput({
               )}
             </div>
 
-            {/* Plain-Language Fact Extraction Summary & Action Bridge */}
+            {/* Structured Facts Extraction & Confirmation: What I Understood */}
             {finalAnswer && activeQuestion && (
               <div className="px-5 sm:px-6 py-4 border-t border-[#D5E5D9]/60 bg-[#FDFEFC]">
-                <FactSummaryCard
+                <WhatIUnderstoodCard
                   inquiryText={activeQuestion}
                   answerText={finalAnswer}
                   jurisdiction={jurisdictionLabel || "All India"}
                   isHindi={isHindi ?? false}
+                  factsData={factsData}
+                  onConfirmFacts={onConfirmFacts}
                 />
               </div>
             )}

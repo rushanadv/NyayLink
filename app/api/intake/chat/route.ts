@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { buildSystemPrompt } from "@/lib/intake/system-prompt";
+import {
+  retrieveRelevantLegalSources,
+  StatutoryReference,
+} from "@/lib/legal/references";
+import { IntakeFacts, IntakeIntent } from "@/lib/intake/fact-types";
 
 export const maxDuration = 60;
 
@@ -13,7 +18,7 @@ const getFallbackModel = (): string =>
 // In-memory rate limiting: IP -> timestamps array
 const rateLimitMap = new Map<string, number[]>();
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
-const MAX_REQUESTS_PER_MINUTE = 15;
+const MAX_REQUESTS_PER_MINUTE = 20;
 
 function checkRateLimit(clientIp: string): { allowed: boolean; remaining: number } {
   const now = Date.now();
@@ -54,6 +59,9 @@ interface RequestBody {
   state?: string;
   district?: string;
   isContinuation?: boolean;
+  intent?: IntakeIntent;
+  confirmedFacts?: IntakeFacts;
+  sources?: StatutoryReference[];
 }
 
 async function requestGroq(
@@ -151,7 +159,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid JSON request body." }, { status: 400 });
     }
 
-    const { messages = [], state, district, isContinuation } = body;
+    const {
+      messages = [],
+      state,
+      district,
+      isContinuation,
+      intent,
+      confirmedFacts,
+      sources,
+    } = body;
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json(
@@ -172,7 +188,7 @@ export async function POST(req: NextRequest) {
       .slice(-6) // Bounded context: last 6 turns preserve state without token bloat
       .map((m) => ({
         role: m.role,
-        content: m.content.slice(0, 1500),
+        content: m.content.slice(0, 1800),
       }));
 
     if (sanitizedChatMessages.length === 0) {
@@ -182,7 +198,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const systemPrompt = buildSystemPrompt({ state, district });
+    // Retrieve relevant verified legal sources from India Code registry
+    const latestUserQuery =
+      [...sanitizedChatMessages].reverse().find((m) => m.role === "user")?.content || "";
+
+    const activeSources: StatutoryReference[] =
+      sources && sources.length > 0
+        ? sources
+        : retrieveRelevantLegalSources(latestUserQuery, {
+            legalIssue: confirmedFacts?.legalIssue,
+            possiblePracticeAreas: confirmedFacts?.possiblePracticeAreas,
+            userRole: confirmedFacts?.userRole,
+          });
+
+    const systemPrompt = buildSystemPrompt({
+      location: { state, district },
+      confirmedFacts,
+      retrievedSources: activeSources,
+    });
+
     const fullMessages: ChatMessage[] = [
       { role: "system", content: systemPrompt },
       ...sanitizedChatMessages,
@@ -211,7 +245,9 @@ export async function POST(req: NextRequest) {
       } else {
         primaryStatus = primaryRes.status;
         const errText = await primaryRes.text();
-        console.warn(`[AI Intake] Primary Groq model (${primaryModel}) failed [${primaryStatus}]: ${errText.slice(0, 160)}`);
+        console.warn(
+          `[AI Intake] Primary Groq model (${primaryModel}) failed [${primaryStatus}]: ${errText.slice(0, 160)}`
+        );
       }
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : String(err);
@@ -330,6 +366,26 @@ export async function POST(req: NextRequest) {
             controller.enqueue(encoder.encode(remainder));
           }
 
+          // Emit verified sources metadata chunk
+          if (activeSources.length > 0) {
+            const serializedSources = JSON.stringify(
+              activeSources.map((s) => ({
+                id: s.id,
+                actName: s.actName,
+                actShortName: s.actShortName,
+                section: s.section,
+                provisionTitle: s.provisionTitle,
+                officialSourceUrl: s.officialSourceUrl,
+                sourcePublisher: s.sourcePublisher,
+                lastCheckedDate: s.lastCheckedDate,
+                verificationStatus: s.verificationStatus,
+                category: s.category,
+                plainSummary: s.plainSummary,
+              }))
+            );
+            controller.enqueue(encoder.encode(`\n\n__NYAYLINK_SOURCES__:${serializedSources}`));
+          }
+
           // Emit deterministic protocol completion token based on generation state
           if (streamError) {
             controller.enqueue(encoder.encode(`\n\n__NYAYLINK_ERROR__: ${streamError}`));
@@ -345,7 +401,7 @@ export async function POST(req: NextRequest) {
 
           const totalDuration = Date.now() - requestStartTime;
           console.info(
-            `[AI Intake] Request completed: model=${selectedModel}, TTFT=${timeToFirstToken ?? "none"}ms, total=${totalDuration}ms, finish=${finishReason || "natural"}`
+            `[AI Intake] Request completed: model=${selectedModel}, TTFT=${timeToFirstToken ?? "none"}ms, total=${totalDuration}ms, sources=${activeSources.length}, finish=${finishReason || "natural"}`
           );
 
           controller.close();
@@ -366,6 +422,8 @@ export async function POST(req: NextRequest) {
         "Transfer-Encoding": "chunked",
         "X-Content-Type-Options": "nosniff",
         "X-RateLimit-Remaining": `${remaining}`,
+        "X-NyayLink-Grounded": activeSources.length > 0 ? "true" : "false",
+        "X-NyayLink-Sources-Count": String(activeSources.length),
       },
     });
   } catch (err: unknown) {
