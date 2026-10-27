@@ -8,7 +8,12 @@ import {
   CheckCircle2,
   XCircle,
   User,
+  ShieldCheck,
+  RotateCcw,
+  FileText,
+  AlertTriangle,
 } from "lucide-react";
+import { revokeBriefHandoff } from "@/app/actions/briefs";
 
 interface ConsultationsTabProps {
   consultations: ConsultationRequest[];
@@ -20,6 +25,34 @@ export function ConsultationsTab({
   onNavigateTab,
 }: ConsultationsTabProps) {
   const [filter, setFilter] = useState<string>("all");
+  const [revokingId, setRevokingId] = useState<string | null>(null);
+  const [revokeNotice, setRevokeNotice] = useState<string | null>(null);
+
+  const handleRevoke = async (c: ConsultationRequest) => {
+    if (
+      !confirm(
+        "Are you sure you want to withdraw this consultation request? Any shared AI preconsultation brief will be revoked immediately."
+      )
+    ) {
+      return;
+    }
+    setRevokingId(c.id);
+    try {
+      if (c.brief_handoff_id) {
+        await revokeBriefHandoff({
+          handoffId: c.brief_handoff_id,
+          reason: "Withdrawn by client from dashboard",
+        });
+      }
+      setRevokeNotice("Consultation request and brief sharing successfully withdrawn.");
+      setTimeout(() => setRevokeNotice(null), 3000);
+      window.location.reload();
+    } catch (e) {
+      console.error("Revoke error:", e);
+    } finally {
+      setRevokingId(null);
+    }
+  };
 
   const filteredConsultations = consultations.filter((c) => {
     if (filter === "all") return true;
@@ -87,6 +120,13 @@ export function ConsultationsTab({
           <span>Book New Consultation</span>
         </button>
       </div>
+
+      {revokeNotice && (
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>{revokeNotice}</span>
+        </div>
+      )}
 
       {/* Filter Tabs */}
       <div className="flex items-center gap-2 border-b border-[#D5E5D9] pb-3 text-xs font-mono">
@@ -172,7 +212,15 @@ export function ConsultationsTab({
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {(c.has_ai_brief ||
+                      Boolean(c.brief_handoff_id) ||
+                      c.message.includes("[AUDIT: CLIENT-SHARED AI PRECONSULTATION BRIEF]")) && (
+                      <span className="text-[10px] font-mono font-semibold text-[#205C43] bg-[#EAF3ED] px-2 py-0.5 rounded border border-[#205C43]/30 flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3 text-[#205C43]" />
+                        <span>AI Preconsultation Brief (Shared)</span>
+                      </span>
+                    )}
                     <span
                       className={`inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded-full border font-medium ${badge.bg}`}
                     >
@@ -209,6 +257,19 @@ export function ConsultationsTab({
                       </span>
                     )}
                   </div>
+
+                  {c.status === "pending" && (
+                    <button
+                      type="button"
+                      onClick={() => handleRevoke(c)}
+                      disabled={revokingId === c.id}
+                      className="px-3 py-1.5 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-red-800 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                      title="Withdraw request and revoke shared preconsultation brief"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>{revokingId === c.id ? "Revoking..." : "Withdraw / Revoke Brief"}</span>
+                    </button>
+                  )}
 
                   {c.lawyer_response && (
                     <div className="w-full mt-2 p-3 rounded-xl bg-[#EAF3ED]/80 border border-[#D5E5D9] text-xs space-y-1">

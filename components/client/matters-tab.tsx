@@ -10,6 +10,8 @@ import {
   Send,
   X,
   UserCheck,
+  FileText,
+  ShieldCheck,
 } from "lucide-react";
 
 interface MattersTabProps {
@@ -289,6 +291,52 @@ export function MattersTab({
                       ? "Hearing dockets or draft filings are active. Check milestone updates below."
                       : "Matter is currently in good standing."}
                   </p>
+                </div>
+
+                {/* Matter Documents & Preconsultation Briefs */}
+                <div className="space-y-3 p-4 rounded-xl bg-white border border-[#D5E5D9]">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-[#69736D] flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5 text-[#205C43]" />
+                      <span>Matter Records & Preconsultation Briefs</span>
+                    </h3>
+                    <span className="text-[10px] font-mono text-[#205C43] bg-[#EAF3ED] px-2 py-0.5 rounded border border-[#205C43]/20">
+                      Privileged
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {selectedMatter.updates?.filter((u) => u.update_type === "document").length ? (
+                      selectedMatter.updates
+                        .filter((u) => u.update_type === "document")
+                        .map((doc) => (
+                          <div
+                            key={doc.id}
+                            className="p-3 rounded-lg bg-[#F8FAF9] border border-[#D5E5D9] flex items-start justify-between gap-3 text-xs"
+                          >
+                            <div className="space-y-1">
+                              <span className="text-[10px] font-mono font-semibold text-[#205C43] uppercase bg-[#EAF3ED] px-2 py-0.5 rounded">
+                                AI Preconsultation Brief (Client Record)
+                              </span>
+                              <p className="text-[#202824] leading-relaxed">{doc.content}</p>
+                              <span className="text-[10px] text-[#69736D] block">
+                                Stored on {new Date(doc.created_at).toLocaleString()} • Confidential client record (Not a formal court pleading)
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                    ) : (
+                      <div className="p-3 rounded-lg bg-[#F8FAF9] border border-[#D5E5D9] text-xs text-[#69736D] flex items-center justify-between">
+                        <span>No AI preconsultation brief linked to this docket yet.</span>
+                        <a
+                          href="/intake"
+                          className="font-semibold text-[#205C43] hover:underline"
+                        >
+                          Launch AI Preconsultation &rarr;
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Chronological Timeline */}

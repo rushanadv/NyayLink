@@ -18,9 +18,14 @@ import {
   RotateCcw,
   ShieldCheck,
   Sparkles,
+  FileText,
+  Compass,
 } from "lucide-react";
 import { IntakeFacts, FactItem, DateItem } from "@/lib/intake/fact-types";
 import { extractFactsFromText } from "@/lib/intake/fact-extractor";
+import { buildLawyerReadyBrief } from "@/lib/intake/brief-builder";
+import { LawyerReadyBrief } from "@/lib/intake/brief-types";
+import { LawyerBriefModal } from "@/components/intake/lawyer-brief-modal";
 
 interface WhatIUnderstoodCardProps {
   inquiryText: string;
@@ -51,6 +56,20 @@ export function WhatIUnderstoodCard({
   const [isAddingFact, setIsAddingFact] = useState(false);
   const [confirmSuccessNotice, setConfirmSuccessNotice] = useState(false);
   const [dateConfirmInputs, setDateConfirmInputs] = useState<Record<string, string>>({});
+  const [isBriefModalOpen, setIsBriefModalOpen] = useState(false);
+  const [generatedBrief, setGeneratedBrief] = useState<LawyerReadyBrief | null>(null);
+
+  const handleOpenBriefModal = () => {
+    const b = buildLawyerReadyBrief({
+      inquiryText,
+      answerText,
+      facts: currentFacts,
+      jurisdiction,
+      locale: isHindi ? "hi" : "en",
+    });
+    setGeneratedBrief(b);
+    setIsBriefModalOpen(true);
+  };
 
   // Sync if parent updates factsData
   useEffect(() => {
@@ -495,18 +514,18 @@ export function WhatIUnderstoodCard({
         </div>
       )}
 
-      {/* Action Footer: Genuine Confirm Facts & Lawyer Handoff Bridge */}
+      {/* Action Footer: Genuine Confirm Facts & Distinct Post-Response Actions */}
       <div className="pt-3 border-t border-[#D5E5D9] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <button
           type="button"
           onClick={handleConfirmAction}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+          className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
             currentFacts.hasConfirmed
               ? "bg-[#EAF3ED] text-[#205C43] border border-[#205C43]/40 hover:bg-[#D5E5D9]"
-              : "bg-[#205C43] text-white hover:bg-[#174530] shadow-sm"
+              : "bg-white border border-[#D5E5D9] text-[#202824] hover:bg-[#F8FAF9] shadow-2xs"
           }`}
         >
-          <Check className="w-4 h-4" />
+          <Check className="w-3.5 h-3.5 text-[#205C43]" />
           <span>
             {currentFacts.hasConfirmed
               ? (isHindi ? "तथ्य पुष्टीकृत हैं (पुनः पुष्टि करें)" : "Facts Confirmed (Re-confirm)")
@@ -514,22 +533,43 @@ export function WhatIUnderstoodCard({
           </span>
         </button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Action 1: Create a lawyer-ready brief */}
+          <button
+            type="button"
+            onClick={handleOpenBriefModal}
+            className="w-full sm:w-auto px-4 py-2 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>{isHindi ? "वकील हेतु सारांश बनाएं" : "Create a lawyer-ready brief"}</span>
+          </button>
+
+          {/* Action 2: Find Advocates (browsing directory only; NEVER auto-shares) */}
           <Link
             href="/lawyers"
-            className="w-full sm:w-auto px-4 py-2 rounded-xl bg-white border border-[#205C43] text-[#205C43] hover:bg-[#EAF3ED] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+            className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-white border border-[#205C43] text-[#205C43] hover:bg-[#EAF3ED] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
           >
-            <span>{isHindi ? "वकील से साझा करें व खोजें" : "Share with Advocate & Find"}</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <Compass className="w-3.5 h-3.5" />
+            <span>{isHindi ? "वकील खोजें" : "Find Advocates"}</span>
           </Link>
         </div>
       </div>
 
       <p className="text-[10.5px] text-[#69736D] italic">
         {isHindi
-          ? "यह सारांश किसी वकील के साथ तभी साझा किया जाएगा जब आप स्पष्ट रूप से 'वकील से साझा करें' चुनेंगे।"
-          : "This summary is shared with an advocate only upon your explicit action to connect."}
+          ? "वकील खोजने या सारांश देखने पर आपका डेटा कभी स्वतः साझा नहीं होता। वकील से साझा करने के लिए आपकी स्पष्ट सहमति आवश्यक है।"
+          : "Browsing advocates or creating a brief never auto-shares your data. Sharing requires your explicit review and consent."}
       </p>
+
+      {/* Lawyer-Ready Brief Review & Export Modal */}
+      {isBriefModalOpen && generatedBrief && (
+        <LawyerBriefModal
+          isOpen={isBriefModalOpen}
+          onClose={() => setIsBriefModalOpen(false)}
+          initialBrief={generatedBrief}
+          initialLocale={isHindi ? "hi" : "en"}
+        />
+      )}
     </div>
   );
 }

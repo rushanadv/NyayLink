@@ -10,6 +10,10 @@ import {
   User,
   Send,
   X,
+  FileText,
+  ShieldCheck,
+  AlertTriangle,
+  Scale,
 } from "lucide-react";
 
 interface RequestsTabProps {
@@ -24,6 +28,7 @@ export function RequestsTab({ consultations }: RequestsTabProps) {
   const [scheduledAt, setScheduledAt] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [viewingBriefReq, setViewingBriefReq] = useState<ConsultationRequest | null>(null);
 
   const filtered = consultations.filter((c) => {
     if (filter === "all") return true;
@@ -164,54 +169,102 @@ export function RequestsTab({ consultations }: RequestsTabProps) {
         </div>
       ) : (
         <div className="space-y-4">
-          {filtered.map((req) => (
-            <div
-              key={req.id}
-              className="p-5 sm:p-6 rounded-2xl bg-white border border-[#D5E5D9] shadow-xs space-y-4"
-            >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#D5E5D9]">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-[#EAF3ED] text-[#205C43] flex items-center justify-center shrink-0">
-                    <User className="w-4 h-4" />
+          {filtered.map((req) => {
+            const isAiBrief =
+              Boolean(req.has_ai_brief) ||
+              Boolean(req.brief_handoff_id) ||
+              req.message.includes("[AUDIT: CLIENT-SHARED AI PRECONSULTATION BRIEF]");
+            const isRevoked =
+              req.status === "cancelled" ||
+              req.message.includes("[BRIEF REVOKED]") ||
+              req.message.includes("[CONSULTATION WITHDRAWN BY CLIENT]");
+
+            return (
+              <div
+                key={req.id}
+                className="p-5 sm:p-6 rounded-2xl bg-white border border-[#D5E5D9] shadow-xs space-y-4"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#D5E5D9]">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-[#EAF3ED] text-[#205C43] flex items-center justify-center shrink-0">
+                      <User className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-semibold text-[#202824]">
+                        {req.client?.full_name || `Client #${req.client_id.slice(0, 8)}`}
+                      </span>
+                      <p className="text-[11px] text-[#69736D]">
+                        Received on {new Date(req.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-xs font-semibold text-[#202824]">
-                      {req.client?.full_name || `Client #${req.client_id.slice(0, 8)}`}
+
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {isAiBrief && (
+                      <span className="text-[10px] font-mono font-semibold text-[#205C43] bg-[#EAF3ED] px-2 py-0.5 rounded border border-[#205C43]/30 flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3 text-[#205C43]" />
+                        <span>AI Preconsultation Brief (Client-Shared)</span>
+                      </span>
+                    )}
+                    <span
+                      className={`text-[11px] font-mono px-2.5 py-1 rounded-full border font-medium uppercase ${
+                        req.status === "accepted" || req.status === "scheduled"
+                          ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                          : req.status === "pending"
+                          ? "bg-amber-50 text-amber-800 border-amber-200"
+                          : "bg-red-50 text-red-800 border-red-200"
+                      }`}
+                    >
+                      {req.status}
                     </span>
-                    <p className="text-[11px] text-[#69736D]">
-                      Received on {new Date(req.created_at).toLocaleDateString()}
-                    </p>
+                    {req.is_demo && (
+                      <span className="text-[10px] font-mono text-[#205C43] bg-[#EAF3ED] px-2 py-0.5 rounded border border-[#D5E5D9]">
+                        DEMO
+                      </span>
+                    )}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`text-[11px] font-mono px-2.5 py-1 rounded-full border font-medium uppercase ${
-                      req.status === "accepted" || req.status === "scheduled"
-                        ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                        : req.status === "pending"
-                        ? "bg-amber-50 text-amber-800 border-amber-200"
-                        : "bg-red-50 text-red-800 border-red-200"
-                    }`}
-                  >
-                    {req.status}
-                  </span>
-                  {req.is_demo && (
-                    <span className="text-[10px] font-mono text-[#205C43] bg-[#EAF3ED] px-2 py-0.5 rounded border border-[#D5E5D9]">
-                      DEMO
-                    </span>
-                  )}
-                </div>
-              </div>
+                {isRevoked ? (
+                  <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-2.5">
+                    <AlertTriangle className="w-4 h-4 shrink-0 text-amber-700 mt-0.5" />
+                    <div>
+                      <strong className="block font-semibold">Consultation Withdrawn by Client</strong>
+                      <span className="text-[11px] text-amber-800">
+                        The client revoked this preconsultation brief. Brief contents are no longer active.
+                      </span>
+                    </div>
+                  </div>
+                ) : isAiBrief ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-[#202824]">
+                        {req.subject}
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={() => setViewingBriefReq(req)}
+                        className="px-3 py-1.5 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                      >
+                        <FileText className="w-3.5 h-3.5" />
+                        <span>View Full Brief</span>
+                      </button>
+                    </div>
 
-              <div className="space-y-2">
-                <h3 className="text-sm font-semibold text-[#202824]">
-                  {req.subject}
-                </h3>
-                <div className="p-4 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] text-xs text-[#202824] leading-relaxed whitespace-pre-wrap">
-                  {req.message}
-                </div>
-              </div>
+                    <div className="p-4 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] text-xs text-[#202824] leading-relaxed max-h-40 overflow-y-auto whitespace-pre-wrap">
+                      {req.message}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold text-[#202824]">
+                      {req.subject}
+                    </h3>
+                    <div className="p-4 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] text-xs text-[#202824] leading-relaxed whitespace-pre-wrap">
+                      {req.message}
+                    </div>
+                  </div>
+                )}
 
               <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[#69736D]">
                 <div className="flex items-center gap-3">
@@ -259,8 +312,9 @@ export function RequestsTab({ consultations }: RequestsTabProps) {
                 </div>
               )}
             </div>
-          ))}
-        </div>
+          );
+        })}
+      </div>
       )}
 
       {/* Action Modal */}
@@ -377,6 +431,94 @@ export function RequestsTab({ consultations }: RequestsTabProps) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Full AI Preconsultation Brief Viewing Modal for Advocate */}
+      {viewingBriefReq && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+          <div
+            className="w-full max-w-3xl max-h-[90vh] bg-white rounded-2xl border border-[#D5E5D9] shadow-2xl flex flex-col overflow-hidden text-[#202824]"
+            role="dialog"
+            aria-modal="true"
+          >
+            {/* Header */}
+            <div className="px-6 py-4 bg-[#F8FAF9] border-b border-[#D5E5D9] flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#EAF3ED] text-[#205C43] flex items-center justify-center">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-[#202824]">
+                    AI Preconsultation Brief — {viewingBriefReq.client?.full_name || "Client"}
+                  </h3>
+                  <p className="text-[11px] text-[#69736D]">
+                    Confidential Client Summary • Shared with Bar Council Privileged Fiduciary
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setViewingBriefReq(null)}
+                className="p-1 rounded-lg text-[#69736D] hover:bg-[#EAF3ED] hover:text-[#202824]"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Advocate Verification Notice Banner */}
+            <div className="px-6 py-3 bg-[#FFFDF7] border-b border-[#E8DCC0] flex items-start gap-2.5 text-xs text-[#7A5E1A]">
+              <ShieldCheck className="w-4 h-4 text-[#C5A059] shrink-0 mt-0.5" />
+              <p className="leading-relaxed">
+                <strong>Advocate Advisory:</strong> This brief is synthesized from AI preconsultation based on client-provided statements and automated statutory mapping. Facts and inferences must be independently verified by chambers prior to court pleadings or legal advice.
+              </p>
+            </div>
+
+            {/* Brief Content Body */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              <div className="p-4 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] text-xs text-[#202824] leading-relaxed whitespace-pre-wrap font-sans">
+                {viewingBriefReq.message}
+              </div>
+            </div>
+
+            {/* Footer with Actions */}
+            <div className="px-6 py-3 bg-[#F8FAF9] border-t border-[#D5E5D9] flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => setViewingBriefReq(null)}
+                className="px-4 py-2 rounded-xl border border-[#D5E5D9] text-[#69736D] hover:bg-white text-xs font-medium cursor-pointer"
+              >
+                Close
+              </button>
+
+              {viewingBriefReq.status === "pending" && (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const req = viewingBriefReq;
+                      setViewingBriefReq(null);
+                      handleOpenActionModal(req, "declined");
+                    }}
+                    className="px-3 py-1.5 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-red-800 text-xs font-semibold cursor-pointer"
+                  >
+                    Decline
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const req = viewingBriefReq;
+                      setViewingBriefReq(null);
+                      handleOpenActionModal(req, "accepted");
+                    }}
+                    className="px-4 py-1.5 rounded-xl bg-[#174530] hover:bg-[#0E2C1E] text-white text-xs font-semibold shadow-xs cursor-pointer"
+                  >
+                    Accept & Schedule
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

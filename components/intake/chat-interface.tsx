@@ -12,6 +12,7 @@ import {
   Briefcase,
   ArrowRight,
   RotateCcw,
+  FileText,
 } from "lucide-react";
 import { MagneticWrapper } from "@/components/ui/magnetic-wrapper";
 import { PerimeterGlowContainer } from "@/components/intake/perimeter-glow";
@@ -27,6 +28,9 @@ import { AIThinkingOrbAndInput } from "@/components/ui/ai-thinking-orb-and-input
 import { GuidedIntakeForm } from "@/components/intake/guided-intake-form";
 import { IntakeFacts, GuidedFormData, IntakeIntent } from "@/lib/intake/fact-types";
 import { extractFactsFromText } from "@/lib/intake/fact-extractor";
+import { buildLawyerReadyBrief } from "@/lib/intake/brief-builder";
+import { LawyerReadyBrief } from "@/lib/intake/brief-types";
+import { LawyerBriefModal } from "@/components/intake/lawyer-brief-modal";
 
 export interface ChatMessage {
   id: string;
@@ -106,6 +110,24 @@ export function ChatInterface() {
   const [activeIntent, setActiveIntent] = useState<IntakeIntent>("understand_position");
 
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  const [isHeaderBriefModalOpen, setIsHeaderBriefModalOpen] = useState(false);
+  const [headerBrief, setHeaderBrief] = useState<LawyerReadyBrief | null>(null);
+
+  const handleOpenHeaderBrief = () => {
+    const lastUserMessage = [...messages].reverse().find((m) => m.role === "user")?.content || "";
+    const lastAssistantMessage = [...messages].reverse().find((m) => m.role === "assistant")?.content || "";
+    const facts = currentFacts || extractFactsFromText(lastUserMessage, selectedState);
+    const brief = buildLawyerReadyBrief({
+      inquiryText: lastUserMessage,
+      answerText: lastAssistantMessage,
+      facts,
+      jurisdiction: selectedState,
+      locale: isHindi ? "hi" : "en",
+    });
+    setHeaderBrief(brief);
+    setIsHeaderBriefModalOpen(true);
+  };
 
   // Browser-native Voice Speech Recognition (Speech-to-Text)
   const voiceInput = useSpeechRecognition({
@@ -480,17 +502,30 @@ export function ChatInterface() {
             </button>
           )}
 
-          {/* Connect with Advocate CTA Button (appears after completion) */}
+          {/* Distinct Post-Response Actions */}
           {hasCompletedExchange && (
-            <MagneticWrapper maxDisplacement={5}>
-              <Link
-                href="/lawyers"
-                className="px-3.5 py-1 rounded-lg bg-[#205C43] hover:bg-[#174530] text-white font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-xs"
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={handleOpenHeaderBrief}
+                className="px-2.5 sm:px-3 py-1 rounded-lg bg-[#205C43] hover:bg-[#174530] text-white font-semibold text-xs transition-colors flex items-center gap-1 shadow-xs cursor-pointer"
+                title="Create a structured brief for consultation"
               >
-                <span>{isHindi ? "वकील खोजें" : "Find Advocates"}</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </MagneticWrapper>
+                <FileText className="w-3.5 h-3.5" />
+                <span>{isHindi ? "वकील हेतु सारांश" : "Create Brief"}</span>
+              </button>
+
+              <MagneticWrapper maxDisplacement={5}>
+                <Link
+                  href="/lawyers"
+                  className="px-2.5 sm:px-3 py-1 rounded-lg bg-white border border-[#205C43] text-[#205C43] hover:bg-[#EAF3ED] font-semibold text-xs transition-colors flex items-center gap-1 shadow-2xs"
+                  title="Browse verified advocates without sharing"
+                >
+                  <span>{isHindi ? "वकील खोजें" : "Find Advocates"}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </MagneticWrapper>
+            </div>
           )}
         </div>
       </div>
@@ -689,6 +724,15 @@ export function ChatInterface() {
           NyayLink AI Triage Engine v2.5
         </span>
       </div>
+
+      {isHeaderBriefModalOpen && headerBrief && (
+        <LawyerBriefModal
+          isOpen={isHeaderBriefModalOpen}
+          onClose={() => setIsHeaderBriefModalOpen(false)}
+          initialBrief={headerBrief}
+          initialLocale={isHindi ? "hi" : "en"}
+        />
+      )}
     </PerimeterGlowContainer>
   );
 }

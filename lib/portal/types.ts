@@ -61,6 +61,8 @@ export interface ConsultationRequest {
   lawyer_response: string | null;
   scheduled_at: string | null;
   is_demo: boolean;
+  brief_handoff_id?: string | null;
+  has_ai_brief?: boolean;
   created_at: string;
   updated_at: string;
   lawyer?: {
@@ -74,6 +76,17 @@ export interface ConsultationRequest {
     phone?: string;
   } | null;
 }
+
+export type {
+  LawyerReadyBrief,
+  BriefFact,
+  BriefDate,
+  BriefJurisdiction,
+  MentionedDocument,
+  BriefHandoffRecord,
+  ClientBriefRecord,
+  BriefHandoffStatus,
+} from "@/lib/intake/brief-types";
 
 export interface UserProfile {
   id: string;
