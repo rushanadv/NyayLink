@@ -41,6 +41,7 @@ interface ClientShellProps {
   matters: LegalMatter[];
   consultations: ConsultationRequest[];
   advocates: PublicLawyer[];
+  underReviewAdvocates?: PublicLawyer[];
   initialTab?: string;
 }
 
@@ -52,6 +53,7 @@ export function ClientShell({
   matters,
   consultations,
   advocates,
+  underReviewAdvocates = [],
   initialTab = "overview",
 }: ClientShellProps) {
   const router = useRouter();
@@ -330,6 +332,7 @@ export function ClientShell({
           {currentTab === "advocates" && (
             <AdvocatesTab
               advocates={advocates}
+              underReviewAdvocates={underReviewAdvocates}
               matters={matters}
               onConsultationRequested={() => setTab("consultations")}
             />

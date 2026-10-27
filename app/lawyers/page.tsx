@@ -39,6 +39,8 @@ async function LawyersDirectoryContent({
   let isAuthenticated = false;
   let errorMessage: string | undefined = undefined;
 
+  let underReviewLawyers: PublicLawyer[] = [];
+
   try {
     const supabase = await createClient();
 
@@ -53,21 +55,42 @@ async function LawyersDirectoryContent({
     }
 
     // 2. Target view:
-    // - Authenticated clients/users access client_lawyer_directory (approved + consented pending advocates)
-    // - Unauthenticated visitors access public_lawyer_directory (Rule 36 approved-only advocates)
+    // - Authenticated clients/users access client_lawyer_directory (approved advocates)
+    // - Unauthenticated visitors access public_lawyer_directory (approved advocates)
     const targetTable = isAuthenticated ? "client_lawyer_directory" : "public_lawyer_directory";
 
-    const { data: dbLawyers, error } = await supabase
+    // Surface A: Strictly Verified / Approved Advocates
+    let dbLawyers: any[] | null = null;
+    let fetchError: any = null;
+
+    const queryWithVerifiedAt = await supabase
       .from(targetTable)
       .select(
-        "id, professional_name, bio, practice_areas, experience_years, city, state, languages, courts_of_practice, consultation_modes, consultation_fee, verification_status, created_at"
+        "id, professional_name, bio, practice_areas, experience_years, city, state, languages, courts_of_practice, consultation_modes, consultation_fee, verification_status, verified_at, created_at"
       )
+      .eq("verification_status", "approved")
       .order("experience_years", { ascending: false });
 
-    if (error) {
+    if (!queryWithVerifiedAt.error) {
+      dbLawyers = queryWithVerifiedAt.data;
+    } else {
+      // Graceful fallback without verified_at if remote view schema has not yet aliased reviewed_at
+      const queryBase = await supabase
+        .from(targetTable)
+        .select(
+          "id, professional_name, bio, practice_areas, experience_years, city, state, languages, courts_of_practice, consultation_modes, consultation_fee, verification_status, created_at"
+        )
+        .eq("verification_status", "approved")
+        .order("experience_years", { ascending: false });
+
+      dbLawyers = queryBase.data;
+      fetchError = queryBase.error;
+    }
+
+    if (fetchError) {
       console.error(`[NyayaLink Server Error] Failed to fetch ${targetTable} from Supabase:`, {
-        message: error.message,
-        code: error.code,
+        message: fetchError.message,
+        code: fetchError.code,
       });
       directoryState = "error";
       errorMessage = "Unable to connect to the advocate directory registry. Please retry shortly.";
@@ -75,12 +98,50 @@ async function LawyersDirectoryContent({
       directoryState = "live";
       lawyers = dbLawyers.map((l: Record<string, unknown>) => ({
         ...l,
-        verification_status:
-          (l.verification_status as string) || (isAuthenticated ? "approved" : "approved"),
+        verification_status: "approved",
       })) as unknown as PublicLawyer[];
     } else {
       // Query succeeded with 0 records
       directoryState = "empty";
+    }
+
+    // Surface B: Profiles Under Review (Only accessible to authenticated clients, never unauthenticated anon)
+    if (isAuthenticated) {
+      try {
+        const reviewRes = await supabase
+          .from("client_under_review_directory")
+          .select(
+            "id, professional_name, bio, practice_areas, experience_years, city, state, languages, courts_of_practice, consultation_modes, consultation_fee, verification_status, created_at"
+          )
+          .order("created_at", { ascending: false });
+
+        if (!reviewRes.error && reviewRes.data && reviewRes.data.length > 0) {
+          underReviewLawyers = reviewRes.data.map((l: Record<string, unknown>) => ({
+            ...l,
+            verification_status: "pending",
+            consultation_fee: null, // Consultation payment strictly disabled
+          })) as unknown as PublicLawyer[];
+        } else {
+          // Graceful fallback to client_lawyer_directory if view migration has not yet executed on remote DB
+          const fallbackRes = await supabase
+            .from("client_lawyer_directory")
+            .select(
+              "id, professional_name, bio, practice_areas, experience_years, city, state, languages, courts_of_practice, consultation_modes, consultation_fee, verification_status, created_at"
+            )
+            .eq("verification_status", "pending")
+            .order("created_at", { ascending: false });
+
+          if (!fallbackRes.error && fallbackRes.data) {
+            underReviewLawyers = fallbackRes.data.map((l: Record<string, unknown>) => ({
+              ...l,
+              verification_status: "pending",
+              consultation_fee: null, // Consultation payment strictly disabled
+            })) as unknown as PublicLawyer[];
+          }
+        }
+      } catch (reviewErr) {
+        console.warn("[NyayaLink Directory] Profiles under review query warning:", reviewErr);
+      }
     }
   } catch (fatalError: unknown) {
     if (
@@ -105,6 +166,7 @@ async function LawyersDirectoryContent({
   return (
     <LawyerDirectoryClient
       initialLawyers={lawyers}
+      underReviewLawyers={underReviewLawyers}
       isAuthenticated={isAuthenticated}
       directoryState={directoryState}
       errorMessage={errorMessage}

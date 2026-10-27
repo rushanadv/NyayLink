@@ -30,7 +30,7 @@ const CREDENTIAL_PANELS: CredentialPanel[] = [
   },
   {
     id: "sec36",
-    title: "Section 36 Compliant",
+    title: "Rule 36 Compliant",
     subtitle: "Zero Touting & Solicitation Rules",
     stat: "100% Neutral",
     icon: Scale,

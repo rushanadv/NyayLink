@@ -87,7 +87,7 @@ export const FEATURES: FeatureItem[] = [
     subtitle: "Bar Council verification, Advocates Act–safe",
     category: "Trust",
     iconName: "ShieldCheck",
-    badge: "Section 36 Compliant",
+    badge: "BCI Rule 36 Compliant",
     highlights: [
       "State Bar Council enrollment ID cross-validation",
       "No unlawful solicitation — strictly an informational marketplace",

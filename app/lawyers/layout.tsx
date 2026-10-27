@@ -6,9 +6,9 @@ import { SmoothScrollProvider } from "@/components/marketing/smooth-scroll-provi
 import { CinematicVideoBackground } from "@/components/marketing/cinematic-video-background";
 
 export const metadata: Metadata = {
-  title: "Verified Advocate Directory | NyayLink",
+  title: "Advocate Directory & Verified Roster | NyayLink",
   description:
-    "Search and consult verified Bar Council advocates across India. Filter by practice area, jurisdiction, experience, and spoken language.",
+    "Browse Bar Council enrolled advocates across India. Explore verified practitioners and profiles under review with upfront, transparent terms.",
 };
 
 const fontSerif = Fraunces({

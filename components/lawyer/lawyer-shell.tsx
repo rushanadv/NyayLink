@@ -225,8 +225,8 @@ export function LawyerShell({
                 }`}
               >
                 {verification?.status === "approved"
-                  ? (isHindi ? "बीसीआई सत्यापित" : "BCI Verified")
-                  : (isHindi ? "प्रक्रियाधीन" : "Pending")}
+                  ? (isHindi ? "सत्यापित अधिवक्ता" : "Verified Advocate")
+                  : (isHindi ? "समीक्षाधीन" : "Under Review")}
               </span>
             </div>
             <p className="text-[10px] text-[#69736D] leading-tight">

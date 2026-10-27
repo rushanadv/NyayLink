@@ -70,6 +70,7 @@ export interface AcceptedConsultationTerms {
   cancellationPolicy: string;
   inclusions: string;
   acceptedAt: string;
+  isPreliminaryInquiry?: boolean;
 }
 
 export async function createConsultationRequest(formData: {

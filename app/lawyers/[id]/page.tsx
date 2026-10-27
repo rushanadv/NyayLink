@@ -57,23 +57,81 @@ async function LawyerDetailContent({ paramsPromise }: { paramsPromise: Promise<{
     console.warn("[NyayLink Profile] Session evaluation non-fatal warning:", authError);
   }
 
-  // 2. Query target view based on authentication state
-  // Authenticated clients/lawyers access client_lawyer_directory (approved + pending advocates)
-  // Unauthenticated visitors access public_lawyer_directory (approved-only)
-  const targetView = isAuthenticated ? "client_lawyer_directory" : "public_lawyer_directory";
+  // 2. Query target directory views
+  // - Verified profiles (approved + published) are discoverable by everyone via public_lawyer_directory / client_lawyer_directory
+  // - Profiles Under Review (pending + published) are ONLY accessible to authenticated clients via client_under_review_directory
+  let profileRecord: any = null;
 
-  const { data: profileRecord, error: profileErr } = await supabase
-    .from(targetView)
+  let verifiedRecord: any = null;
+
+  const verifiedRes = await supabase
+    .from("public_lawyer_directory")
     .select(
-      "id, professional_name, bio, practice_areas, experience_years, city, state, languages, courts_of_practice, consultation_modes, consultation_fee, office_address, verification_status, created_at"
+      "id, professional_name, bio, practice_areas, experience_years, city, state, languages, courts_of_practice, consultation_modes, consultation_fee, office_address, verification_status, verified_at, created_at"
     )
     .eq("id", id)
+    .eq("verification_status", "approved")
     .maybeSingle();
 
-  if (profileErr) {
-    console.error(`[NyayLink Profile Error] Failed to fetch lawyer ${id} from ${targetView}:`, profileErr);
+  if (!verifiedRes.error && verifiedRes.data) {
+    verifiedRecord = verifiedRes.data;
+  } else {
+    const baseRes = await supabase
+      .from("public_lawyer_directory")
+      .select(
+        "id, professional_name, bio, practice_areas, experience_years, city, state, languages, courts_of_practice, consultation_modes, consultation_fee, office_address, verification_status, created_at"
+      )
+      .eq("id", id)
+      .eq("verification_status", "approved")
+      .maybeSingle();
+    if (baseRes.data) {
+      verifiedRecord = {
+        ...baseRes.data,
+        verified_at: null,
+      };
+    }
   }
 
+  if (verifiedRecord) {
+    profileRecord = verifiedRecord;
+  } else if (isAuthenticated) {
+    // If not found in verified and user is authenticated, check Profiles Under Review
+    const { data: underReviewRecord, error: underReviewErr } = await supabase
+      .from("client_under_review_directory")
+      .select(
+        "id, professional_name, bio, practice_areas, experience_years, city, state, languages, courts_of_practice, consultation_modes, consultation_fee, office_address, verification_status, created_at"
+      )
+      .eq("id", id)
+      .eq("verification_status", "pending")
+      .maybeSingle();
+
+    if (underReviewRecord) {
+      profileRecord = {
+        ...underReviewRecord,
+        // Server-side enforcement: consultation_fee must be null for pending profiles
+        consultation_fee: null,
+      };
+    } else {
+      // Fallback check against client_lawyer_directory in case new view is not yet indexed
+      const { data: fallbackRecord } = await supabase
+        .from("client_lawyer_directory")
+        .select(
+          "id, professional_name, bio, practice_areas, experience_years, city, state, languages, courts_of_practice, consultation_modes, consultation_fee, office_address, verification_status, created_at"
+        )
+        .eq("id", id)
+        .eq("verification_status", "pending")
+        .maybeSingle();
+
+      if (fallbackRecord) {
+        profileRecord = {
+          ...fallbackRecord,
+          consultation_fee: null,
+        };
+      }
+    }
+  }
+
+  // If still not found (or unauthenticated visitor trying to view a pending profile)
   if (!profileRecord) {
     notFound();
   }
@@ -103,10 +161,11 @@ async function LawyerDetailContent({ paramsPromise }: { paramsPromise: Promise<{
     city: profileRecord.city,
     state: profileRecord.state,
     languages: profileRecord.languages || [],
-    verification_status: profileRecord.verification_status || (isAuthenticated ? "pending" : "approved"),
+    verification_status: profileRecord.verification_status === "pending" ? "pending" : "approved",
+    verified_at: profileRecord.verified_at || null,
     courts_of_practice: profileRecord.courts_of_practice || [],
     consultation_modes: profileRecord.consultation_modes || ["Online Video Consultation", "In-Chambers Consultation"],
-    consultation_fee: profileRecord.consultation_fee || null,
+    consultation_fee: profileRecord.verification_status === "pending" ? null : (profileRecord.consultation_fee || null),
     office_address: profileRecord.office_address || null,
     created_at: profileRecord.created_at,
     educations: eduRes.data || [],

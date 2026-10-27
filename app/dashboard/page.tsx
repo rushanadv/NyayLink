@@ -54,8 +54,9 @@ async function ClientDashboardContent({
   const initialTab = resolvedParams.tab || "overview";
 
   // 4. Fetch real database entities under RLS in parallel
-  // Authenticated client accesses client_lawyer_directory (approved + consented pending advocates)
-  const [profileRes, mattersRes, consultationsRes, directoryRes] = await Promise.all([
+  // Verified advocates: strictly approved and published advocates
+  // Profiles under review: strictly pending advocates with client discovery consent
+  const [profileRes, mattersRes, consultationsRes, verifiedRes, underReviewRes] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
     supabase
       .from("legal_matters")
@@ -70,16 +71,36 @@ async function ClientDashboardContent({
     supabase
       .from("client_lawyer_directory")
       .select("id, professional_name, bio, practice_areas, experience_years, city, state, languages, verification_status, created_at")
+      .eq("verification_status", "approved")
       .order("experience_years", { ascending: false }),
+    supabase
+      .from("client_under_review_directory")
+      .select("id, professional_name, bio, practice_areas, experience_years, city, state, languages, verification_status, created_at")
+      .order("created_at", { ascending: false }),
   ]);
 
   const profile = (profileRes.data as UserProfile | null) || null;
   const matters = (mattersRes.data as LegalMatter[]) || [];
   const consultations = (consultationsRes.data as ConsultationRequest[]) || [];
   const advocates: PublicLawyer[] =
-    directoryRes.data && directoryRes.data.length > 0
-      ? (directoryRes.data as PublicLawyer[])
+    verifiedRes.data && verifiedRes.data.length > 0
+      ? (verifiedRes.data as PublicLawyer[])
       : [];
+
+  let underReviewAdvocates: PublicLawyer[] = [];
+  if (underReviewRes.data && underReviewRes.data.length > 0) {
+    underReviewAdvocates = underReviewRes.data as PublicLawyer[];
+  } else if (underReviewRes.error) {
+    // Fallback if client_under_review_directory view is not yet indexed
+    const { data: fallbackPending } = await supabase
+      .from("client_lawyer_directory")
+      .select("id, professional_name, bio, practice_areas, experience_years, city, state, languages, verification_status, created_at")
+      .eq("verification_status", "pending")
+      .order("created_at", { ascending: false });
+    if (fallbackPending) {
+      underReviewAdvocates = fallbackPending as PublicLawyer[];
+    }
+  }
 
   const displayName =
     profile?.full_name ||
@@ -96,6 +117,7 @@ async function ClientDashboardContent({
       matters={matters}
       consultations={consultations}
       advocates={advocates}
+      underReviewAdvocates={underReviewAdvocates}
       initialTab={initialTab}
     />
   );

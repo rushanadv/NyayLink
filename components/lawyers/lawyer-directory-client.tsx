@@ -43,11 +43,14 @@ export interface PublicLawyer {
   consultation_fee?: number | null;
   created_at?: string;
   verification_status?: "approved" | "pending" | "changes_requested" | "rejected" | string;
+  verified_at?: string | null;
+  submitted_at?: string | null;
   is_published?: boolean;
 }
 
 interface LawyerDirectoryClientProps {
   initialLawyers: PublicLawyer[];
+  underReviewLawyers?: PublicLawyer[];
   isAuthenticated: boolean;
   loadWarning?: string;
   directoryState?: "live" | "empty" | "error" | "dev_demo";
@@ -69,6 +72,7 @@ const ITEMS_PER_PAGE = 9;
 
 export function LawyerDirectoryClient({
   initialLawyers,
+  underReviewLawyers = [],
   isAuthenticated,
   loadWarning,
   directoryState = "live",
@@ -76,6 +80,7 @@ export function LawyerDirectoryClient({
   initialPracticeArea,
 }: LawyerDirectoryClientProps) {
   const shouldReduceMotion = useReducedMotion();
+  const [activeSurface, setActiveSurface] = useState<"verified" | "under_review">("verified");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPracticeArea, setSelectedPracticeArea] = useState<string>(() => {
     if (initialPracticeArea) return initialPracticeArea;
@@ -88,7 +93,6 @@ export function LawyerDirectoryClient({
   });
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
-  const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [selectedExperience, setSelectedExperience] = useState<string>("all");
   const [selectedMode, setSelectedMode] = useState<string>("all");
   const [sortBy, setSortBy] = useState<"exp-desc" | "exp-asc" | "name-asc" | "fee-asc">("exp-desc");
@@ -102,26 +106,30 @@ export function LawyerDirectoryClient({
     }
   }, [initialPracticeArea]);
 
-  // Reset to page 1 whenever any filter changes
+  // Reset to page 1 whenever any filter or active surface changes
   useEffect(() => {
     setCurrentPage(1);
   }, [
+    activeSurface,
     searchQuery,
     selectedPracticeArea,
     selectedCity,
     selectedLanguage,
-    selectedStatus,
     selectedExperience,
     selectedMode,
     sortBy,
   ]);
 
-  // Extract all distinct filter options dynamically
+  // Active dataset strictly selected by surface
+  const currentDataset = useMemo(() => {
+    return activeSurface === "verified" ? initialLawyers : underReviewLawyers;
+  }, [activeSurface, initialLawyers, underReviewLawyers]);
+
+  // Extract all distinct filter options dynamically from current dataset
   const practiceAreaOptions = useMemo(() => {
     const rawOptions = getCanonicalFilterOptions(false);
-    // Also include any unique practice area from data that isn't mapped
     const set = new Set<string>();
-    initialLawyers.forEach((l) => {
+    currentDataset.forEach((l) => {
       l.practice_areas?.forEach((pa) => {
         const cat = resolvePracticeAreaCategory(pa);
         if (!cat) set.add(pa);
@@ -129,27 +137,27 @@ export function LawyerDirectoryClient({
     });
     const extra = Array.from(set).map((val) => ({ value: val, label: val }));
     return [...rawOptions, ...extra];
-  }, [initialLawyers]);
+  }, [currentDataset]);
 
   const citiesList = useMemo(() => {
     const set = new Set<string>();
-    initialLawyers.forEach((l) => {
+    currentDataset.forEach((l) => {
       if (l.city) set.add(l.city);
     });
     return Array.from(set).sort();
-  }, [initialLawyers]);
+  }, [currentDataset]);
 
   const languagesList = useMemo(() => {
     const set = new Set<string>();
-    initialLawyers.forEach((l) => {
+    currentDataset.forEach((l) => {
       l.languages?.forEach((lang) => set.add(lang));
     });
     return Array.from(set).sort();
-  }, [initialLawyers]);
+  }, [currentDataset]);
 
   // Client-side instant filtering with canonical taxonomy engine
   const filteredLawyers = useMemo(() => {
-    return initialLawyers
+    return currentDataset
       .filter((lawyer) => {
         // Exclude synthetic/demo test accounts from public discovery
         const lowerName = lawyer.professional_name.toLowerCase();
@@ -226,14 +234,6 @@ export function LawyerDirectoryClient({
           }
         }
 
-        // 7. Verification Status filter
-        if (selectedStatus !== "all") {
-          const status = lawyer.verification_status || "approved";
-          if (status !== selectedStatus) {
-            return false;
-          }
-        }
-
         return true;
       })
       .sort((a, b) => {
@@ -254,12 +254,11 @@ export function LawyerDirectoryClient({
         return 0;
       });
   }, [
-    initialLawyers,
+    currentDataset,
     searchQuery,
     selectedPracticeArea,
     selectedCity,
     selectedLanguage,
-    selectedStatus,
     selectedExperience,
     selectedMode,
     sortBy,
@@ -279,7 +278,6 @@ export function LawyerDirectoryClient({
     selectedPracticeArea !== "all" ||
     selectedCity !== "all" ||
     selectedLanguage !== "all" ||
-    selectedStatus !== "all" ||
     selectedExperience !== "all" ||
     selectedMode !== "all";
 
@@ -288,7 +286,6 @@ export function LawyerDirectoryClient({
     setSelectedPracticeArea("all");
     setSelectedCity("all");
     setSelectedLanguage("all");
-    setSelectedStatus("all");
     setSelectedExperience("all");
     setSelectedMode("all");
     setSortBy("exp-desc");
@@ -301,16 +298,17 @@ export function LawyerDirectoryClient({
       <div className="space-y-4 max-w-3xl">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#EAF3ED] border border-[#D5E5D9] text-xs font-mono font-semibold text-[#205C43]">
           <span className="w-1.5 h-1.5 rounded-full bg-[#205C43] animate-pulse" />
-          <span>VERIFIED ADVOCATE DIRECTORY</span>
+          <span>ADVOCATE DIRECTORY & REGISTER</span>
         </div>
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-[#202824] tracking-tight leading-[1.15] text-balance">
-          Find Verified Bar Council Advocates
+          {activeSurface === "verified"
+            ? "Find Bar Council Enrolled Advocates"
+            : "Advocate Profiles Under Review"}
         </h1>
         <p className="text-sm sm:text-base text-[#69736D] leading-relaxed">
-          Search independent practitioners across Supreme Court, High Courts, and
-          District Tribunals. All profiles feature authenticated Bar Council of
-          India enrollment records, upfront flat consultation fees, and zero
-          referral commission.
+          {activeSurface === "verified"
+            ? "Search independent legal practitioners across Supreme Court, High Courts, and District Tribunals. Profiles in this register feature authenticated State Bar Council enrollment credentials, transparent consultation fees, and direct client engagement."
+            : "Review practitioners who have recently onboarded with publication consent and submitted their State Bar Council enrolment credentials for administrative verification. Paid consultations are strictly disabled for profiles under review."}
         </p>
 
         {/* Badges / Guarantees Row */}
@@ -318,24 +316,108 @@ export function LawyerDirectoryClient({
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#D5E5D9] shadow-xs">
             <Users className="w-3.5 h-3.5 text-[#205C43]" />
             <span className="text-[#202824] font-medium">
-              {initialLawyers.length > 0
-                ? `${initialLawyers.length} Enrolled Advocates`
-                : "National Bar Roll"}
+              {activeSurface === "verified"
+                ? `${initialLawyers.length} Verified Advocates`
+                : `${underReviewLawyers.length} Profiles Under Review`}
             </span>
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#D5E5D9] shadow-xs">
             <CheckCircle2 className="w-3.5 h-3.5 text-[#205C43]" />
-            <span className="text-[#202824] font-medium">BCI Credentials Validated</span>
+            <span className="text-[#202824] font-medium">
+              {activeSurface === "verified"
+                ? "Independent Enrolment Verification"
+                : "Verification In Progress"}
+            </span>
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#D5E5D9] shadow-xs">
             <Scale className="w-3.5 h-3.5 text-[#205C43]" />
-            <span className="text-[#202824] font-medium">Section 36 Compliant</span>
+            <span className="text-[#202824] font-medium">BCI Rule 36 Compliant</span>
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#D5E5D9] shadow-xs">
             <ShieldCheck className="w-3.5 h-3.5 text-[#205C43]" />
-            <span className="text-[#202824] font-medium">Milestone Escrow Protection</span>
+            <span className="text-[#202824] font-medium">
+              {activeSurface === "verified"
+                ? "Transparent Retainer Protection"
+                : "Non-Binding Inquiries Only"}
+            </span>
           </div>
         </div>
+
+        {/* Two Distinct Directory Surfaces Tabs */}
+        <div className="pt-3 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              setActiveSurface("verified");
+              setCurrentPage(1);
+            }}
+            className={`px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
+              activeSurface === "verified"
+                ? "bg-[#205C43] text-white shadow-xs"
+                : "bg-white text-[#69736D] border border-[#D5E5D9] hover:bg-[#F8FAF9]"
+            }`}
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            <span>Verified Advocates</span>
+            <span
+              className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                activeSurface === "verified"
+                  ? "bg-white/20 text-white"
+                  : "bg-[#EAF3ED] text-[#205C43]"
+              }`}
+            >
+              {initialLawyers.length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActiveSurface("under_review");
+              setCurrentPage(1);
+            }}
+            className={`px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
+              activeSurface === "under_review"
+                ? "bg-amber-800 text-white shadow-xs"
+                : "bg-white text-[#69736D] border border-[#D5E5D9] hover:bg-[#F8FAF9]"
+            }`}
+          >
+            <Clock className="w-4 h-4 text-amber-600" />
+            <span>Profiles Under Review</span>
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-200">
+              Not yet verified
+            </span>
+            {underReviewLawyers.length > 0 && (
+              <span
+                className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                  activeSurface === "under_review"
+                    ? "bg-white/20 text-white"
+                    : "bg-amber-50 text-amber-800 border border-amber-200"
+                }`}
+              >
+                {underReviewLawyers.length}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Restrained Disclosure Banner for Profiles Under Review */}
+        {activeSurface === "under_review" && (
+          <div className="p-4 rounded-xl bg-[#FFFDF7] border border-[#E8DCC0] text-xs text-[#7A5E1A] flex items-start gap-3 shadow-2xs mt-2">
+            <AlertCircle className="w-4 h-4 text-[#C5A059] shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-[#202824]">Profiles Under Review</span>
+                <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-200 font-bold">
+                  Not yet verified
+                </span>
+              </div>
+              <p className="leading-relaxed text-[#69736D]">
+                Advocates in this section have submitted their Bar Council enrolment details and are undergoing administrative review. These credentials have not yet been independently verified. In accordance with platform policy and Bar Council guidelines, paid consultations and fee agreements are strictly disabled for profiles under review. You may submit non-binding preliminary inquiries only.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Development Demo Notice */}
         {directoryState === "dev_demo" && (
@@ -362,18 +444,18 @@ export function LawyerDirectoryClient({
           </div>
         )}
         {/* Unauthenticated Client Access Prompt */}
-        {!isAuthenticated && (
-          <div className="p-4 sm:p-5 rounded-2xl bg-[#EAF3ED] border border-[#D5E5D9] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs mt-4">
+        {!isAuthenticated && activeSurface === "under_review" && (
+          <div className="p-4 sm:p-5 rounded-2xl bg-[#FFFDF7] border border-[#E8DCC0] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs mt-4">
             <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-white border border-[#D5E5D9] flex items-center justify-center text-[#205C43] shrink-0 mt-0.5 shadow-2xs">
-                <ShieldCheck className="w-5 h-5 text-[#205C43]" />
+              <div className="w-9 h-9 rounded-xl bg-white border border-[#E8DCC0] flex items-center justify-center text-amber-800 shrink-0 mt-0.5 shadow-2xs">
+                <Clock className="w-5 h-5 text-amber-700" />
               </div>
               <div className="space-y-0.5">
                 <p className="text-xs sm:text-sm font-semibold text-[#202824]">
-                  Registered Client Directory Access
+                  Registered Client Sign-In Required for Profiles Under Review
                 </p>
                 <p className="text-xs text-[#69736D] leading-relaxed">
-                  Sign in as a client to discover newly onboarded advocates practicing before your local courts while their Bar Council verification completes.
+                  Under Bar Council Rule 36 and privacy regulations, profiles undergoing initial credential verification are reserved for authenticated registered clients. Sign in to browse pending profiles or submit non-binding inquiries.
                 </p>
               </div>
             </div>
@@ -381,7 +463,7 @@ export function LawyerDirectoryClient({
               href="/auth/login?intent=client&next=/lawyers"
               className="whitespace-nowrap px-4 py-2 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white text-xs font-semibold shadow-xs transition-all shrink-0"
             >
-              Sign In to Browse All Advocates
+              Sign In to Browse
             </Link>
           </div>
         )}
@@ -410,8 +492,8 @@ export function LawyerDirectoryClient({
           )}
         </div>
 
-        {/* Dropdowns Row (7 responsive columns) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
+        {/* Dropdowns Row (6 responsive columns) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-3">
           {/* 1. Practice Area Filter (Canonical Taxonomy) */}
           <div className="relative">
             <label className="block text-[11px] font-mono text-[#69736D] uppercase tracking-wider mb-1 font-semibold">
@@ -507,22 +589,6 @@ export function LawyerDirectoryClient({
             <ChevronDown className="absolute right-2.5 top-[34px] w-3.5 h-3.5 text-[#69736D] pointer-events-none" />
           </div>
 
-          {/* 6. Verification Status Filter */}
-          <div className="relative">
-            <label className="block text-[11px] font-mono text-[#69736D] uppercase tracking-wider mb-1 font-semibold">
-              Verification
-            </label>
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full h-10 px-3 pr-8 rounded-lg bg-[#F8FAF9] border border-[#D5E5D9] text-xs text-[#202824] focus:border-[#205C43] outline-none appearance-none cursor-pointer"
-            >
-              <option value="all">All Statuses</option>
-              <option value="approved">BCI Verified Only</option>
-              <option value="pending">Newly Joined (Pending)</option>
-            </select>
-            <ChevronDown className="absolute right-2.5 top-[34px] w-3.5 h-3.5 text-[#69736D] pointer-events-none" />
-          </div>
 
           {/* 7. Sort By Filter */}
           <div className="relative">
@@ -598,14 +664,6 @@ export function LawyerDirectoryClient({
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#EAF3ED] border border-[#D5E5D9] text-[11px] text-[#205C43] font-medium">
                 Lang: {selectedLanguage}
                 <button onClick={() => setSelectedLanguage("all")} className="hover:text-rose-700 ml-0.5" aria-label="Remove language filter">
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            )}
-            {selectedStatus !== "all" && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#EAF3ED] border border-[#D5E5D9] text-[11px] text-[#205C43] font-medium">
-                Status: {selectedStatus === "approved" ? "Verified" : "Pending"}
-                <button onClick={() => setSelectedStatus("all")} className="hover:text-rose-700 ml-0.5" aria-label="Remove status filter">
                   <X className="w-3 h-3" />
                 </button>
               </span>
@@ -693,13 +751,18 @@ export function LawyerDirectoryClient({
               const feeDisplay = lawyer.consultation_fee
                 ? `₹${lawyer.consultation_fee.toLocaleString("en-IN")}`
                 : "₹1,500";
+              const isPending = lawyer.verification_status === "pending";
 
               return (
                 <motion.div
                   key={lawyer.id}
                   whileHover={shouldReduceMotion ? undefined : { scale: 1.018 }}
                   transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                  className="relative p-6 rounded-2xl bg-white border border-[#D5E5D9] hover:border-[#205C43]/40 transition-all shadow-xs hover:shadow-md flex flex-col justify-between group overflow-hidden"
+                  className={`relative p-6 rounded-2xl bg-white border ${
+                    isPending
+                      ? "border-neutral-300 hover:border-neutral-400"
+                      : "border-[#D5E5D9] hover:border-[#205C43]/40"
+                  } transition-all shadow-xs hover:shadow-md flex flex-col justify-between group overflow-hidden`}
                 >
                   <div>
                     {/* Card Header */}
@@ -707,7 +770,9 @@ export function LawyerDirectoryClient({
                       <div className="flex items-center gap-3.5">
                         <Link
                           href={`/lawyers/${lawyer.id}`}
-                          className="w-12 h-12 rounded-full bg-[#EAF3ED] hover:bg-[#D5E5D9] flex items-center justify-center font-serif text-sm font-semibold text-[#205C43] border border-[#D5E5D9] shrink-0 shadow-2xs transition-colors"
+                          className={`w-12 h-12 rounded-full ${
+                            isPending ? "bg-neutral-100 text-neutral-700 border-neutral-300" : "bg-[#EAF3ED] text-[#205C43] border-[#D5E5D9]"
+                          } hover:bg-[#D5E5D9] flex items-center justify-center font-serif text-sm font-semibold shrink-0 shadow-2xs transition-colors border`}
                         >
                           {initials}
                         </Link>
@@ -718,21 +783,25 @@ export function LawyerDirectoryClient({
                             </h3>
                           </Link>
                           <div className="flex items-center gap-1.5 mt-1">
-                            {lawyer.verification_status === "pending" ? (
+                            {isPending ? (
                               <span
-                                className="text-[10px] font-mono text-amber-900 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/80 flex items-center gap-1 font-semibold"
-                                title="Bar Council credentials submitted; registrar verification in progress"
+                                className="text-[10px] font-mono text-neutral-800 bg-neutral-100 px-2 py-0.5 rounded-md border border-neutral-300 flex items-center gap-1 font-semibold"
+                                title="Credentials submitted; registrar review in progress. Not yet verified."
                               >
-                                <Clock className="w-3 h-3 text-amber-700" />
-                                Newly Joined • Verification Pending
+                                <Clock className="w-3 h-3 text-neutral-600" />
+                                Not yet verified
                               </span>
                             ) : (
                               <span
                                 className="text-[10px] font-mono text-[#205C43] bg-[#EAF3ED] px-2 py-0.5 rounded-md border border-[#D5E5D9] flex items-center gap-1 font-semibold"
-                                title="Bar Council of India credentials authenticated"
+                                title={
+                                  lawyer.verified_at
+                                    ? `Enrolment verified on ${new Date(lawyer.verified_at).toLocaleDateString("en-IN")}`
+                                    : "Bar Council credentials authenticated by registrar"
+                                }
                               >
                                 <CheckCircle2 className="w-3 h-3 text-[#205C43]" />
-                                BCI Verified Advocate
+                                Verified Advocate
                               </span>
                             )}
                           </div>
@@ -752,20 +821,30 @@ export function LawyerDirectoryClient({
                       </div>
                     </div>
 
-                    {/* Transparent Consultation Terms Preview */}
-                    <div className="mt-3 px-3 py-2 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-1.5 font-medium text-[#202824]">
-                        <Scale className="w-3.5 h-3.5 text-[#205C43]" />
-                        <span>
-                          {feeDisplay}{" "}
-                          <span className="text-[#69736D] font-normal text-[11px]">/ 45m Session</span>
-                        </span>
+                    {/* Transparent Consultation Terms / Preliminary Preview */}
+                    {isPending ? (
+                      <div className="mt-3 px-3 py-2 rounded-xl bg-neutral-50 border border-neutral-200 flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-1.5 font-medium text-neutral-700">
+                          <Scale className="w-3.5 h-3.5 text-neutral-500" />
+                          <span>Preliminary Inquiry</span>
+                        </div>
+                        <span className="text-[11px] text-neutral-500 font-mono">No Fee • Unconfirmed</span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-[11px] text-[#4A544F]">
-                        <Video className="w-3 h-3 text-[#205C43]" />
-                        <span>Online & Chambers</span>
+                    ) : (
+                      <div className="mt-3 px-3 py-2 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-1.5 font-medium text-[#202824]">
+                          <Scale className="w-3.5 h-3.5 text-[#205C43]" />
+                          <span>
+                            {feeDisplay}{" "}
+                            <span className="text-[#69736D] font-normal text-[11px]">/ 45m Session</span>
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-[11px] text-[#4A544F]">
+                          <Video className="w-3 h-3 text-[#205C43]" />
+                          <span>Online & Chambers</span>
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     {/* Courts of practice if available */}
                     {lawyer.courts_of_practice && lawyer.courts_of_practice.length > 0 && (
@@ -807,15 +886,15 @@ export function LawyerDirectoryClient({
                       </span>
                     </div>
 
-                    {/* Pending Verification Notice */}
-                    {lawyer.verification_status === "pending" && (
-                      <div className="mt-3.5 p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/60 text-[11px] text-amber-900 leading-snug space-y-0.5">
-                        <div className="font-semibold font-mono text-[10px] uppercase text-amber-950 flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-amber-700" />
-                          <span>Verification Pending</span>
+                    {/* Under Review Notice */}
+                    {isPending && (
+                      <div className="mt-3.5 p-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-[11px] text-neutral-800 leading-snug space-y-0.5">
+                        <div className="font-semibold font-mono text-[10px] uppercase text-neutral-900 flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-neutral-600" />
+                          <span>Not Yet Verified • Profile Under Review</span>
                         </div>
-                        <p className="text-amber-800 text-[11px]">
-                          Profile visible to registered clients. Direct consultation booking is enabled for preliminary chambers inquiry while Bar Council verification completes.
+                        <p className="text-neutral-600 text-[11px]">
+                          Credentials have been submitted and are under review. Paid consultation booking is disabled. Non-binding preliminary inquiries are permitted with advocate consent.
                         </p>
                       </div>
                     )}
@@ -831,13 +910,15 @@ export function LawyerDirectoryClient({
                     </Link>
                     <MagneticWrapper className="w-full" maxDisplacement={4}>
                       <Link
-                        href={`/lawyers/${lawyer.id}#consultation`}
-                        className="w-full py-2.5 px-3 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white font-semibold text-xs transition-colors shadow-xs flex items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#205C43] block text-center"
+                        href={`/lawyers/${lawyer.id}#${isPending ? "preliminary-inquiry" : "consultation"}`}
+                        className={`w-full py-2.5 px-3 rounded-xl ${
+                          isPending
+                            ? "bg-neutral-800 hover:bg-neutral-900 text-white"
+                            : "bg-[#205C43] hover:bg-[#174530] text-white"
+                        } font-semibold text-xs transition-colors shadow-xs flex items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#205C43] block text-center`}
                       >
                         <span>
-                          {lawyer.verification_status === "pending"
-                            ? "Preliminary"
-                            : "Consultation"}
+                          {isPending ? "Preliminary Inquiry" : "Consultation"}
                         </span>
                         <ArrowRight className="w-3.5 h-3.5 inline ml-0.5" />
                       </Link>

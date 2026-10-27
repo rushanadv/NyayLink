@@ -99,7 +99,7 @@ export function HeroSplit() {
               </div>
               <div className="min-w-0">
                 <span className="font-mono text-[10px] uppercase tracking-wider text-[#DFBE7E] block font-semibold leading-tight">
-                  BCI Verified
+                  Enrolled Advocates
                 </span>
                 <span className="text-[11px] text-white/80 block truncate">
                   State Bar Council Enrolled

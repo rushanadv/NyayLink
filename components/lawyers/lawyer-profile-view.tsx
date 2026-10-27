@@ -53,6 +53,7 @@ export interface DetailedLawyerProfile {
   state: string;
   languages: string[];
   verification_status?: string;
+  verified_at?: string | null;
   courts_of_practice?: string[];
   consultation_modes?: string[];
   consultation_fee?: number | null;
@@ -102,7 +103,7 @@ export function LawyerProfileView({
   const isVerified = lawyer.verification_status === "approved";
   const isPending = lawyer.verification_status === "pending";
   const initials = getInitials(lawyer.professional_name);
-  const consultationFee = lawyer.consultation_fee || 1500;
+  const consultationFee = isPending ? 0 : (lawyer.consultation_fee || 1500);
 
   const handleConsultationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,8 +129,8 @@ export function LawyerProfileView({
       setSubmitFeedback({
         type: "error",
         message: isHindi
-          ? "कृपया परामर्श नियम व शर्तों की पुष्टि करें।"
-          : "Please confirm that you have reviewed and agree to the consultation terms.",
+          ? "कृपया परामर्श / पूछताछ नियमों की पुष्टि करें।"
+          : "Please confirm that you have reviewed and agree to the preliminary terms.",
       });
       return;
     }
@@ -138,21 +139,32 @@ export function LawyerProfileView({
     setSubmitFeedback(null);
 
     try {
-      const fullDetails = `[Mode: ${consultationMode}]\n${message.trim()}`;
+      const fullDetails = `[Mode: ${consultationMode}]\n${isPending ? "[Notice: Preliminary inquiry with unverified advocate under administrative review]\n" : ""}${message.trim()}`;
       const res = await createConsultationRequest({
         lawyerId: lawyer.id,
         subject: subject.trim(),
         message: fullDetails,
         preferredDate: preferredDate || null,
-        termsAccepted: {
-          fee: consultationFee,
-          currency: "INR",
-          durationMinutes: 45,
-          format: consultationMode,
-          cancellationPolicy: "Free rescheduling or cancellation up to 4 hours before the session.",
-          inclusions: "45-min legal evaluation, preliminary document review, procedural strategy advice.",
-          acceptedAt: new Date().toISOString(),
-        },
+        termsAccepted: isPending
+          ? {
+              fee: 0,
+              currency: "INR",
+              durationMinutes: 0,
+              format: consultationMode,
+              isPreliminaryInquiry: true,
+              cancellationPolicy: "Non-binding preliminary chambers inquiry. No fee charged.",
+              inclusions: "Non-binding inquiry with chambers team. Advocate credentials are under review; does not establish legal representation.",
+              acceptedAt: new Date().toISOString(),
+            }
+          : {
+              fee: consultationFee,
+              currency: "INR",
+              durationMinutes: 45,
+              format: consultationMode,
+              cancellationPolicy: "Free rescheduling or cancellation up to 4 hours before the session.",
+              inclusions: "45-min legal evaluation, preliminary document review, procedural strategy advice.",
+              acceptedAt: new Date().toISOString(),
+            },
       });
 
       if (!res.success) {
@@ -161,9 +173,13 @@ export function LawyerProfileView({
 
       setSubmitFeedback({
         type: "success",
-        message: isHindi
-          ? "परामर्श अनुरोध सफलतापूर्वक भेजा गया। अधिवक्ता की प्रतिक्रिया आपके डैशबोर्ड पर दिखाई देगी।"
-          : "Consultation request sent successfully! You can track the advocate's response in your dashboard.",
+        message: isPending
+          ? (isHindi
+              ? "प्रारंभिक पूछताछ सफलतापूर्वक भेज दी गई। ध्यान दें: यह गैर-बाध्यकारी पूछताछ है और परामर्श की पुष्टि नहीं है।"
+              : "Preliminary inquiry sent successfully to chambers. Note: This is a non-binding preliminary inquiry and does not constitute a confirmed consultation.")
+          : (isHindi
+              ? "परामर्श अनुरोध सफलतापूर्वक भेजा गया। अधिवक्ता की प्रतिक्रिया आपके डैशबोर्ड पर दिखाई देगी।"
+              : "Consultation request sent successfully! You can track the advocate's response in your dashboard."),
       });
       setSubject("");
       setMessage("");
@@ -224,16 +240,38 @@ export function LawyerProfileView({
                   </div>
 
                   {/* Verification Status Pill */}
-                  <div>
+                  <div className="flex flex-wrap items-center gap-2">
                     {isVerified ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EAF3ED] text-[#205C43] border border-[#D5E5D9] text-xs font-semibold font-mono">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#205C43]" />
-                        {isHindi ? "बीसीआई सत्यापित अधिवक्ता" : "BCI Verified Advocate"}
-                      </span>
+                      <>
+                        <span
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EAF3ED] text-[#205C43] border border-[#D5E5D9] text-xs font-semibold font-mono"
+                          title={
+                            lawyer.verified_at
+                              ? `Enrolment verified on ${new Date(lawyer.verified_at).toLocaleDateString("en-IN")}`
+                              : "Bar Council credentials authenticated by registrar"
+                          }
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5 text-[#205C43]" />
+                          {isHindi ? "सत्यापित अधिवक्ता" : "Verified Advocate"}
+                        </span>
+                        {lawyer.verified_at && (
+                          <span className="text-[11px] font-mono text-[#69736D]">
+                            {isHindi ? "सत्यापन तिथि:" : "Verified on:"}{" "}
+                            {new Date(lawyer.verified_at).toLocaleDateString("en-IN", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })}
+                          </span>
+                        )}
+                      </>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-200 text-xs font-semibold font-mono">
-                        <Clock className="w-3.5 h-3.5 text-amber-700" />
-                        {isHindi ? "सत्यापन लंबित • बार काउंसिल साख प्रस्तुत" : "Newly Joined • Verification Pending"}
+                      <span
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-100 text-neutral-800 border border-neutral-300 text-xs font-semibold font-mono"
+                        title="Profile submitted; credential verification currently in progress. Not yet verified."
+                      >
+                        <Clock className="w-3.5 h-3.5 text-neutral-600" />
+                        {isHindi ? "अभी सत्यापित नहीं" : "Not yet verified"}
                       </span>
                     )}
                   </div>
@@ -242,15 +280,17 @@ export function LawyerProfileView({
 
               {/* Notice for Pending Verification */}
               {isPending && (
-                <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/80 text-xs text-amber-900 leading-relaxed flex items-start gap-2.5">
-                  <AlertCircle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="font-semibold block mb-0.5">
-                      {isHindi ? "पंजीकरण सत्यापन प्रक्रियाधीन है" : "Verification in Progress"}
+                <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200 text-xs text-neutral-800 leading-relaxed flex items-start gap-2.5">
+                  <AlertCircle className="w-4 h-4 text-neutral-600 shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <strong className="font-semibold block text-neutral-900">
+                      {isHindi ? "प्रोफ़ाइल समीक्षाधीन • अभी सत्यापित नहीं" : "Profile Under Review • Not Yet Verified"}
                     </strong>
-                    {isHindi
-                      ? "अधिवक्ता की बार काउंसिल साख सत्यापन हेतु प्रस्तुत कर दी गई है। बार काउंसिल ऑफ इंडिया के नियम 36 के तहत सहमति प्राप्त होने के कारण प्रारंभिक संपर्क सक्षम है।"
-                      : "This advocate has submitted Bar Council credentials for administrative verification. Direct consultation booking is enabled for preliminary chambers inquiry while formal registrar validation completes."}
+                    <p className="text-neutral-600">
+                      {isHindi
+                        ? "यह प्रोफ़ाइल समीक्षाधीन है। बार काउंसिल पंजीकरण क्रेडेंशियल्स का सत्यापन अभी पूरा नहीं हुआ है। सशुल्क परामर्श बुकिंग अक्षम है। मुवक्किल सहमति के आधार पर केवल गैर-बाध्यकारी प्रारंभिक पूछताछ भेज सकते हैं, जिससे कानूनी प्रतिनिधित्व स्थापित नहीं होता।"
+                        : "This advocate profile has been submitted and is currently undergoing administrative review. Bar Council credentials have not yet been independently verified. Paid consultation booking is disabled. Registered clients may submit a non-binding preliminary inquiry; this inquiry does not constitute a confirmed appointment or legal representation."}
+                    </p>
                   </div>
                 </div>
               )}
@@ -292,11 +332,17 @@ export function LawyerProfileView({
                     {isHindi ? "परामर्श शुल्क" : "Consultation Fee"}
                   </span>
                   <div className="flex items-center gap-1.5 text-xs font-medium text-[#202824]">
-                    <Scale className="w-3.5 h-3.5 text-[#205C43] shrink-0" />
+                    <Scale className={`w-3.5 h-3.5 ${isPending ? "text-neutral-500" : "text-[#205C43]"} shrink-0`} />
                     <span>
-                      {lawyer.consultation_fee
-                        ? `₹${lawyer.consultation_fee.toLocaleString("en-IN")}`
-                        : isHindi ? "अधिवक्ता से पूछें" : "Inquire"}
+                      {isPending ? (
+                        <span className="text-neutral-600 font-mono text-xs">
+                          {isHindi ? "शुल्क अक्षम (समीक्षाधीन)" : "Disabled • Under Review"}
+                        </span>
+                      ) : lawyer.consultation_fee ? (
+                        `₹${lawyer.consultation_fee.toLocaleString("en-IN")}`
+                      ) : (
+                        "₹1,500"
+                      )}
                     </span>
                   </div>
                 </div>
@@ -551,62 +597,115 @@ export function LawyerProfileView({
                     />
                   </div>
 
-                  {/* Transparent Consultation Terms Summary Box */}
-                  <div className="p-3.5 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] text-xs space-y-2">
-                    <div className="flex items-center justify-between pb-2 border-b border-[#D5E5D9]/70 font-semibold text-[#202824]">
-                      <span className="flex items-center gap-1.5">
-                        <Scale className="w-3.5 h-3.5 text-[#205C43]" />
-                        <span>{isHindi ? "पारदर्शी परामर्श शर्तें" : "Transparent Consultation Terms"}</span>
-                      </span>
-                      <span className="text-[#205C43] font-mono font-bold">
-                        ₹{consultationFee.toLocaleString("en-IN")}
-                      </span>
-                    </div>
-
-                    <div className="space-y-1 text-[11px] text-[#4A544F]">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[#69736D]">{isHindi ? "अवधि व प्रारूप:" : "Duration & Format:"}</span>
-                        <span className="font-medium text-[#202824]">45 Mins • {consultationMode}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[#69736D]">{isHindi ? "शामिल सेवाएं:" : "Scope:"}</span>
-                        <span className="font-medium text-[#202824]">Preliminary legal evaluation</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[#69736D]">{isHindi ? "रद्दीकरण नीति:" : "Cancellation:"}</span>
-                        <span className="font-medium text-[#202824]">Free up to 4 hrs prior</span>
-                      </div>
-                    </div>
-
-                    <div className="pt-2 border-t border-[#D5E5D9]/70">
-                      <label className="flex items-start gap-2 cursor-pointer text-[11px] text-[#202824] leading-tight select-none">
-                        <input
-                          type="checkbox"
-                          checked={termsAcceptedChecked}
-                          onChange={(e) => setTermsAcceptedChecked(e.target.checked)}
-                          className="mt-0.5 rounded border-[#D5E5D9] text-[#205C43] focus:ring-[#205C43] cursor-pointer"
-                        />
-                        <span>
-                          {isHindi
-                            ? `मैं ₹${consultationFee.toLocaleString("en-IN")} परामर्श शुल्क और चैंबर नियमों की समीक्षा व स्वीकृति देता हूँ।`
-                            : `I review & accept the ₹${consultationFee.toLocaleString("en-IN")} consultation fee and chambers policy before request submission.`}
+                  {/* Consultation / Preliminary Inquiry Terms Summary Box */}
+                  {isPending ? (
+                    <div className="p-3.5 rounded-xl bg-neutral-50 border border-neutral-300 text-xs space-y-2">
+                      <div className="flex items-center justify-between pb-2 border-b border-neutral-200 font-semibold text-neutral-800">
+                        <span className="flex items-center gap-1.5">
+                          <Scale className="w-3.5 h-3.5 text-neutral-600" />
+                          <span>{isHindi ? "प्रारंभिक पूछताछ शर्तें" : "Preliminary Inquiry Terms"}</span>
                         </span>
-                      </label>
+                        <span className="text-neutral-700 font-mono font-bold">
+                          {isHindi ? "निःशुल्क • समीक्षाधीन" : "Free • Under Review"}
+                        </span>
+                      </div>
+
+                      <div className="space-y-1 text-[11px] text-neutral-600">
+                        <div className="flex items-center justify-between">
+                          <span className="text-neutral-500">{isHindi ? "प्रारूप:" : "Format:"}</span>
+                          <span className="font-medium text-neutral-800">{consultationMode}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-neutral-500">{isHindi ? "सीमा:" : "Scope:"}</span>
+                          <span className="font-medium text-neutral-800">Non-binding chambers inquiry</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-neutral-500">{isHindi ? "सत्यापन स्थिति:" : "Status:"}</span>
+                          <span className="font-medium text-neutral-700">Not yet verified</span>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-neutral-200">
+                        <label className="flex items-start gap-2 cursor-pointer text-[11px] text-neutral-700 leading-tight select-none">
+                          <input
+                            type="checkbox"
+                            checked={termsAcceptedChecked}
+                            onChange={(e) => setTermsAcceptedChecked(e.target.checked)}
+                            className="mt-0.5 rounded border-neutral-300 text-neutral-800 focus:ring-neutral-700 cursor-pointer"
+                          />
+                          <span>
+                            {isHindi
+                              ? "मैं समझता/समझती हूँ कि यह प्रोफ़ाइल समीक्षाधीन है और अभी सत्यापित नहीं है। यह पूछताछ निःशुल्क और गैर-बाध्यकारी है और इससे कानूनी प्रतिनिधित्व की पुष्टि नहीं होती।"
+                              : "I understand this advocate is under review and not yet verified. This inquiry is free, non-binding, and does not establish legal representation or confirm an appointment."}
+                          </span>
+                        </label>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="p-3.5 rounded-xl bg-[#F8FAF9] border border-[#D5E5D9] text-xs space-y-2">
+                      <div className="flex items-center justify-between pb-2 border-b border-[#D5E5D9]/70 font-semibold text-[#202824]">
+                        <span className="flex items-center gap-1.5">
+                          <Scale className="w-3.5 h-3.5 text-[#205C43]" />
+                          <span>{isHindi ? "पारदर्शी परामर्श शर्तें" : "Transparent Consultation Terms"}</span>
+                        </span>
+                        <span className="text-[#205C43] font-mono font-bold">
+                          ₹{consultationFee.toLocaleString("en-IN")}
+                        </span>
+                      </div>
+
+                      <div className="space-y-1 text-[11px] text-[#4A544F]">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[#69736D]">{isHindi ? "अवधि व प्रारूप:" : "Duration & Format:"}</span>
+                          <span className="font-medium text-[#202824]">45 Mins • {consultationMode}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[#69736D]">{isHindi ? "शामिल सेवाएं:" : "Scope:"}</span>
+                          <span className="font-medium text-[#202824]">Preliminary legal evaluation</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[#69736D]">{isHindi ? "रद्दीकरण नीति:" : "Cancellation:"}</span>
+                          <span className="font-medium text-[#202824]">Free up to 4 hrs prior</span>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-[#D5E5D9]/70">
+                        <label className="flex items-start gap-2 cursor-pointer text-[11px] text-[#202824] leading-tight select-none">
+                          <input
+                            type="checkbox"
+                            checked={termsAcceptedChecked}
+                            onChange={(e) => setTermsAcceptedChecked(e.target.checked)}
+                            className="mt-0.5 rounded border-[#D5E5D9] text-[#205C43] focus:ring-[#205C43] cursor-pointer"
+                          />
+                          <span>
+                            {isHindi
+                              ? `मैं ₹${consultationFee.toLocaleString("en-IN")} परामर्श शुल्क और चैंबर नियमों की समीक्षा व स्वीकृति देता हूँ।`
+                              : `I review & accept the ₹${consultationFee.toLocaleString("en-IN")} consultation fee and chambers policy before request submission.`}
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+                  )}
 
                   <MagneticWrapper className="w-full" maxDisplacement={4}>
                     <button
                       type="submit"
                       disabled={isSubmitting || !termsAcceptedChecked}
-                      className="w-full py-2.5 rounded-xl bg-[#205C43] hover:bg-[#174530] text-white font-semibold text-xs transition-colors shadow-xs flex items-center justify-center gap-2 disabled:opacity-50"
+                      className={`w-full py-2.5 rounded-xl ${
+                        isPending
+                          ? "bg-neutral-800 hover:bg-neutral-900"
+                          : "bg-[#205C43] hover:bg-[#174530]"
+                      } text-white font-semibold text-xs transition-colors shadow-xs flex items-center justify-center gap-2 disabled:opacity-50`}
                     >
                       {isSubmitting ? (
-                        <span>{isHindi ? "भेजा जा रहा है..." : "Submitting Inquiry..."}</span>
+                        <span>{isHindi ? "भेजा जा रहा है..." : "Submitting..."}</span>
                       ) : (
                         <>
                           <Send className="w-3.5 h-3.5" />
-                          <span>{isPending ? "Send Chambers Inquiry" : "Submit Consultation Request"}</span>
+                          <span>
+                            {isPending
+                              ? (isHindi ? "प्रारंभिक पूछताछ भेजें (निःशुल्क)" : "Submit Preliminary Inquiry (Free)")
+                              : (isHindi ? "परामर्श अनुरोध भेजें" : "Submit Consultation Request")}
+                          </span>
                         </>
                       )}
                     </button>

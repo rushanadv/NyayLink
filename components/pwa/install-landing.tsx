@@ -524,7 +524,7 @@ export function InstallLanding() {
               <div className="relative aspect-[16/10] rounded-xl overflow-hidden border border-[#D5E5D9] bg-[#EAF3ED]">
                 <Image
                   src="/screenshots/showcase-lawyers.png"
-                  alt="NyayLink Verified Advocate Directory"
+                  alt="NyayLink Advocate Directory & Roster"
                   fill
                   className="object-cover object-top group-hover:scale-102 transition-transform duration-300"
                   sizes="(max-width: 768px) 100vw, 25vw"
@@ -601,7 +601,7 @@ export function InstallLanding() {
               </div>
             </div>
 
-            {/* Pillar 2: Verified Advocate Directory */}
+            {/* Pillar 2: Advocate Directory & Verified Roster */}
             <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#D5E5D9] shadow-xs hover:shadow-sm transition-all space-y-4 flex flex-col justify-between">
               <div className="space-y-3">
                 <div className="w-10 h-10 rounded-xl bg-[#EAF3ED] border border-[#D5E5D9] flex items-center justify-center text-[#205C43]">

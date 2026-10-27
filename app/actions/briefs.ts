@@ -547,6 +547,7 @@ export async function getAdvocatesForHandoff(practiceArea?: string) {
     .select(
       "id, professional_name, bio, practice_areas, experience_years, city, state, languages, verification_status"
     )
+    .eq("verification_status", "approved")
     .order("experience_years", { ascending: false })
     .limit(20);
 

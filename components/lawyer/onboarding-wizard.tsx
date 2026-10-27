@@ -448,7 +448,7 @@ export function AdvocateOnboardingWizard({
               </div>
               <div className="flex items-center gap-2 text-[#69736D]">
                 <Clock className="w-4 h-4 text-amber-600" />
-                <span>BCI Verified badge (Upon official review)</span>
+                <span>Verified Advocate badge (Upon official review)</span>
               </div>
             </div>
           </div>
