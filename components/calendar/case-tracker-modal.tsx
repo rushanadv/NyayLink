@@ -5,13 +5,12 @@ import {
   Scale,
   X,
   ExternalLink,
-  Calendar,
   AlertCircle,
   CheckCircle2,
-  Clock,
   Loader2,
-  HelpCircle,
   ShieldAlert,
+  Copy,
+  Check,
 } from "lucide-react";
 import {
   INDIAN_COURT_COMPLEXES,
@@ -37,7 +36,7 @@ export function CaseTrackerModal({
   const { isHindi } = useLanguage();
 
   const [cnrNumber, setCnrNumber] = useState("");
-  const [courtComplex, setCourtComplex] = useState(INDIAN_COURT_COMPLEXES[1]); // Delhi High Court
+  const [courtComplex, setCourtComplex] = useState<string>(INDIAN_COURT_COMPLEXES[1]); // Delhi High Court
   const [caseType, setCaseType] = useState("Criminal Appeal");
   const [caseNumber, setCaseNumber] = useState("");
   const [caseYear, setCaseYear] = useState<number>(new Date().getFullYear());
@@ -49,6 +48,7 @@ export function CaseTrackerModal({
   const [selectedMatterId, setSelectedMatterId] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [copiedCNR, setCopiedCNR] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   if (!isOpen) return null;
@@ -147,14 +147,42 @@ export function CaseTrackerModal({
               ? "सार्वजनिक ई-कोर्ट्स सेवा पोर्टल से सत्यापित करने के लिए सीधा लिंक उपलब्ध है। आपके द्वारा दर्ज की गई सुनवाई तिथि 'User-Entered' के रूप में कैलेंडर में सहेजी जाएगी।"
               : "Manual tracking workflow with official eCourts Services portal verification. Hearing entries are truthfully marked as user-entered with timestamped provenance."}
           </p>
-          <div className="pt-1">
+          <div className="pt-1 flex items-center gap-3 flex-wrap">
+            {cnrValidation?.isValid && (
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(cnrValidation.cleanCNR);
+                    setCopiedCNR(true);
+                    setTimeout(() => setCopiedCNR(false), 2000);
+                  } catch (err) {
+                    console.warn("Copy failed:", err);
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white border border-[#D5E5D9] text-[11px] text-[#202824] hover:bg-[#F4FAF6] font-medium"
+              >
+                {copiedCNR ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-600" />
+                    <span className="text-emerald-700 font-bold">{isHindi ? "कॉपी हो गया!" : "Copied CNR!"}</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5 text-[#205C43]" />
+                    <span>{isHindi ? "सीएनआर कॉपी करें" : "Copy CNR"}</span>
+                  </>
+                )}
+              </button>
+            )}
+
             <a
               href={officialUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-[11px] text-[#205C43] hover:underline font-semibold"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#205C43] text-white text-[11px] hover:bg-[#174530] font-semibold"
             >
-              <span>{isHindi ? "आधिकारिक ई-कोर्ट्स पोर्टल खोलें" : "Open Official eCourts Case Status Portal"}</span>
+              <span>{isHindi ? "आधिकारिक ई-कोर्ट्स केस खोज खोलें" : "Open official eCourts case search"}</span>
               <ExternalLink className="w-3 h-3" />
             </a>
           </div>

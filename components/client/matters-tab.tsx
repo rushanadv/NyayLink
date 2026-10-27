@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { LegalMatter } from "@/lib/portal/types";
 import { createLegalMatter } from "@/app/actions/portal";
+import { ECourtsCaseLookupPanel } from "@/components/court/ecourts-case-lookup-panel";
 import {
   Briefcase,
   Plus,
@@ -11,7 +13,6 @@ import {
   X,
   UserCheck,
   FileText,
-  ShieldCheck,
 } from "lucide-react";
 
 interface MattersTabProps {
@@ -41,6 +42,7 @@ export function MattersTab({
   const [selectedMatterId, setSelectedMatterId] = useState<string | null>(
     matters[0]?.id || null
   );
+  const router = useRouter();
 
   // New Matter Form State
   const [title, setTitle] = useState("");
@@ -338,6 +340,13 @@ export function MattersTab({
                     )}
                   </div>
                 </div>
+
+                {/* Official eCourts & Case Lookup Panel */}
+                <ECourtsCaseLookupPanel
+                  matter={selectedMatter}
+                  userRole="client"
+                  onUpdated={() => router.refresh()}
+                />
 
                 {/* Chronological Timeline */}
                 <div className="space-y-4 pt-2">

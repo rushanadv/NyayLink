@@ -37,6 +37,22 @@ export interface LegalMatter {
   created_at: string;
   updated_at: string;
   updates?: MatterUpdate[];
+  // eCourts & Case Tracking fields
+  cnr_number?: string | null;
+  court_complex?: string | null;
+  case_type?: string | null;
+  case_number?: string | null;
+  case_year?: number | null;
+  court_hearing_date?: string | null;
+  court_status?: string | null;
+  court_status_source?: "user_manual_entry" | "advocate_manual_entry" | "authorized_provider" | null;
+  court_last_checked_at?: string | null;
+  court_provenance?: {
+    source?: string;
+    is_verified?: boolean;
+    last_checked_by?: string;
+    notes?: string;
+  } | null;
   lawyer?: {
     id: string;
     professional_name: string;

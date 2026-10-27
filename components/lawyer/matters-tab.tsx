@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { LegalMatter } from "@/lib/portal/types";
 import { addMatterTimelineUpdate } from "@/app/actions/portal";
+import { ECourtsCaseLookupPanel } from "@/components/court/ecourts-case-lookup-panel";
 import {
   Briefcase,
   CheckCircle2,
@@ -17,6 +19,7 @@ export function MattersTab({ matters }: MattersTabProps) {
   const [selectedMatterId, setSelectedMatterId] = useState<string | null>(
     matters[0]?.id || null
   );
+  const router = useRouter();
 
   // Update Note State
   const [noteContent, setNoteContent] = useState("");
@@ -193,6 +196,13 @@ export function MattersTab({ matters }: MattersTabProps) {
                     {selectedMatter.description}
                   </div>
                 </div>
+
+                {/* Official eCourts & Case Lookup Panel */}
+                <ECourtsCaseLookupPanel
+                  matter={selectedMatter}
+                  userRole="lawyer"
+                  onUpdated={() => router.refresh()}
+                />
 
                 {/* Post Update Form */}
                 <div className="p-5 rounded-2xl bg-[#EAF3ED]/60 border border-[#D5E5D9] space-y-4">
