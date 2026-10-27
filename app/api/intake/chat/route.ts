@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { buildSystemPrompt } from "@/lib/intake/system-prompt";
 import {
   retrieveRelevantLegalSources,
+  retrieveLegalSourcesHybrid,
+  validateCitations,
   StatutoryReference,
 } from "@/lib/legal/references";
 import { IntakeFacts, IntakeIntent } from "@/lib/intake/fact-types";
@@ -198,18 +200,26 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Retrieve relevant verified legal sources from India Code registry
+    // Retrieve relevant verified legal sources via hybrid retrieval pipeline
     const latestUserQuery =
       [...sanitizedChatMessages].reverse().find((m) => m.role === "user")?.content || "";
 
-    const activeSources: StatutoryReference[] =
-      sources && sources.length > 0
-        ? sources
-        : retrieveRelevantLegalSources(latestUserQuery, {
-            legalIssue: confirmedFacts?.legalIssue,
-            possiblePracticeAreas: confirmedFacts?.possiblePracticeAreas,
-            userRole: confirmedFacts?.userRole,
-          });
+    let activeSources: StatutoryReference[] = [];
+    let retrievalMode: "lexical" | "hybrid" = "lexical";
+    if (sources && sources.length > 0) {
+      activeSources = sources;
+    } else {
+      const retrievalResult = await retrieveLegalSourcesHybrid(latestUserQuery, {
+        factsContext: {
+          legalIssue: confirmedFacts?.legalIssue,
+          possiblePracticeAreas: confirmedFacts?.possiblePracticeAreas,
+          userRole: confirmedFacts?.userRole,
+          jurisdiction: { state, district },
+        },
+      });
+      activeSources = retrievalResult.sources;
+      retrievalMode = retrievalResult.isLexicalOnly ? "lexical" : "hybrid";
+    }
 
     const systemPrompt = buildSystemPrompt({
       location: { state, district },
@@ -303,6 +313,7 @@ export async function POST(req: NextRequest) {
         let hasEmittedTokens = false;
         let streamError: string | null = null;
         let timeToFirstToken: number | null = null;
+        let generatedAssistantContent = "";
 
         try {
           while (true) {
@@ -341,6 +352,7 @@ export async function POST(req: NextRequest) {
                     if (timeToFirstToken === null) {
                       timeToFirstToken = Date.now() - requestStartTime;
                     }
+                    generatedAssistantContent += content;
                     controller.enqueue(encoder.encode(content));
                     hasEmittedTokens = true;
                   }
@@ -366,10 +378,15 @@ export async function POST(req: NextRequest) {
             controller.enqueue(encoder.encode(remainder));
           }
 
-          // Emit verified sources metadata chunk
-          if (activeSources.length > 0) {
+          // Server-side citation validation:
+          // Validate whether the generated response explicitly cited any retrieved sources.
+          // Never emit fabricated citations or sources not present in activeSources.
+          const validatedSources = validateCitations(generatedAssistantContent, activeSources);
+          const finalSourcesToEmit = validatedSources.length > 0 ? validatedSources : activeSources;
+
+          if (finalSourcesToEmit.length > 0) {
             const serializedSources = JSON.stringify(
-              activeSources.map((s) => ({
+              finalSourcesToEmit.map((s) => ({
                 id: s.id,
                 actName: s.actName,
                 actShortName: s.actShortName,
@@ -424,6 +441,7 @@ export async function POST(req: NextRequest) {
         "X-RateLimit-Remaining": `${remaining}`,
         "X-NyayLink-Grounded": activeSources.length > 0 ? "true" : "false",
         "X-NyayLink-Sources-Count": String(activeSources.length),
+        "X-NyayLink-Retrieval-Mode": retrievalMode,
       },
     });
   } catch (err: unknown) {

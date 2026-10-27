@@ -8,6 +8,7 @@ import {
   FileText,
   Sliders,
   ArrowUpRight,
+  BookOpen,
 } from "lucide-react";
 import type { AdminDashboardTab, UserRole } from "@/lib/admin/types";
 import { LogoutButton } from "@/components/logout-button";
@@ -44,6 +45,7 @@ export function AdminSidebar({
     },
     { id: "clients", label: "Users & Roles", icon: Users },
     { id: "invitations", label: "Invitations", icon: MailCheck },
+    { id: "sources", label: "Legal Sources", icon: BookOpen },
     { id: "audit", label: "Audit Ledger", icon: FileText },
     { id: "settings", label: "Settings", icon: Sliders },
   ];

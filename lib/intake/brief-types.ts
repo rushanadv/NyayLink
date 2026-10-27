@@ -40,6 +40,12 @@ export interface StatutorySource {
   title: string;
   summary: string;
   relevanceNote?: string;
+  officialSourceUrl?: string;
+  actShortName?: string;
+  jurisdiction?: string;
+  lastCheckedDate?: string;
+  verificationStatus?: string;
+  provenance?: string;
 }
 
 export interface LawyerReadyBrief {

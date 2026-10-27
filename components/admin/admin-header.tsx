@@ -30,6 +30,11 @@ const tabMeta: Record<AdminDashboardTab, { breadcrumb: string; title: string; su
     title: "Invitations",
     subtitle: "Cryptographic invitation tokens issued to partner law firms and advocates.",
   },
+  sources: {
+    breadcrumb: "Console / Knowledge",
+    title: "Legal Source Registry & pgvector",
+    subtitle: "Curated Indian statutory enactments, section provisions, and pgvector embeddings.",
+  },
   audit: {
     breadcrumb: "Console / Security",
     title: "Audit Ledger",

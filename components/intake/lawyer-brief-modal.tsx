@@ -24,6 +24,7 @@ import {
   CheckCircle2,
   Languages,
   Loader2,
+  ExternalLink,
 } from "lucide-react";
 import { LawyerReadyBrief, BriefFact, BriefDate, MentionedDocument, StatutorySource } from "@/lib/intake/brief-types";
 import { saveClientBrief } from "@/app/actions/briefs";
@@ -303,7 +304,11 @@ export function LawyerBriefModal({
                ${brief.retrievedSources
                  .map(
                    (s) =>
-                     `<div class="statute"><strong>${s.actName} — ${s.section}:</strong> ${s.title}<br><span style="color:#555;">${s.summary}</span></div>`
+                     `<div class="statute"><strong>${s.actName} — ${s.section}:</strong> ${s.title}<br><span style="color:#555;">${s.summary}</span>${
+                       s.officialSourceUrl
+                         ? `<br><span style="font-size:10px;color:#205C43;">Source: <a href="${s.officialSourceUrl}" target="_blank">${s.officialSourceUrl}</a> (${s.verificationStatus === "officially_verified" ? "Officially Verified" : "Pending Update"})</span>`
+                         : ""
+                     }</div>`
                  )
                  .join("")} `
             : ""
@@ -379,7 +384,7 @@ export function LawyerBriefModal({
     if (isSectionIncluded("statutes") && brief.retrievedSources.length > 0) {
       text += `## STATUTORY CITATIONS\n`;
       brief.retrievedSources.forEach((s) => {
-        text += `- ${s.actName} (${s.section}): ${s.title}\n`;
+        text += `- ${s.actName} (${s.section}): ${s.title}${s.officialSourceUrl ? ` [${s.officialSourceUrl}]` : ""}\n`;
       });
       text += `\n`;
     }
@@ -866,15 +871,42 @@ export function LawyerBriefModal({
                     {brief.retrievedSources.map((source, idx) => (
                       <div
                         key={idx}
-                        className="p-3 rounded-lg bg-white border border-[#D5E5D9] text-xs space-y-1"
+                        className="p-3 rounded-lg bg-white border border-[#D5E5D9] text-xs space-y-1.5"
                       >
-                        <div className="font-semibold text-[#205C43]">
-                          {source.actName} — {source.section}
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-semibold text-[#205C43]">
+                            {source.actName} — {source.section}
+                          </span>
+                          {source.verificationStatus === "officially_verified" && (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#EAF3ED] text-[#205C43]">
+                              <ShieldCheck className="w-2.5 h-2.5" />
+                              <span>{isHi ? "सत्यापित" : "Verified"}</span>
+                            </span>
+                          )}
                         </div>
                         <div className="font-medium text-[#202824]">{source.title}</div>
                         <p className="text-[#69736D] text-[11px] leading-relaxed">
                           {source.summary}
                         </p>
+                        {source.officialSourceUrl && (
+                          <div className="pt-1 border-t border-[#D5E5D9]/50 flex items-center justify-between text-[10px]">
+                            <a
+                              href={source.officialSourceUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[#205C43] hover:underline font-medium"
+                              title="Open verified India Code publication"
+                            >
+                              <span>{isHi ? "आधिकारिक India Code स्रोत" : "Official India Code Source"}</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                            {source.lastCheckedDate && (
+                              <span className="text-[#8A958E]">
+                                {isHi ? "सत्यापित तिथि" : "Checked"}: {source.lastCheckedDate}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

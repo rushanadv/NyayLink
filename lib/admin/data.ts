@@ -188,3 +188,39 @@ export async function fetchAuditLogs(
 
   return (data || []) as AuditLogRecord[];
 }
+
+/**
+ * Fetch legal source documents, provisions, and ingestion runs for admin management.
+ */
+export async function fetchLegalSourcesData(supabase: SupabaseServerClient) {
+  try {
+    const [docsRes, provsRes, runsRes] = await Promise.all([
+      supabase.from("legal_source_documents").select("*").order("act_year", { ascending: false }),
+      supabase.from("legal_source_provisions").select("*").order("provision_identifier", { ascending: true }),
+      supabase.from("legal_source_ingestion_runs").select("*").order("created_at", { ascending: false }).limit(10),
+    ]);
+
+    const { CANONICAL_DOCUMENTS, CANONICAL_PROVISIONS } = await import("@/lib/legal/canonical-registry");
+
+    const documents = docsRes.data && docsRes.data.length > 0 ? docsRes.data : CANONICAL_DOCUMENTS;
+    const provisions = provsRes.data && provsRes.data.length > 0 ? provsRes.data : CANONICAL_PROVISIONS;
+    const ingestionRuns = runsRes.data || [];
+
+    return {
+      documents,
+      provisions,
+      ingestionRuns,
+      isLiveDb: Boolean(docsRes.data && docsRes.data.length > 0),
+    };
+  } catch (err) {
+    console.error("[NyayaLink Admin Data] Error fetching legal sources:", err);
+    const { CANONICAL_DOCUMENTS, CANONICAL_PROVISIONS } = await import("@/lib/legal/canonical-registry");
+    return {
+      documents: CANONICAL_DOCUMENTS,
+      provisions: CANONICAL_PROVISIONS,
+      ingestionRuns: [],
+      isLiveDb: false,
+    };
+  }
+}
+

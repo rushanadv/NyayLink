@@ -93,5 +93,6 @@ export type AdminDashboardTab =
   | "verifications"
   | "clients"
   | "invitations"
+  | "sources"
   | "audit"
   | "settings";

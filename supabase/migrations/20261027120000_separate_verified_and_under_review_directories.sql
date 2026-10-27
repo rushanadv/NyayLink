@@ -10,8 +10,14 @@
 -- 3. Update public_lawyer_directory view to include substantiated verified_at.
 -- ==============================================================================
 
+-- ==============================================================================
 -- 1. Redefine client_lawyer_directory (Strictly Approved Advocates)
-DROP VIEW IF EXISTS public.client_lawyer_directory CASCADE;
+-- Note: DROP VIEW ... RESTRICT is used instead of CASCADE to guarantee that no
+-- unexpected downstream dependent database objects can be silently dropped.
+-- CREATE OR REPLACE VIEW cannot be used because column 'verified_at' is introduced
+-- in the projection, which alters ordinal column positions in PostgreSQL.
+-- ==============================================================================
+DROP VIEW IF EXISTS public.client_lawyer_directory RESTRICT;
 
 CREATE VIEW public.client_lawyer_directory
 WITH (security_barrier = true)
@@ -58,8 +64,8 @@ GRANT SELECT ON public.client_lawyer_directory TO authenticated;
 -- Accessible exclusively to authenticated clients, lawyers, and admins.
 -- Shows advocates who have completed minimum onboarding and opted into publication consent,
 -- but whose Bar Council credentials have not yet been independently verified.
--- Note: consultation_fee is deliberately NULL to forbid paid consultations.
-DROP VIEW IF EXISTS public.client_under_review_directory CASCADE;
+-- Note: Using RESTRICT to guarantee no dependent database objects are silently removed.
+DROP VIEW IF EXISTS public.client_under_review_directory RESTRICT;
 
 CREATE VIEW public.client_under_review_directory
 WITH (security_barrier = true)
@@ -103,8 +109,13 @@ REVOKE ALL ON public.client_under_review_directory FROM PUBLIC, anon;
 GRANT SELECT ON public.client_under_review_directory TO authenticated;
 
 
+-- ==============================================================================
 -- 3. Redefine public_lawyer_directory (Strictly Approved Advocates for Public Visitors)
-DROP VIEW IF EXISTS public.public_lawyer_directory CASCADE;
+-- Note: DROP VIEW ... RESTRICT ensures no downstream dependencies are destroyed.
+-- CREATE OR REPLACE VIEW cannot be used because column 'verified_at' alters the
+-- view projection column ordering from earlier migrations.
+-- ==============================================================================
+DROP VIEW IF EXISTS public.public_lawyer_directory RESTRICT;
 
 CREATE VIEW public.public_lawyer_directory AS
 SELECT

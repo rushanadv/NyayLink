@@ -53,6 +53,27 @@ export const CANONICAL_LEGAL_REFERENCES: StatutoryReference[] = [
     keywords: ["cheat", "cheating", "fraud", "scam", "deceived", "property", "money stolen", "420", "318", "धोखाधड़ी", "ठगी"],
   },
   {
+    id: "bns-sec-316",
+    actName: "Bharatiya Nyaya Sanhita, 2023",
+    actShortName: "BNS, 2023",
+    actYear: 2023,
+    section: "Section 316",
+    provisionTitle: "Criminal breach of trust",
+    jurisdiction: "Union of India (Central)",
+    officialSourceUrl: "https://www.indiacode.nic.in/handle/123456789/20062",
+    sourcePublisher: "Ministry of Law and Justice, Government of India (Act No. 45 of 2023)",
+    lastCheckedDate: "2026-10-27",
+    verificationStatus: "officially_verified",
+    category: "criminal",
+    keyStatutoryText:
+      "Whoever, being in any manner entrusted with property, or with any dominion over property, dishonestly misappropriates or converts to his own use that property, or dishonestly uses or disposes of that property in violation of any direction of law prescribing the mode in which such trust is to be discharged, or of any legal contract, express or implied, which he has made touching the discharge of such trust, or wilfully suffers any other person so to do, commits criminal breach of trust.",
+    plainSummary:
+      "Replaces Section 405/406 of the erstwhile IPC. Applies when entrusted assets, funds, partnership property, or deposits are dishonestly misappropriated.",
+    statutoryLimitationNote:
+      "Punishable with imprisonment up to 5 years, or fine, or both.",
+    keywords: ["breach of trust", "misappropriation", "entrusted property", "funds misappropriated", "405", "406", "316", "अमानत में खयानत"],
+  },
+  {
     id: "bnss-sec-173",
     actName: "Bharatiya Nagarik Suraksha Sanhita, 2023",
     actShortName: "BNSS, 2023",
@@ -108,6 +129,50 @@ export const CANONICAL_LEGAL_REFERENCES: StatutoryReference[] = [
     plainSummary:
       "Corresponds to Section 438 CrPC. Allows an accused or apprehended individual to seek judicial protection against imminent arrest before Sessions Court or High Court.",
     keywords: ["anticipatory bail", "arrest", "apprehending arrest", "sessions court", "high court", "अग्रिम जमानत", "गिरफ्तारी"],
+  },
+  {
+    id: "bnss-sec-144",
+    actName: "Bharatiya Nagarik Suraksha Sanhita, 2023",
+    actShortName: "BNSS, 2023",
+    actYear: 2023,
+    section: "Section 144",
+    provisionTitle: "Order for maintenance of wives, children and parents",
+    jurisdiction: "Union of India (Central)",
+    officialSourceUrl: "https://www.indiacode.nic.in/handle/123456789/20063",
+    sourcePublisher: "Ministry of Law and Justice, Government of India",
+    lastCheckedDate: "2026-10-27",
+    verificationStatus: "officially_verified",
+    category: "family",
+    keyStatutoryText:
+      "If any person having sufficient means neglects or refuses to maintain his wife, unable to maintain herself, or his legitimate or illegitimate minor child... a Magistrate of the first class may, upon proof of such neglect or refusal, order such person to make a monthly allowance for the maintenance of his wife or child or parent.",
+    plainSummary:
+      "Corresponds to Section 125 of CrPC. Statutory secular maintenance remedy providing monthly maintenance and interim support.",
+    statutoryLimitationNote:
+      "Summary statutory proceeding before Family Court or Judicial Magistrate.",
+    keywords: ["maintenance", "wife maintenance", "child support", "parents maintenance", "125", "144", "भरण-पोषण", "खर्चा"],
+  },
+
+  // --- Bharatiya Sakshya Adhiniyam, 2023 (BSA) ---
+  {
+    id: "bsa-sec-61",
+    actName: "Bharatiya Sakshya Adhiniyam, 2023",
+    actShortName: "BSA, 2023",
+    actYear: 2023,
+    section: "Section 61",
+    provisionTitle: "Admissibility of electronic records",
+    jurisdiction: "Union of India (Central)",
+    officialSourceUrl: "https://www.indiacode.nic.in/handle/123456789/20064",
+    sourcePublisher: "Ministry of Law and Justice, Legislative Department",
+    lastCheckedDate: "2026-10-27",
+    verificationStatus: "officially_verified",
+    category: "civil",
+    keyStatutoryText:
+      "Nothing in this Adhiniyam shall apply to deny the admissibility of an electronic record in evidence on the ground that it is an electronic record, and such record shall have the same legal effect, validity and enforceability as other document, subject to section 63.",
+    plainSummary:
+      "Replaces Section 65A/65B of the erstwhile Indian Evidence Act, 1872. Affirms primary legal validity and admissibility of emails, WhatsApp records, SMS, and digital logs in judicial proceedings.",
+    statutoryLimitationNote:
+      "Governed by certificate requirements under BSA Section 63.",
+    keywords: ["electronic evidence", "whatsapp evidence", "email proof", "digital record", "certificate", "65b", "61", "इलेक्ट्रॉनिक साक्ष्य"],
   },
 
   // --- Consumer Protection Act, 2019 ---
@@ -493,3 +558,17 @@ export function validateCitationsAgainstRegistry(
     return actMentioned || sectionMentioned;
   });
 }
+
+// Re-export hybrid retrieval engine for async / pgvector retrieval pipelines
+export {
+  retrieveLegalSourcesHybrid,
+  validateCitations,
+  detectLanguage,
+  provisionToReference,
+} from "./retrieval";
+export type { HybridRetrievalResult, RetrievalOptions, RetrievalFactsContext } from "./retrieval";
+export {
+  CANONICAL_DOCUMENTS,
+  CANONICAL_PROVISIONS,
+} from "./canonical-registry";
+export type { LegalSourceDocument, LegalSourceProvision } from "./canonical-registry";

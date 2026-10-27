@@ -142,7 +142,7 @@ export function generateAdvocateQuestions(
   }
 
   // Topic-specific additions
-  const topic = (facts.legalIssue || facts.originalQuery).toLowerCase();
+  const topic = (facts.legalIssue || facts.originalQuery || "").toLowerCase();
   const customList: string[] = [];
 
   if (topic.includes("cheque") || topic.includes("138") || topic.includes("चेक")) {
@@ -217,6 +217,7 @@ export interface BuildBriefParams {
   jurisdiction?: string;
   locale?: "en" | "hi";
   customTitle?: string;
+  sources?: StatutoryReference[];
 }
 
 /**
@@ -229,6 +230,7 @@ export function buildLawyerReadyBrief({
   jurisdiction,
   locale = "en",
   customTitle,
+  sources,
 }: BuildBriefParams): LawyerReadyBrief {
   const isHi = locale === "hi";
 
@@ -288,15 +290,18 @@ export function buildLawyerReadyBrief({
   const questionsForAdvocate = generateAdvocateQuestions(facts, locale);
 
   // 8. Retrieved Statutory Sources
-  const rawSources: StatutoryReference[] = retrieveRelevantLegalSources(
-    `${inquiryText} ${facts.legalIssue || ""}`,
-    {
-      legalIssue: facts.legalIssue,
-      possiblePracticeAreas: facts.possiblePracticeAreas,
-      userRole: facts.userRole,
-    },
-    4
-  );
+  const rawSources: StatutoryReference[] =
+    sources && sources.length > 0
+      ? sources
+      : retrieveRelevantLegalSources(
+          `${inquiryText} ${facts.legalIssue || ""}`,
+          {
+            legalIssue: facts.legalIssue,
+            possiblePracticeAreas: facts.possiblePracticeAreas,
+            userRole: facts.userRole,
+          },
+          4
+        );
 
   const retrievedSources: StatutorySource[] = rawSources.map((s) => ({
     actName: s.actName,
@@ -304,6 +309,12 @@ export function buildLawyerReadyBrief({
     title: s.provisionTitle,
     summary: s.plainSummary,
     relevanceNote: s.statutoryLimitationNote,
+    officialSourceUrl: s.officialSourceUrl,
+    actShortName: s.actShortName,
+    jurisdiction: s.jurisdiction,
+    lastCheckedDate: s.lastCheckedDate,
+    verificationStatus: s.verificationStatus,
+    provenance: s.sourcePublisher,
   }));
 
   return {

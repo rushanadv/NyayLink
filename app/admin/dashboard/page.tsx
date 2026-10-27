@@ -6,6 +6,7 @@ import {
   fetchUserProfilesWithRoles,
   fetchInvitations,
   fetchAuditLogs,
+  fetchLegalSourcesData,
 } from "@/lib/admin/data";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminHeader } from "@/components/admin/admin-header";
@@ -14,6 +15,7 @@ import { LawyersTab } from "@/components/admin/lawyers-tab";
 import { VerificationsTab } from "@/components/admin/verifications-tab";
 import { ClientsTab } from "@/components/admin/clients-tab";
 import { InvitationsTab } from "@/components/admin/invitations-tab";
+import { LegalSourcesTab } from "@/components/admin/legal-sources-tab";
 import { AuditTab } from "@/components/admin/audit-tab";
 import { SettingsTab } from "@/components/admin/settings-tab";
 import { AccessDenied } from "@/components/admin/access-denied";
@@ -73,6 +75,7 @@ async function AdminDashboardContent({
     "verifications",
     "clients",
     "invitations",
+    "sources",
     "audit",
     "settings",
   ];
@@ -83,12 +86,13 @@ async function AdminDashboardContent({
     : "overview";
 
   // 3. Fetch real database statistics and records in parallel under RLS
-  const [stats, lawyers, userProfiles, invitations, auditLogs] = await Promise.all([
+  const [stats, lawyers, userProfiles, invitations, auditLogs, sourcesData] = await Promise.all([
     fetchAdminStats(supabase),
     fetchLawyersWithVerifications(supabase),
     fetchUserProfilesWithRoles(supabase),
     fetchInvitations(supabase),
     fetchAuditLogs(supabase),
+    fetchLegalSourcesData(supabase),
   ]);
 
   return (
@@ -127,6 +131,15 @@ async function AdminDashboardContent({
 
             {currentTab === "invitations" && (
               <InvitationsTab invitations={invitations} />
+            )}
+
+            {currentTab === "sources" && (
+              <LegalSourcesTab
+                documents={sourcesData.documents}
+                provisions={sourcesData.provisions}
+                ingestionRuns={sourcesData.ingestionRuns}
+                isLiveDb={sourcesData.isLiveDb}
+              />
             )}
 
             {currentTab === "audit" && <AuditTab auditLogs={auditLogs} />}
